@@ -1,4 +1,5 @@
 import type { Handle } from '@sveltejs/kit';
+
 import { ACCESS_TOKEN } from '$features/auth/auth.constants';
 import { verifyToken } from '$features/auth/server/auth.server';
 

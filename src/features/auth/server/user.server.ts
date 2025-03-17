@@ -1,4 +1,6 @@
 import type { User } from '$lib/db.schemas';
+
+import { normalizeEmail } from '$lib';
 import { db } from '$lib/server/db';
 
 import bcrypt from 'bcrypt';
@@ -50,13 +52,4 @@ export async function createUser(
 
 export async function comparePasswords(user: User, password: string) {
 	return bcrypt.compare(password, user.password);
-}
-
-function normalizeEmail(email: string) {
-	try {
-		const [emailName, domainPart] = rsplit(email, '@', 1);
-		return emailName.normalize('NFKC') + '@' + domainPart.toLowerCase();
-	} catch {
-		return email;
-	}
 }

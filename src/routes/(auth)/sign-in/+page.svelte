@@ -19,7 +19,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	import { Loader } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import Metadata from '$components/metadata.svelte';
 	import ShowPasswordButton from '$components/show-password-button.svelte';
 	import { signInSchema } from '$features/auth/auth.schemas';
@@ -113,7 +113,7 @@
 				<FormButton class="w-full rounded-lg" disabled={$delayed}
 					>Sign in
 					{#if $delayed}
-						<Loader size={16} class="ml-1 text-primary-foreground animate-spin" />
+						<LoaderCircle size={16} class="ml-1 text-primary-foreground animate-spin" />
 					{/if}
 				</FormButton>
 			</div>

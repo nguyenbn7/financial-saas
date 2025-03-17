@@ -1,5 +1,5 @@
 import type { Kyselify } from 'drizzle-orm/kysely';
-import type { user } from '../db.schemas';
+import type { account, category, transaction, user } from '../db.schemas';
 import type { LogConfig } from 'kysely';
 
 import { env } from '$env/dynamic/private';
@@ -16,9 +16,9 @@ const pool = new pg.Pool({
 
 interface Database {
 	user: Kyselify<typeof user>;
-	// account: Kyselify<typeof account>;
-	// category: Kyselify<typeof category>;
-	// transaction: Kyselify<typeof transaction>;
+	account: Kyselify<typeof account>;
+	category: Kyselify<typeof category>;
+	transaction: Kyselify<typeof transaction>;
 }
 
 const log: LogConfig | undefined = import.meta.env.DEV ? ['query', 'error'] : undefined;

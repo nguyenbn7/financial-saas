@@ -18,7 +18,7 @@
 
 	let { data, children }: Props = $props();
 
-	let { displayName } = data;
+	let { user } = data;
 </script>
 
 <header class="bg-linear-to-b from-primary-700 to-primary-500 px-4 pt-8 pb-36 lg:px-14">
@@ -36,11 +36,11 @@
 				<Navigation />
 			</div>
 
-			<UserButton {displayName} />
+			<UserButton displayName={user.name} />
 		</div>
 
 		<div class="mb-4 space-y-2">
-			<h2 class="text-2xl font-medium text-white lg:text-4xl">Welcome back, {displayName} 👋🏻</h2>
+			<h2 class="text-2xl font-medium text-white lg:text-4xl">Welcome back, {user.name} 👋🏻</h2>
 			<p class="text-sm text-[#89b6fd] lg:text-base">This is your Financial Overview Report</p>
 		</div>
 	</div>

@@ -21,7 +21,7 @@
 	} from '$components/ui/form';
 	import { toast } from 'svelte-sonner';
 
-	import { Loader } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import Metadata from '$components/metadata.svelte';
 	import ShowPasswordButton from '$components/show-password-button.svelte';
 	import { signUpSchema } from '$features/auth/auth.schemas';
@@ -131,7 +131,7 @@
 				<FormButton class="w-full rounded-lg" disabled={$delayed}
 					>Create an account
 					{#if $delayed}
-						<Loader size={16} class="ml-1 text-primary-foreground animate-spin" />
+						<LoaderCircle size={16} class="ml-1 text-primary-foreground animate-spin" />
 					{/if}
 				</FormButton>
 			</div>

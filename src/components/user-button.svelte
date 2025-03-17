@@ -16,6 +16,7 @@
 	import { Avatar, AvatarFallback, AvatarImage } from '$components/ui/avatar';
 
 	import { LogOut, User } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 
 	interface Props {
 		displayName: string;
@@ -57,7 +58,15 @@
 					<button
 						{...props}
 						onclick={async () => {
-							await fetch('/log-out', { method: 'POST' });
+							const response = await fetch('/log-out', { method: 'POST' });
+							const data = (await response.json()) as
+								| { success: boolean; error: undefined }
+								| { success: undefined; error: string };
+
+							if (data.success) {
+								toast.success('Good bye');
+							}
+
 							return goto('/', { invalidateAll: true });
 						}}
 					>

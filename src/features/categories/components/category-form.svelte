@@ -1,11 +1,11 @@
 <script lang="ts" module>
 	import type { z } from 'zod';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { insertAccountSchema, updateAccountSchema } from '../accounts.schemas';
+	import type { insertCategorySchema, updateCategorySchema } from '../categories.schemas';
 
-	export type InsertAccountForm = SuperForm<z.input<typeof insertAccountSchema>, any>;
-	export type UpdateAccountForm = SuperForm<z.input<typeof updateAccountSchema>, any>;
-	export type AccountForms = InsertAccountForm | UpdateAccountForm;
+	export type InsertCategoryForm = SuperForm<z.input<typeof insertCategorySchema>, any>;
+	export type UpdateCategoryForm = SuperForm<z.input<typeof updateCategorySchema>, any>;
+	export type CategoryForms = InsertCategoryForm | UpdateCategoryForm;
 </script>
 
 <script lang="ts">
@@ -25,7 +25,7 @@
 	import { LoaderCircle, Trash } from '@lucide/svelte';
 
 	interface Props {
-		form: AccountForms;
+		form: CategoryForms;
 		createAction?: string;
 		updateAction?: string;
 		deleteAction?: string;
@@ -46,7 +46,7 @@
 
 	let openConfirmDialog = $state(false);
 
-	function isUpdateForm(form: AccountForms): form is UpdateAccountForm {
+	function isUpdateForm(form: CategoryForms): form is UpdateCategoryForm {
 		return get(form.form).id !== undefined;
 	}
 
@@ -105,7 +105,7 @@
 			<LoaderCircle size={16} class="mr-1 text-primary-foreground animate-spin" />
 			{isUpdateForm(form) ? 'Saving...' : 'Creating...'}
 		{:else}
-			{isUpdateForm(form) ? 'Save Changes' : 'Create account'}
+			{isUpdateForm(form) ? 'Save Changes' : 'Create category'}
 		{/if}
 	</FormButton>
 
@@ -121,14 +121,14 @@
 				<LoaderCircle size={16} class="mr-1 text-red-600 animate-spin" />
 				Deleting...
 			{:else}
-				<Trash size={16} class="mr-1" />Delete account
+				<Trash size={16} class="mr-1" />Delete category
 			{/if}
 		</FormButton>
 
 		<ConfirmDialog
 			bind:open={openConfirmDialog}
 			title="Are you sure?"
-			description="You are about to delete this account"
+			description="You are about to delete this category"
 		/>
 	{/if}
 </form>

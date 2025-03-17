@@ -2,8 +2,8 @@
 	import type { ActionResult } from '@sveltejs/kit';
 	import type { ColumnDef } from '@tanstack/table-core';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Account as AccountModel } from '$lib/db.schemas';
-	import type { AccountForms } from '$features/accounts/components/account-form.svelte';
+	import type { Category as CategoryModel } from '$lib/db.schemas';
+	import type { CategoryForms } from '$features/categories/components/category-form.svelte';
 
 	import { applyAction } from '$app/forms';
 
@@ -25,12 +25,15 @@
 		DataTableSortColumn
 	} from '$components/datatable';
 
-	import AccountSheet from '$features/accounts/components/account-sheet.svelte';
-	import { insertAccountSchema, updateAccountSchema } from '$features/accounts/accounts.schemas';
+	import CategorySheet from '$features/categories/components/category-sheet.svelte';
+	import {
+		insertCategorySchema,
+		updateCategorySchema
+	} from '$features/categories/categories.schemas';
 
 	import { Plus } from '@lucide/svelte';
 
-	type Account = Omit<AccountModel, 'userId'>;
+	type Category = Omit<CategoryModel, 'userId'>;
 
 	type OnUpdateParams = { result: Extract<ActionResult, { type: 'success' | 'failure' }> };
 
@@ -50,13 +53,13 @@
 		}
 	}
 
-	function updatePagination(pagination: Pagination<Account>) {
-		accounts = pagination.data;
+	function updatePagination(pagination: Pagination<Category>) {
+		categories = pagination.data;
 		page = pagination.page;
 		pageSize = pagination.pageSize;
 	}
 
-	function openSheet(form: AccountForms, data?: Account) {
+	function openSheet(form: CategoryForms, data?: Category) {
 		open = true;
 		if (data) form.form.set(data);
 		currentForm = form;
@@ -75,7 +78,7 @@
 	let { data }: PageProps = $props();
 
 	const createForm = superForm(data.createForm, {
-		validators: zodClient(insertAccountSchema),
+		validators: zodClient(insertCategorySchema),
 		onUpdate,
 		onError,
 		onUpdated({ form }) {
@@ -89,7 +92,7 @@
 	});
 
 	const updateForm = superForm(data.updateForm, {
-		validators: zodClient(updateAccountSchema),
+		validators: zodClient(updateCategorySchema),
 		onUpdate,
 		onError,
 		onUpdated({ form }) {
@@ -121,18 +124,18 @@
 	});
 
 	let page = $state(data.pagination.page);
-	let accounts = $state(data.pagination.data);
+	let categories = $state(data.pagination.data);
 	let pageSize = $state(data.pagination.pageSize);
 
 	let open = $state(false);
-	let currentForm: AccountForms = $state(createForm);
+	let currentForm: CategoryForms = $state(createForm);
 
 	const { delayed: isCreating } = createForm;
 	const { delayed: isUpdating } = updateForm;
 
 	let loading = $state($isCreating || $isUpdating);
 
-	const columns: ColumnDef<Account>[] = [
+	const columns: ColumnDef<Category>[] = [
 		{
 			id: 'select',
 			header: ({ table }) =>
@@ -170,13 +173,13 @@
 	];
 </script>
 
-<Metadata title="Financial Accounts" />
+<Metadata title="Financial Categories" />
 
 <DataTableLoader {loading}>
 	<div class="px-4 lg:px-14 pb-10 -mt-24">
 		<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
 			<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
-				<CardTitle class="text-xl line-clamp-1">Accounts page</CardTitle>
+				<CardTitle class="text-xl line-clamp-1">Categories page</CardTitle>
 
 				<Button size="sm" onclick={() => openSheet(createForm)}>
 					<Plus />Add new
@@ -185,7 +188,7 @@
 
 			<CardContent>
 				<DataTable
-					data={accounts}
+					data={categories}
 					paginationState={{ pageIndex: page - 1, pageSize }}
 					{columns}
 					filterKey="name"
@@ -197,7 +200,7 @@
 							onUpdate={(selectedRows) => {
 								deletesForm.form.update(() => ({ ids: selectedRows.map((r) => r.original.id) }));
 							}}
-							alertDialogDescription="You are about to delete these accounts"
+							alertDialogDescription="You are about to delete these categories"
 						/>
 					{/snippet}
 				</DataTable>
@@ -206,4 +209,4 @@
 	</div>
 </DataTableLoader>
 
-<AccountSheet form={currentForm} bind:open disabled={loading} />
+<CategorySheet form={currentForm} bind:open disabled={loading} />

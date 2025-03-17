@@ -19,31 +19,44 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@lucide/svelte": "^0.482.0",
 		"@sveltejs/adapter-node": "^5.2.11",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.0.14",
+		"@types/bcrypt": "^5.0.2",
+		"@types/pg": "^8.11.11",
 		"bits-ui": "^1.3.12",
 		"clsx": "^2.1.1",
 		"drizzle-kit": "^0.30.2",
+		"drizzle-orm": "^0.40.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
+		"formsnap": "^2.0.0",
 		"globals": "^16.0.0",
+		"mode-watcher": "^0.5.1",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
+		"svelte-sonner": "^0.3.28",
+		"sveltekit-superforms": "^2.24.0",
 		"tailwind-merge": "^3.0.2",
 		"tailwind-variants": "^1.0.0",
 		"tailwindcss": "^4.0.14",
 		"tailwindcss-animate": "^1.0.7",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
-		"vite": "^6.0.0"
+		"vite": "^6.0.0",
+		"zod": "^3.24.2"
 	},
 	"dependencies": {
-		"drizzle-orm": "^0.40.0",
-		"postgres": "^3.4.5"
+		"@tanstack/table-core": "^8.21.2",
+		"bcrypt": "^5.1.1",
+		"drizzle-zod": "^0.7.0",
+		"jose": "^6.0.10",
+		"kysely": "^0.27.6",
+		"pg": "^8.14.0"
 	}
 }

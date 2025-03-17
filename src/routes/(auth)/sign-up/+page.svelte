@@ -131,7 +131,7 @@
 				<FormButton class="w-full rounded-lg" disabled={$delayed}
 					>Create an account
 					{#if $delayed}
-						<Loader size={16} class="ml-1 text-primary animate-spin" />
+						<Loader size={16} class="ml-1 text-primary-foreground animate-spin" />
 					{/if}
 				</FormButton>
 			</div>

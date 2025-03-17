@@ -10,7 +10,7 @@ import {
 	deleteAccountsSchema,
 	insertAccountSchema,
 	updateAccountSchema
-} from '$features/accounts/accounts.schemas';
+} from '$features/accounts/schemas';
 import {
 	deleteAccount,
 	deleteAccounts,

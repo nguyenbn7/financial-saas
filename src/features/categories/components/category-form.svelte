@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import type { z } from 'zod';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { insertCategorySchema, updateCategorySchema } from '../categories.schemas';
+	import type { insertCategorySchema, updateCategorySchema } from '../schemas';
 
 	export type InsertCategoryForm = SuperForm<z.input<typeof insertCategorySchema>, any>;
 	export type UpdateCategoryForm = SuperForm<z.input<typeof updateCategorySchema>, any>;

@@ -4,6 +4,8 @@
 
 	import '../app.css';
 
+	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+
 	import { Toaster } from '$components/ui/sonner';
 	import BackToTop from '$components/back-to-top.svelte';
 
@@ -13,10 +15,14 @@
 	}
 
 	let { data, children }: Props = $props();
+
+	const queryClient = new QueryClient();
 </script>
 
 <Toaster richColors closeButton theme="light" />
 
-{@render children()}
+<QueryClientProvider client={queryClient}>
+	{@render children()}
+</QueryClientProvider>
 
 <BackToTop />

@@ -5,8 +5,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate } from 'sveltekit-superforms';
 
-import { ACCESS_TOKEN } from '$features/auth/auth.constants';
-import { signInSchema } from '$features/auth/auth.schemas';
+import { ACCESS_TOKEN } from '$features/auth/constants';
+import { signInSchema } from '$features/auth/schemas';
 import { createToken, getExpiresAt } from '$features/auth/server/auth.server';
 import { comparePasswords, getUserByUsername } from '$features/auth/server/user.server';
 

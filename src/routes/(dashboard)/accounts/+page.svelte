@@ -26,7 +26,7 @@
 	} from '$components/datatable';
 
 	import AccountSheet from '$features/accounts/components/account-sheet.svelte';
-	import { insertAccountSchema, updateAccountSchema } from '$features/accounts/accounts.schemas';
+	import { insertAccountSchema, updateAccountSchema } from '$features/accounts/schemas';
 
 	import { Plus } from '@lucide/svelte';
 

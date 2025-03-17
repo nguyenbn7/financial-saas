@@ -19,7 +19,7 @@
 	} from '$components/datatable';
 	import Metadata from '$components/metadata.svelte';
 
-	import { insertTransactionSchema } from '$features/transactions/transactions.schemas';
+	import { insertTransactionSchema } from '$features/transactions/schemas';
 	import TransactionSheet from '$features/transactions/components/transaction-sheet.svelte';
 
 	import { Plus } from '@lucide/svelte';
@@ -38,7 +38,6 @@
 	});
 
 	let transactions = $state(data.data);
-	let accountOptions = $state(data.accountOptions);
 
 	let loading = $state(false);
 	let open = $state(false);
@@ -106,4 +105,4 @@
 	</div>
 </DataTableLoader>
 
-<TransactionSheet {open} {accountOptions} form={createForm} />
+<TransactionSheet bind:open form={createForm} />

@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 
-import { ACCESS_TOKEN } from '$features/auth/auth.constants';
+import { ACCESS_TOKEN } from '$features/auth/constants';
 
 export const POST: RequestHandler = async ({ locals, cookies }) => {
 	const { user } = locals;

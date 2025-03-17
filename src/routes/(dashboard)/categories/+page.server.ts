@@ -17,7 +17,7 @@ import {
 	insertCategorySchema,
 	deleteCategoriesSchema,
 	updateCategorySchema
-} from '$features/categories/categories.schemas';
+} from '$features/categories/schemas';
 
 const { DEV } = import.meta.env;
 

@@ -79,3 +79,7 @@ export async function deleteCategories(userId: number, data: { ids: number[] }) 
 		.where('id', 'in', data.ids)
 		.execute();
 }
+
+export async function getCategoryOptions(userId: number) {
+	return db.selectFrom('category').where('user_id', '=', userId).select(['id', 'name']).execute();
+}

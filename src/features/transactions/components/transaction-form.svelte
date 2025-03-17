@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import type { z } from 'zod';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { insertTransactionSchema, updateTransactionSchema } from '../transactions.schemas';
+	import type { insertTransactionSchema, updateTransactionSchema } from '../schemas';
 	import type { getAccountOptions } from '$features/accounts/server/accounts.server';
 
 	export type InsertTransactionForm = SuperForm<z.input<typeof insertTransactionSchema>, any>;
@@ -93,7 +93,10 @@
 					onValueChange={(value) => ($formData.accountId = Number(value))}
 					name={props.name}
 				>
-					<SelectTrigger>Select an account</SelectTrigger>
+					<SelectTrigger class="mt-2"
+						>{accountOptions.find((a) => a.id === $formData.accountId)?.name ??
+							'Select an account'}</SelectTrigger
+					>
 					<SelectContent>
 						{#each accountOptions as option}
 							<SelectItem value={`${option.id}`} label={option.name} />

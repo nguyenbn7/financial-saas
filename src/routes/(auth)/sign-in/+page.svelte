@@ -22,7 +22,7 @@
 	import { LoaderCircle } from '@lucide/svelte';
 	import Metadata from '$components/metadata.svelte';
 	import ShowPasswordButton from '$components/show-password-button.svelte';
-	import { signInSchema } from '$features/auth/auth.schemas';
+	import { signInSchema } from '$features/auth/schemas';
 
 	let { data }: PageProps = $props();
 

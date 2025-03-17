@@ -8,10 +8,8 @@ import { superValidate } from 'sveltekit-superforms';
 
 import { db } from '$lib/server/db';
 
-import { getAccountOptions } from '$features/accounts/server/accounts.server';
-
-import { querySchema } from '$features/transactions/transactions.schemas';
-import { insertTransactionSchema } from '$features/transactions/transactions.schemas';
+import { querySchema } from '$features/transactions/schemas';
+import { insertTransactionSchema } from '$features/transactions/schemas';
 
 export const load = (async ({ parent, url }) => {
 	const { user } = await parent();
@@ -61,9 +59,7 @@ export const load = (async ({ parent, url }) => {
 		])
 		.execute();
 
-	const accountOptions = await getAccountOptions(user.id);
-
 	const createForm = await superValidate(zod(insertTransactionSchema));
 
-	return { createForm, data, accountOptions };
+	return { createForm, data };
 }) satisfies PageServerLoad;

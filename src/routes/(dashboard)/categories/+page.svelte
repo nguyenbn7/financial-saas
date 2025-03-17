@@ -29,7 +29,7 @@
 	import {
 		insertCategorySchema,
 		updateCategorySchema
-	} from '$features/categories/categories.schemas';
+	} from '$features/categories/schemas';
 
 	import { Plus } from '@lucide/svelte';
 

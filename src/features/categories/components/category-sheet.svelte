@@ -27,7 +27,13 @@
 	}
 </script>
 
-<Sheet bind:open {onOpenChange}>
+<Sheet
+	bind:open
+	onOpenChange={(value) => {
+		form.reset();
+		onOpenChange?.(value);
+	}}
+>
 	<SheetContent class="space-y-4" interactOutsideBehavior={disabled ? 'ignore' : 'close'}>
 		<SheetHeader>
 			<SheetTitle>{isUpdateForm(form) ? 'Edit ' : 'New '}Category</SheetTitle>

@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	import type { z } from 'zod';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { insertAccountSchema, updateAccountSchema } from '../accounts.schemas';
+	import type { insertAccountSchema, updateAccountSchema } from '../schemas';
 
 	export type InsertAccountForm = SuperForm<z.input<typeof insertAccountSchema>, any>;
 	export type UpdateAccountForm = SuperForm<z.input<typeof updateAccountSchema>, any>;

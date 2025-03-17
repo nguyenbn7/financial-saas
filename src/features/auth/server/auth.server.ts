@@ -10,7 +10,7 @@ import { db } from '$lib/server/db';
 /**
  * @see {@link https://github.com/panva/jose/issues/210#jws-alg Algorithm Key Requirements}
  */
-const alg = 'HS256';
+const alg = 'HS512';
 
 const secret = new TextEncoder().encode(env.SECRET);
 
@@ -20,13 +20,22 @@ export function getExpiresAt(seconds: number = 3600 /** 1 hour */) {
 }
 
 export async function createToken(user: User, expiresAt: Date) {
-	return new jose.SignJWT({ id: user.id })
-		.setProtectedHeader({ alg })
-		.setIssuedAt()
-		.setIssuer(PUBLIC_APP_NAME)
-		.setAudience(PUBLIC_APP_NAME)
-		.setExpirationTime(expiresAt)
-		.sign(secret);
+	try {
+		// console.log(
+		// 	await new jose.CompactEncrypt(new TextEncoder().encode(`${user.id}`))
+		// 		.setProtectedHeader({ alg: 'PBES2-HS512+A256KW', enc: 'A256GCM' })
+		// 		.encrypt(secret)
+		// );
+
+		return new jose.SignJWT({ sub: `${user.id}`, iss: PUBLIC_APP_NAME, aud: PUBLIC_APP_NAME })
+			.setProtectedHeader({ alg })
+			.setIssuedAt()
+			.setExpirationTime(expiresAt)
+			.sign(secret);
+	} catch (error) {
+		console.log(error);
+		return;
+	}
 }
 
 export async function verifyToken(token: string) {
@@ -36,7 +45,12 @@ export async function verifyToken(token: string) {
 			audience: PUBLIC_APP_NAME
 		});
 
-		const userId = verifiedToken.payload.id as number;
+		const userIdStr = verifiedToken.payload.sub;
+		if (!userIdStr) return;
+
+		if (!/^\d+$/.test(userIdStr)) return;
+
+		const userId = Number(userIdStr);
 
 		return db
 			.selectFrom('user as u')

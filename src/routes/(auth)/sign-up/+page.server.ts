@@ -33,6 +33,9 @@ export const actions = {
 		const expiresAt = getExpiresAt();
 		const accessToken = await createToken(user, expiresAt);
 
+		if (!accessToken)
+			return message(form, 'Something went wrong. Please try again', { status: 500 });
+
 		cookies.set(ACCESS_TOKEN, accessToken, {
 			httpOnly: true,
 			sameSite: 'lax',

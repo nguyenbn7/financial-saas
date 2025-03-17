@@ -34,7 +34,7 @@
 {#if selectedRows.length > 0}
 	<Button
 		variant="outline-red"
-		class="ml-auto font-normal text-xs hover:cursor-pointer"
+		class="ml-auto font-normal hover:cursor-pointer"
 		onclick={() => (isOpen = true)}
 	>
 		<Trash2 /> Delete ({selectedRows.length})

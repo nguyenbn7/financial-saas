@@ -130,7 +130,7 @@
 	const { delayed: isCreating } = createForm;
 	const { delayed: isUpdating } = updateForm;
 
-	let loading = $state($isCreating || $isUpdating);
+	let loading = $derived($isCreating || $isUpdating);
 
 	const columns: ColumnDef<Account>[] = [
 		{

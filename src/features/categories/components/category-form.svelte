@@ -86,7 +86,7 @@
 				<Input
 					{...props}
 					bind:value={$formData.name}
-					placeholder="e.g. Cash, Bank, Credit Card"
+					placeholder="e.g. Food, Travel, etc."
 					class="mt-2"
 					{disabled}
 				/>

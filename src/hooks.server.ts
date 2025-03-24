@@ -1,7 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 
 import { ACCESS_TOKEN } from '$features/auth/constants';
-import { verifyToken } from '$features/auth/server/auth.server';
+import { verifyToken } from '$features/auth/server/service.server';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	if (!event.url.pathname.startsWith('/api')) {

@@ -4,25 +4,27 @@
 	import { applyAction } from '$app/forms';
 
 	import { toast } from 'svelte-sonner';
-	import { Label } from '$components/ui/label';
-	import { Input } from '$components/ui/input';
-	import { Checkbox } from '$components/ui/checkbox';
-	import { Card, CardContent, CardHeader, CardTitle } from '$components/ui/card';
+	import { Label } from '$lib/components/ui/label';
+	import { Input } from '$lib/components/ui/input';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import {
 		FormButton,
 		FormControl,
 		FormField,
 		FormFieldErrors,
 		FormLabel
-	} from '$components/ui/form';
+	} from '$lib/components/ui/form';
+
+	import { Metadata } from '$lib/components/metadata';
+	import ShowPasswordButton from '$lib/components/show-password-button.svelte';
 
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	import { LoaderCircle } from '@lucide/svelte';
-	import Metadata from '$components/metadata.svelte';
-	import ShowPasswordButton from '$components/show-password-button.svelte';
 	import { signInSchema } from '$features/auth/schemas';
+
+	import { LoaderCircle } from '@lucide/svelte';
 
 	let { data }: PageProps = $props();
 

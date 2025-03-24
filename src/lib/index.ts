@@ -22,3 +22,16 @@ export function normalizeEmail(email: string) {
 		return email;
 	}
 }
+
+export class ClientError extends Error {
+	#status = 500;
+
+	constructor(message?: string, status = 500) {
+		super(message);
+		this.#status = status;
+	}
+
+	get status() {
+		return this.#status;
+	}
+}

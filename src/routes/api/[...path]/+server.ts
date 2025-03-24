@@ -1,9 +1,9 @@
-import type { RequestHandler } from '../$types';
+import type { RequestHandler } from './$types';
 
 import { Hono } from 'hono';
 
-import accounts from '$features/accounts/server/hono.server';
-import categories from '$features/categories/server/hono.server';
+import accounts from '$features/accounts/server/route.server';
+import categories from '$features/categories/server/route.server';
 
 const app = new Hono()
 	.basePath('/api')

@@ -54,6 +54,7 @@
 	"dependencies": {
 		"@dicebear/collection": "^9.2.2",
 		"@dicebear/core": "^9.2.2",
+		"@hono/zod-validator": "^0.4.3",
 		"@tanstack/svelte-query": "^5.68.0",
 		"@tanstack/table-core": "^8.21.2",
 		"bcrypt": "^5.1.1",

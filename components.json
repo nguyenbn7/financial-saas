@@ -7,10 +7,10 @@
 		"baseColor": "neutral"
 	},
 	"aliases": {
-		"components": "$components",
+		"components": "$lib/components",
 		"utils": "$lib/utils",
-		"ui": "$components/ui",
-		"hooks": "$hooks"
+		"ui": "$lib/components/ui",
+		"hooks": "$lib/hooks"
 	},
 	"typescript": true,
 	"registry": "https://next.shadcn-svelte.com/registry"

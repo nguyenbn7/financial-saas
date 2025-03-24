@@ -1,83 +1,36 @@
 <script lang="ts">
 	import type { PageServerData } from './$types';
-	import type { ColumnDef } from '@tanstack/table-core';
-	import type { Transaction as TransactionModel } from '$lib/db.schemas';
 
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
-	import { Button } from '$components/ui/button';
-	import { Checkbox } from '$components/ui/checkbox';
-	import { renderComponent } from '$components/ui/data-table';
-	import { Card, CardContent, CardHeader, CardTitle } from '$components/ui/card';
+	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
-	import {
-		DataTable,
-		DataTableLoader,
-		DataTableRowActions,
-		DataTableSortColumn
-	} from '$components/datatable';
-	import Metadata from '$components/metadata.svelte';
+	import { DataTable, DataTableLoader } from '$lib/components/datatable';
+	import Metadata from '$lib/components/metadata/metadata.svelte';
 
-	import { insertTransactionSchema } from '$features/transactions/schemas';
-	import TransactionSheet from '$features/transactions/components/transaction-sheet.svelte';
+	import { transactionFormSchema } from '$features/transactions/schemas';
+	import { TransactionSheet } from '$features/transactions/components';
+	import { getColumns } from '$features/transactions/datatable-columns';
 
 	import { Plus } from '@lucide/svelte';
 
-	type Transaction = Omit<
-		TransactionModel & { account: string; category: string | null },
-		'accountId' | 'categoryId'
-	>;
-
-	type PageProps = { data: PageServerData };
+	interface PageProps {
+		data: PageServerData;
+	}
 
 	let { data }: PageProps = $props();
 
-	const createForm = superForm(data.createForm, {
-		validators: zodClient(insertTransactionSchema)
+	const transactionForm = superForm(data.form, {
+		validators: zodClient(transactionFormSchema)
 	});
 
 	let transactions = $state(data.data);
-
-	let loading = $state(false);
 	let open = $state(false);
 
-	const columns: ColumnDef<Transaction>[] = [
-		{
-			id: 'select',
-			header: ({ table }) =>
-				renderComponent(Checkbox, {
-					checked: table.getIsAllPageRowsSelected(),
-					indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-					onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
-					'aria-label': 'Select all'
-				}),
-			cell: ({ row }) =>
-				renderComponent(Checkbox, {
-					checked: row.getIsSelected(),
-					onCheckedChange: (value) => row.toggleSelected(!!value),
-					'aria-label': 'Select row'
-				}),
-			enableSorting: false,
-			enableHiding: false
-		},
-		{
-			accessorKey: 'name',
-			header: ({ column }) =>
-				renderComponent(DataTableSortColumn, {
-					onclick: () => column.toggleSorting(),
-					isSorted: column.getIsSorted(),
-					text: 'Name'
-				})
-		},
-		{
-			id: 'actions',
-			cell: ({ row }) =>
-				renderComponent(DataTableRowActions, {
-					onEdit() {}
-				})
-		}
-	];
+	let loading = $state(false);
+	const columns = getColumns({});
 </script>
 
 <Metadata title="Transactions History" />
@@ -105,4 +58,4 @@
 	</div>
 </DataTableLoader>
 
-<TransactionSheet bind:open form={createForm} />
+<TransactionSheet bind:open form={transactionForm} accountOptions={[]} />

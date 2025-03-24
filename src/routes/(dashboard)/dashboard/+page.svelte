@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	
-	import Metadata from '$components/metadata.svelte';
+
+	import Metadata from '$lib/components/metadata/metadata.svelte';
 
 	let { data }: PageProps = $props();
 </script>

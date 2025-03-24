@@ -1,173 +1,108 @@
 <script lang="ts">
-	import type { ActionResult } from '@sveltejs/kit';
-	import type { ColumnDef } from '@tanstack/table-core';
+	import type { FormResult } from 'sveltekit-superforms';
 	import type { ActionData, PageServerData } from './$types';
-	import type { Account as AccountModel } from '$lib/db.schemas';
-	import type { AccountForms } from '$features/accounts/components/account-form.svelte';
 
 	import { applyAction } from '$app/forms';
 
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { superForm, type FormResult } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 
 	import { toast } from 'svelte-sonner';
-	import { Button } from '$components/ui/button';
-	import { Checkbox } from '$components/ui/checkbox';
-	import { renderComponent } from '$components/ui/data-table';
-	import { Card, CardContent, CardHeader, CardTitle } from '$components/ui/card';
+	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
-	import Metadata from '$components/metadata.svelte';
-	import {
-		DataTable,
-		DataTableDeletesButton,
-		DataTableLoader,
-		DataTableRowActions,
-		DataTableSortColumn
-	} from '$components/datatable';
+	import Metadata from '$lib/components/metadata/metadata.svelte';
+	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
-	import AccountSheet from '$features/accounts/components/account-sheet.svelte';
-	import { insertAccountSchema, updateAccountSchema } from '$features/accounts/schemas';
+	import { AccountSheet } from '$features/accounts/components';
+	import { getColumns } from '$features/accounts/datatable-columns';
+	import { accountFormSchema } from '$features/accounts/schemas';
+	import { deleteAccounts } from '$features/accounts/api';
 
 	import { Plus } from '@lucide/svelte';
 
-	type Account = Omit<AccountModel, 'userId'>;
-
-	type OnUpdateParams = { result: Extract<ActionResult, { type: 'success' | 'failure' }> };
-
-	type PageProps = { data: PageServerData };
-
-	async function onUpdate({ result }: OnUpdateParams) {
-		if (result.status === 401) {
-			await applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-			toast.error('Unauthorized');
-			return;
-		}
-
-		const { pagination } = result.data as FormResult<ActionData>;
-
-		if (pagination) {
-			updatePagination(pagination);
-		}
-	}
-
-	function updatePagination(pagination: Pagination<Account>) {
-		accounts = pagination.data;
-		page = pagination.page;
-		pageSize = pagination.pageSize;
-	}
-
-	function openSheet(form: AccountForms, data?: Account) {
-		open = true;
-		if (data) form.form.set(data);
-		currentForm = form;
-	}
-
-	function closeSheet() {
-		open = false;
-		currentForm.reset();
-	}
-
-	function onError() {
-		loading = false;
-		closeSheet();
+	interface PageProps {
+		data: PageServerData;
 	}
 
 	let { data }: PageProps = $props();
 
-	const createForm = superForm(data.createForm, {
-		validators: zodClient(insertAccountSchema),
-		onUpdate,
-		onError,
-		onUpdated({ form }) {
-			loading = false;
-			closeSheet();
-
-			if (form.message) {
-				toast.success(form.message);
+	const accountForm = superForm(data.form, {
+		validators: zodClient(accountFormSchema),
+		async onUpdate({ result }) {
+			if (result.status === 401) {
+				await applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+				toast.error('Unauthorized');
+				return;
 			}
-		}
-	});
 
-	const updateForm = superForm(data.updateForm, {
-		validators: zodClient(updateAccountSchema),
-		onUpdate,
-		onError,
-		onUpdated({ form }) {
-			loading = false;
-			closeSheet();
+			const { pagination } = result.data as FormResult<ActionData>;
 
-			if (form.message) {
-				toast.success(form.message);
+			if (pagination) {
+				accounts = pagination.data;
+				page = pagination.page;
+				pageSize = pagination.pageSize;
 			}
-		}
-	});
-
-	const deletesForm = superForm(data.deletesForm, {
-		dataType: 'json',
-		onSubmit() {
-			setTimeout(() => (loading = true), 500);
 		},
 		onError() {
 			loading = false;
+			openSheet = false;
+			accountForm.reset();
 		},
-		onUpdate,
 		onUpdated({ form }) {
 			loading = false;
+			openSheet = false;
 
-			if (form.message) {
-				toast.success(form.message);
+			if (form.valid) {
+				toast.success(form.data.id ? 'Account updated' : 'Account created');
 			}
+
+			accountForm.reset();
 		}
 	});
+
+	const { delayed } = accountForm;
+
+	const deletesClient = deleteAccounts();
 
 	let page = $state(data.pagination.page);
 	let accounts = $state(data.pagination.data);
 	let pageSize = $state(data.pagination.pageSize);
 
-	let open = $state(false);
-	let currentForm: AccountForms = $state(createForm);
+	let openSheet = $state(false);
 
-	const { delayed: isCreating } = createForm;
-	const { delayed: isUpdating } = updateForm;
+	let loading = $derived($deletesClient.isPending || $delayed);
 
-	let loading = $derived($isCreating || $isUpdating);
-
-	const columns: ColumnDef<Account>[] = [
-		{
-			id: 'select',
-			header: ({ table }) =>
-				renderComponent(Checkbox, {
-					checked: table.getIsAllPageRowsSelected(),
-					indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-					onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
-					'aria-label': 'Select all'
-				}),
-			cell: ({ row }) =>
-				renderComponent(Checkbox, {
-					checked: row.getIsSelected(),
-					onCheckedChange: (value) => row.toggleSelected(!!value),
-					'aria-label': 'Select row'
-				}),
-			enableSorting: false,
-			enableHiding: false
-		},
-		{
-			accessorKey: 'name',
-			header: ({ column }) =>
-				renderComponent(DataTableSortColumn, {
-					onclick: () => column.toggleSorting(),
-					isSorted: column.getIsSorted(),
-					text: 'Name'
-				})
-		},
-		{
-			id: 'actions',
-			cell: ({ row }) =>
-				renderComponent(DataTableRowActions, {
-					onEdit: () => openSheet(updateForm, row.original)
-				})
+	const columns = getColumns({
+		onEdit(data) {
+			openSheet = true;
+			accountForm.form.set({ ...data });
 		}
-	];
+	});
+
+	$effect(() => {
+		if ($deletesClient.isSuccess && $deletesClient.data) {
+			const { pagination } = $deletesClient.data;
+			accounts = pagination.data;
+			page = pagination.page;
+			pageSize = pagination.pageSize;
+
+			if ($deletesClient.variables.ids.length === 1) {
+				openSheet = false;
+				toast.success('Account deleted');
+			} else {
+				toast.success('Accounts deleted');
+			}
+		} else if ($deletesClient.error) {
+			const { message, status } = $deletesClient.error;
+
+			if (status === 401) {
+				toast.error(message);
+				applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+				return;
+			}
+		}
+	});
 </script>
 
 <Metadata title="Financial Accounts" />
@@ -178,7 +113,7 @@
 			<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 				<CardTitle class="text-xl line-clamp-1">Accounts page</CardTitle>
 
-				<Button size="sm" onclick={() => openSheet(createForm)}>
+				<Button size="sm" onclick={() => (openSheet = true)}>
 					<Plus />Add new
 				</Button>
 			</CardHeader>
@@ -191,14 +126,17 @@
 					filterKey="name"
 				>
 					{#snippet deleteBulk(selectedRows)}
-						<DataTableDeletesButton
-							{selectedRows}
-							form={deletesForm}
-							onUpdate={(selectedRows) => {
-								deletesForm.form.update(() => ({ ids: selectedRows.map((r) => r.original.id) }));
-							}}
-							alertDialogDescription="You are about to delete these accounts"
-						/>
+						{#if selectedRows.length > 0}
+							<DataTableDeletesButton
+								selectedRowsCount={selectedRows.length}
+								disabled={$deletesClient.isPending}
+								onDeletes={() => {
+									const ids = selectedRows.map((r) => r.original.id);
+									$deletesClient.mutate({ ids });
+								}}
+								confirmDialogDescription="You are about to delete these accounts"
+							/>
+						{/if}
 					{/snippet}
 				</DataTable>
 			</CardContent>
@@ -206,4 +144,15 @@
 	</div>
 </DataTableLoader>
 
-<AccountSheet form={currentForm} bind:open disabled={loading} />
+<AccountSheet
+	form={accountForm}
+	bind:open={openSheet}
+	disabled={loading}
+	deleting={$deletesClient.isPending}
+	onOpenChange={(open) => {
+		if (!open) accountForm.reset();
+	}}
+	onDelete={(id) => {
+		$deletesClient.mutate({ ids: [id] });
+	}}
+/>

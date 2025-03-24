@@ -1,77 +1,41 @@
-<script lang="ts" module>
-	import type { z } from 'zod';
-	import type { SuperForm } from 'sveltekit-superforms';
-	import type { insertTransactionSchema, updateTransactionSchema } from '../schemas';
-	import type { getAccountOptions } from '$features/accounts/server/accounts.server';
-
-	export type InsertTransactionForm = SuperForm<z.input<typeof insertTransactionSchema>, any>;
-	export type UpdateTransactionForm = SuperForm<z.input<typeof updateTransactionSchema>, any>;
-	export type TransactionForms = InsertTransactionForm | UpdateTransactionForm;
-</script>
-
 <script lang="ts">
-	import { get } from 'svelte/store';
+	import type { TransactionFormValues } from '.';
+	import type { AccountOptions } from '$features/accounts/api';
 
-	import { Input } from '$components/ui/input';
+	import { Input } from '$lib/components/ui/input';
 	import {
 		FormButton,
 		FormControl,
 		FormField,
 		FormFieldErrors,
 		FormLabel
-	} from '$components/ui/form';
-	import { Select, SelectContent, SelectItem, SelectTrigger } from '$components/ui/select';
+	} from '$lib/components/ui/form';
+	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 
-	import ConfirmDialog, { getConfirmation } from '$components/confirm-dialog.svelte';
-
-	import { LoaderCircle, Trash } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 
 	interface Props {
-		form: TransactionForms;
-		createAction?: string;
-		updateAction?: string;
-		deleteAction?: string;
+		form: TransactionFormValues;
+		createAction: string;
+		updateAction: string;
 		disabled?: boolean;
-		accountOptions?: AsyncReturnType<typeof getAccountOptions>;
+		showLoader?: boolean;
+		accountOptions: AccountOptions;
 	}
 
 	let {
 		form,
-		createAction = '?/create',
-		updateAction = '?/update',
-		deleteAction = '?/delete',
+		createAction,
+		updateAction,
+		accountOptions,
 		disabled = false,
-		accountOptions = []
+		showLoader = false
 	}: Props = $props();
 
-	const { form: formData, enhance, submit } = form;
-
-	let deleteForm = $state(false);
-
-	let openConfirmDialog = $state(false);
-
-	function isUpdateForm(form: TransactionForms): form is UpdateTransactionForm {
-		return get(form.form).id !== undefined;
-	}
-
-	async function onDelete(
-		event:
-			| (MouseEvent & { currentTarget: EventTarget & HTMLButtonElement })
-			| (MouseEvent & { currentTarget: EventTarget & HTMLAnchorElement })
-	) {
-		openConfirmDialog = true;
-		event.preventDefault();
-
-		const ok = await getConfirmation();
-
-		if (ok) {
-			deleteForm = true;
-			return submit(event.target);
-		}
-	}
+	const { form: formData, enhance } = form;
 </script>
 
-<form action="#####" method="post" class="space-y-4 pt-2" use:enhance>
+<form method="post" class="space-y-4 pt-2" use:enhance>
 	{#if $formData.id}
 		<FormField {form} name="id">
 			<FormControl>
@@ -109,39 +73,12 @@
 		</FormControl>
 	</FormField>
 
-	<FormButton
-		class="w-full"
-		{disabled}
-		formaction={isUpdateForm(form) ? updateAction : createAction}
-	>
-		{#if disabled && !deleteForm}
+	<FormButton class="w-full" {disabled} formaction={$formData.id ? updateAction : createAction}>
+		{#if disabled && showLoader}
 			<LoaderCircle size={16} class="mr-1 text-primary-foreground animate-spin" />
-			{isUpdateForm(form) ? 'Saving...' : 'Creating...'}
+			{$formData.id ? 'Saving...' : 'Creating...'}
 		{:else}
-			{isUpdateForm(form) ? 'Save Changes' : 'Create transaction'}
+			{$formData.id ? 'Save Changes' : 'Create transaction'}
 		{/if}
 	</FormButton>
-
-	{#if isUpdateForm(form)}
-		<FormButton
-			formaction={deleteAction}
-			class="w-full"
-			{disabled}
-			variant="outline-red"
-			onclick={onDelete}
-		>
-			{#if disabled && deleteForm}
-				<LoaderCircle size={16} class="mr-1 text-red-600 animate-spin" />
-				Deleting...
-			{:else}
-				<Trash size={16} class="mr-1" />Delete transaction
-			{/if}
-		</FormButton>
-
-		<ConfirmDialog
-			bind:open={openConfirmDialog}
-			title="Are you sure?"
-			description="You are about to delete this transaction"
-		/>
-	{/if}
 </form>

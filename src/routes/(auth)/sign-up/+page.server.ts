@@ -8,7 +8,7 @@ import { message, superValidate } from 'sveltekit-superforms';
 import { ACCESS_TOKEN } from '$features/auth/constants';
 import { signUpSchema } from '$features/auth/schemas';
 import { createUser, getUserByUsername } from '$features/auth/server/user.server';
-import { createToken, getExpiresAt } from '$features/auth/server/auth.server';
+import { createToken, getExpiresAt } from '$features/auth/server/service.server';
 
 export const load = (async () => {
 	const form = await superValidate(zod(signUpSchema));

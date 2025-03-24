@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AccountForms, UpdateAccountForm } from './account-form.svelte';
+	import type { AccountFormValues } from '.';
 
 	import {
 		Sheet,
@@ -7,42 +7,80 @@
 		SheetDescription,
 		SheetHeader,
 		SheetTitle
-	} from '$components/ui/sheet';
+	} from '$lib/components/ui/sheet';
+	import { Button } from '$lib/components/ui/button';
 
-	import AccountForm from './account-form.svelte';
-	import { get } from 'svelte/store';
+	import { ConfirmDialog, getConfirmation } from '$lib/components/confirm-dialog';
+
+	import { AccountForm } from '.';
+
+	import { LoaderCircle, Trash } from '@lucide/svelte';
 
 	interface Props {
 		open?: boolean;
-		form: AccountForms;
-		disabled?: boolean;
+		form: AccountFormValues;
+		createAction?: string;
+		updateAction?: string;
 		onOpenChange?: (value: boolean) => void;
+		onDelete?: (id: number) => MaybePromise<void>;
+		disabled?: boolean;
+		deleting?: boolean;
 	}
 
-	let { open = $bindable(false), form, disabled = false, onOpenChange }: Props = $props();
+	let {
+		form,
+		onOpenChange,
+		onDelete,
+		open = $bindable(false),
+		createAction = '?/create',
+		updateAction = '?/update',
+		disabled = false,
+		deleting = false
+	}: Props = $props();
 
-	function isEditForm(form: AccountForms): form is UpdateAccountForm {
-		return get(form.form).id !== undefined;
+	const { form: formData } = form;
+
+	let openConfirmDialog = $state(false);
+
+	async function onClick() {
+		openConfirmDialog = true;
+
+		const ok = await getConfirmation();
+
+		if (ok) {
+			return await onDelete?.($formData.id!);
+		}
 	}
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		form.reset();
-		onOpenChange?.(value);
-	}}
->
+<Sheet bind:open {onOpenChange}>
 	<SheetContent class="space-y-4" interactOutsideBehavior={disabled ? 'ignore' : 'close'}>
 		<SheetHeader>
-			<SheetTitle>{isEditForm(form) ? 'Edit ' : 'New '}Account</SheetTitle>
+			<SheetTitle>{$formData.id ? 'Edit ' : 'New '}Account</SheetTitle>
 			<SheetDescription>
-				{isEditForm(form)
+				{$formData.id
 					? 'Edit an existing account.'
 					: 'Create a new account to track your transactions.'}
 			</SheetDescription>
 		</SheetHeader>
 
-		<AccountForm {form} {disabled} />
+		<AccountForm {form} {disabled} {createAction} {updateAction} showLoader={!deleting} />
+
+		{#if $formData.id}
+			<Button class="w-full" {disabled} variant="outline-red" onclick={onClick}>
+				{#if disabled && deleting}
+					<LoaderCircle size={16} class="mr-1 text-red-600 animate-spin" />
+					Deleting...
+				{:else}
+					<Trash size={16} class="mr-1" />Delete account
+				{/if}
+			</Button>
+		{/if}
 	</SheetContent>
 </Sheet>
+
+<ConfirmDialog
+	bind:open={openConfirmDialog}
+	title="Are you sure?"
+	description="You are about to delete this account"
+/>

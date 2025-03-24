@@ -6,8 +6,8 @@
 
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 
-	import { Toaster } from '$components/ui/sonner';
-	import BackToTop from '$components/back-to-top.svelte';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import BackToTop from '$lib/components/back-to-top.svelte';
 
 	interface Props {
 		data: LayoutData;

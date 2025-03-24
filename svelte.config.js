@@ -10,8 +10,6 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			$components: './src/components',
-			$hooks: './src/hooks',
 			'$features/*': './src/features/*',
 			'$assets/*': './src/assets/*'
 		}

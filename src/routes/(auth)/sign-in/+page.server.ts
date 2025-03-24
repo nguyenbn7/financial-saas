@@ -7,7 +7,7 @@ import { message, superValidate } from 'sveltekit-superforms';
 
 import { ACCESS_TOKEN } from '$features/auth/constants';
 import { signInSchema } from '$features/auth/schemas';
-import { createToken, getExpiresAt } from '$features/auth/server/auth.server';
+import { createToken, getExpiresAt } from '$features/auth/server/service.server';
 import { comparePasswords, getUserByUsername } from '$features/auth/server/user.server';
 
 export const load = (async () => {

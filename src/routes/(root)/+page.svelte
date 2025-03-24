@@ -4,11 +4,11 @@
 	import Logo from '$assets/logo.svg';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
-	import { Button } from '$components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 
 	import { ArrowRight, LayoutDashboard, Video } from '@lucide/svelte';
 
-	import Metadata from '$components/metadata.svelte';
+	import Metadata from '$lib/components/metadata/metadata.svelte';
 
 	const title = 'Embrace the financial arena with an engaging spirit';
 	const description =

@@ -11,7 +11,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
-	import Metadata from '$lib/components/metadata/metadata.svelte';
+	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
 	import { AccountSheet } from '$features/accounts/components';

@@ -7,7 +7,8 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 
 	import { Toaster } from '$lib/components/ui/sonner';
-	import BackToTop from '$lib/components/back-to-top.svelte';
+
+	import { BackToTop as BackToTopButton } from '$lib/components/button';
 
 	interface Props {
 		data: LayoutData;
@@ -25,4 +26,4 @@
 	{@render children()}
 </QueryClientProvider>
 
-<BackToTop />
+<BackToTopButton />

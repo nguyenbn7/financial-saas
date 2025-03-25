@@ -14,10 +14,17 @@
 		type SortingState
 	} from '@tanstack/table-core';
 
-	import { Input } from '../ui/input';
-	import { Button } from '../ui/button';
-	import { createSvelteTable, FlexRender } from '../ui/data-table';
-	import * as Table from '../ui/table';
+	import { Input } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
+	import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table';
+	import {
+		Table,
+		TableBody,
+		TableCell,
+		TableHead,
+		TableHeader,
+		TableRow
+	} from '$lib/components/ui/table';
 
 	import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/svelte';
 
@@ -113,39 +120,39 @@
 		{@render deleteBulk?.(table.getFilteredSelectedRowModel().rows)}
 	</div>
 	<div class="rounded-md border">
-		<Table.Root>
-			<Table.Header>
+		<Table>
+			<TableHeader>
 				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-					<Table.Row>
+					<TableRow>
 						{#each headerGroup.headers as header (header.id)}
-							<Table.Head>
+							<TableHead>
 								{#if !header.isPlaceholder}
 									<FlexRender
 										content={header.column.columnDef.header}
 										context={header.getContext()}
 									/>
 								{/if}
-							</Table.Head>
+							</TableHead>
 						{/each}
-					</Table.Row>
+					</TableRow>
 				{/each}
-			</Table.Header>
-			<Table.Body>
+			</TableHeader>
+			<TableBody>
 				{#each table.getRowModel().rows as row (row.id)}
-					<Table.Row data-state={row.getIsSelected() && 'selected'}>
+					<TableRow data-state={row.getIsSelected() && 'selected'}>
 						{#each row.getVisibleCells() as cell (cell.id)}
-							<Table.Cell>
+							<TableCell>
 								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-							</Table.Cell>
+							</TableCell>
 						{/each}
-					</Table.Row>
+					</TableRow>
 				{:else}
-					<Table.Row>
-						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
-					</Table.Row>
+					<TableRow>
+						<TableCell colspan={columns.length} class="h-24 text-center">No results.</TableCell>
+					</TableRow>
 				{/each}
-			</Table.Body>
-		</Table.Root>
+			</TableBody>
+		</Table>
 	</div>
 	<div class="flex items-center justify-end space-x-2 py-4">
 		<div class="text-muted-foreground flex-1 text-sm">

@@ -22,8 +22,8 @@
 	import { toast } from 'svelte-sonner';
 
 	import { LoaderCircle } from '@lucide/svelte';
-	import Metadata from '$lib/components/metadata/metadata.svelte';
-	import ShowPasswordButton from '$lib/components/show-password-button.svelte';
+	import { Metadata } from '$lib/components/metadata';
+	import { ShowPassword as ShowPasswordButton } from '$lib/components/button';
 	import { signUpSchema } from '$features/auth/schemas';
 
 	let { data }: PageProps = $props();

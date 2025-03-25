@@ -17,7 +17,7 @@
 		AlertDialogFooter,
 		AlertDialogHeader,
 		AlertDialogTitle
-	} from '../ui/alert-dialog';
+	} from '$lib/components/ui/alert-dialog';
 
 	interface Props {
 		open?: boolean;

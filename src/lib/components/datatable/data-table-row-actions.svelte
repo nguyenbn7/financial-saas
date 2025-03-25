@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { MouseEventHandler } from 'svelte/elements';
 
-	import { buttonVariants } from '../ui/button';
+	import { buttonVariants } from '$lib/components/ui/button';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
 		DropdownMenuItem,
 		DropdownMenuTrigger
-	} from '../ui/dropdown-menu';
+	} from '$lib/components/ui/dropdown-menu';
 
 	import { cn } from '$lib/utils';
 

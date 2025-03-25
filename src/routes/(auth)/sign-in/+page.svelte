@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/form';
 
 	import { Metadata } from '$lib/components/metadata';
-	import ShowPasswordButton from '$lib/components/show-password-button.svelte';
+	import { ShowPassword as ShowPasswordButton} from '$lib/components/button';
 
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';

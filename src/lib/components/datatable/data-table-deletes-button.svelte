@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Button } from '../ui/button';
+	import { Button } from '$lib/components/ui/button';
 
-	import ConfirmDialog, { getConfirmation } from '../confirm-dialog/confirm-dialog.svelte';
+	import { ConfirmDialog, getConfirmation } from '$lib/components/confirm-dialog';
 
 	import { Trash2 } from '@lucide/svelte';
 

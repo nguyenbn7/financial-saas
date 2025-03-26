@@ -14,7 +14,8 @@
 
 	import { CategoryForm } from '.';
 
-	import { LoaderCircle, Trash } from '@lucide/svelte';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+	import Trash from '@lucide/svelte/icons/trash';
 
 	interface Props {
 		open?: boolean;

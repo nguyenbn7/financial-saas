@@ -6,9 +6,11 @@
 
 	import { Button } from '$lib/components/ui/button';
 
-	import { ArrowRight, LayoutDashboard, Video } from '@lucide/svelte';
+	import { Metadata } from '$lib/components/metadata';
 
-	import Metadata from '$lib/components/metadata/metadata.svelte';
+	import ArrowRight from '@lucide/svelte/icons/arrow-right';
+	import Video from '@lucide/svelte/icons/video';
+	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 
 	const title = 'Embrace the financial arena with an engaging spirit';
 	const description =

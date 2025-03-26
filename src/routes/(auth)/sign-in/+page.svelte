@@ -17,14 +17,14 @@
 	} from '$lib/components/ui/form';
 
 	import { Metadata } from '$lib/components/metadata';
-	import { ShowPassword as ShowPasswordButton} from '$lib/components/button';
+	import { ShowPassword as ShowPasswordButton } from '$lib/components/button';
 
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	import { signInSchema } from '$features/auth/schemas';
 
-	import { LoaderCircle } from '@lucide/svelte';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	let { data }: PageProps = $props();
 

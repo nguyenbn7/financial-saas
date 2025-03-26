@@ -10,7 +10,7 @@
 	} from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 
-	import { LoaderCircle } from '@lucide/svelte';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	interface Props {
 		form: AccountFormValues;

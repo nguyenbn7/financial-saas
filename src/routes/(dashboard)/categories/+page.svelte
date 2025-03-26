@@ -19,7 +19,7 @@
 	import { categoryFormSchema } from '$features/categories/schemas';
 	import { deleteCategories } from '$features/categories/api';
 
-	import { Plus } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
 		data: PageServerData;

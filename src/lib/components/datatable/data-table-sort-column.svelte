@@ -12,7 +12,9 @@
 
 	import { Button } from '$lib/components/ui/button';
 
-	import { ArrowDownWideNarrow, ArrowUpNarrowWide, ArrowUpDown } from '@lucide/svelte';
+	import ArrowDownWideNarrow from '@lucide/svelte/icons/arrow-down-wide-narrow';
+	import ArrowUpNarrowWide from '@lucide/svelte/icons/arrow-up-wide-narrow';
+	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
 
 	let { text, isSorted, variant = 'ghost', ...restProps }: DataTableSortColumnProps = $props();
 </script>

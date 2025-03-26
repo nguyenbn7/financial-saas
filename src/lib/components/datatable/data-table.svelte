@@ -26,7 +26,10 @@
 		TableRow
 	} from '$lib/components/ui/table';
 
-	import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/svelte';
+	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import ChevronsLeft from '@lucide/svelte/icons/chevrons-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import ChevronsRight from '@lucide/svelte/icons/chevrons-right';
 
 	type DataTableProps<TData, TValue> = {
 		data: TData[];

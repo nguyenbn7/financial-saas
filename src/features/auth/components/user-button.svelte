@@ -4,6 +4,7 @@
 	import { createAvatar } from '@dicebear/core';
 	import { adventurer } from '@dicebear/collection';
 
+	import { toast } from 'svelte-sonner';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
@@ -15,8 +16,8 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Avatar, AvatarFallback, AvatarImage } from '$lib/components/ui/avatar';
 
-	import { LogOut, User } from '@lucide/svelte';
-	import { toast } from 'svelte-sonner';
+	import LogOut from '@lucide/svelte/icons/log-out';
+	import User from '@lucide/svelte/icons/user';
 
 	interface Props {
 		displayName: string;

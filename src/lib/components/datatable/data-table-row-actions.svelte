@@ -11,7 +11,9 @@
 
 	import { cn } from '$lib/utils';
 
-	import { Edit, MoreHorizontal } from '@lucide/svelte';
+	import Edit from '@lucide/svelte/icons/edit';
+	import MoreHorizontal from '@lucide/svelte/icons/more-horizontal';
+
 
 	interface Props {
 		onEdit?: MouseEventHandler<HTMLDivElement> | null | undefined;

@@ -8,8 +8,9 @@
 	import Logo from '$assets/logo.svg';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
-	import Navigation from '$lib/components/navigation.svelte';
-	import UserButton from '$features/auth/components/user-button.svelte';
+	import { Navigation } from '$lib/components/navigation';
+
+	import { UserButton } from '$features/auth/components';
 
 	interface Props {
 		data: LayoutData;

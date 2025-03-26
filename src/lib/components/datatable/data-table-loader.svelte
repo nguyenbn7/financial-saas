@@ -4,7 +4,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Card, CardContent, CardHeader } from '$lib/components/ui/card';
 
-	import { LoaderCircle } from '@lucide/svelte';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	interface Props {
 		loading?: boolean;

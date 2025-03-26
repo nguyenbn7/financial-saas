@@ -19,7 +19,7 @@
 	import { accountFormSchema } from '$features/accounts/schemas';
 	import { deleteAccounts } from '$features/accounts/api';
 
-	import { Plus } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
 		data: PageServerData;

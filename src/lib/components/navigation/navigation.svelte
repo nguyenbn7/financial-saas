@@ -5,10 +5,11 @@
 	import { page } from '$app/state';
 
 	import { cn } from '$lib/utils';
-	import { Menu } from '@lucide/svelte';
 
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Sheet, SheetContent, SheetTrigger } from '$lib/components/ui/sheet';
+
+	import Menu from '@lucide/svelte/icons/menu';
 
 	const routes = [
 		{

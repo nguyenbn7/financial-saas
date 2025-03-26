@@ -7,14 +7,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
+	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DataTableLoader } from '$lib/components/datatable';
-	import Metadata from '$lib/components/metadata/metadata.svelte';
 
 	import { transactionFormSchema } from '$features/transactions/schemas';
 	import { TransactionSheet } from '$features/transactions/components';
 	import { getColumns } from '$features/transactions/datatable-columns';
 
-	import { Plus } from '@lucide/svelte';
+	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
 		data: PageServerData;

@@ -3,7 +3,7 @@
 
 	import { ConfirmDialog, getConfirmation } from '$lib/components/confirm-dialog';
 
-	import { Trash2 } from '@lucide/svelte';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 
 	interface Props {
 		selectedRowsCount?: number;

@@ -21,10 +21,12 @@
 	} from '$lib/components/ui/form';
 	import { toast } from 'svelte-sonner';
 
-	import { LoaderCircle } from '@lucide/svelte';
-	import { Metadata } from '$lib/components/metadata';
 	import { ShowPassword as ShowPasswordButton } from '$lib/components/button';
 	import { signUpSchema } from '$features/auth/schemas';
+
+	import { Metadata } from '$lib/components/metadata';
+
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	let { data }: PageProps = $props();
 

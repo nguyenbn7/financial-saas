@@ -10,22 +10,31 @@
 	import { Command, CommandGroup, CommandItem, CommandList } from '../ui/command';
 
 	import Check from '@lucide/svelte/icons/check';
-	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import CirclePlus from '@lucide/svelte/icons/circle-plus';
 
 	type Option = { label: string; value: string };
 
 	interface Props {
+		onChange: (option: Option) => void;
 		onCreate?: (value: string) => MaybePromise<void>;
-		onChange?: (option: Option) => MaybePromise<void>;
-		options: Option[];
+		options?: Option[];
+		value?: string;
+		placeholder?: string;
 		disabled?: boolean;
+		widthClass?: string;
 	}
 
-	let { onCreate, onChange, options, disabled = false }: Props = $props();
+	let {
+		onCreate,
+		onChange,
+		placeholder,
+		value = $bindable(''),
+		options = [],
+		disabled = false,
+		widthClass = 'w-42'
+	}: Props = $props();
 
 	let open = $state(false);
-	let value = $state('');
 	let query = $state('');
 
 	let triggerRef = $state<HTMLButtonElement>(null!);
@@ -63,8 +72,6 @@
 	$effect(() => {
 		if (!open) query = '';
 	});
-
-	$inspect(selectedLabel);
 </script>
 
 {#snippet CommandAddItem()}
@@ -95,9 +102,10 @@
 				{...props}
 				type={!open ? 'button' : 'text'}
 				value={!open ? selectedLabel : query}
-				class="w-[200px]"
+				class={cn(widthClass)}
 				role="listbox"
 				aria-expanded={open}
+				{placeholder}
 				tabindex={0}
 				{disabled}
 				oninput={(e) => {
@@ -107,7 +115,7 @@
 		{/snippet}
 	</PopoverTrigger>
 
-	<PopoverContent class="w-[200px] p-0" sideOffset={10} trapFocus={false}>
+	<PopoverContent class={cn('p-0', widthClass)} sideOffset={10} trapFocus={false}>
 		<Command filter={customFilter}>
 			<CommandPrimitive.Input hidden value={query} />
 
@@ -128,8 +136,7 @@
 							tabindex={0}
 							value={option.label}
 							onSelect={() => {
-								onChange?.(option);
-								value = option.value;
+								onChange(option);
 								closeAndFocusTrigger();
 							}}
 						>

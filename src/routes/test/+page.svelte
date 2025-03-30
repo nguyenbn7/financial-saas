@@ -23,17 +23,23 @@
 			label: 'Astro'
 		}
 	]);
+
+	let value = $state('');
 </script>
 
 <div class="w-32 mx-auto mt-10">
 	<CreatableSelect
+		bind:value
 		options={frameworks}
-		onCreate={(value) => {
+		onCreate={(newValue) => {
 			frameworks.push({
-				value,
-				label: value
+				value: newValue,
+				label: newValue
 			});
-			console.log(value);
+			value = newValue;
+		}}
+		onChange={(option) => {
+			value = option.value;
 		}}
 	/>
 </div>

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { TransactionFormValues } from '.';
-	import type { AccountOptions } from '$features/accounts/api';
 
 	import { Input } from '$lib/components/ui/input';
 	import {
@@ -10,7 +9,8 @@
 		FormFieldErrors,
 		FormLabel
 	} from '$lib/components/ui/form';
-	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+
+	import { CreatableSelect } from '$lib/components/select';
 
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
@@ -20,7 +20,8 @@
 		updateAction: string;
 		disabled?: boolean;
 		showLoader?: boolean;
-		accountOptions: AccountOptions;
+		onCreateAccount: (name: string) => void;
+		accountOptions: { label: string; value: string }[];
 	}
 
 	let {
@@ -28,6 +29,7 @@
 		createAction,
 		updateAction,
 		accountOptions,
+		onCreateAccount,
 		disabled = false,
 		showLoader = false
 	}: Props = $props();
@@ -46,11 +48,31 @@
 		</FormField>
 	{/if}
 
-	<FormField {form} name="accountId">
+	<FormField {form} name="id">
 		<FormControl>
 			{#snippet children({ props })}
 				<FormLabel>Account</FormLabel>
+				
+				<CreatableSelect
+					{...props}
+					placeholder="Select an account"
+					value={`${$formData.accountId}`}
+					{disabled}
+					options={accountOptions}
+					onCreate={onCreateAccount}
+					onValueChange={(value) => ($formData.accountId = Number(value))}
+				/>
+			{/snippet}
+		</FormControl>
 
+		<FormFieldErrors />
+	</FormField>
+
+	<!-- <CreatableSelect placeholder="Select an account" /> -->
+	<!-- <FormField {form} name="accountId">
+		<FormControl>
+			{#snippet children({ props })}
+				<FormLabel>Account</FormLabel>
 				<Select
 					type="single"
 					value={`${$formData.accountId}`}
@@ -67,11 +89,10 @@
 						{/each}
 					</SelectContent>
 				</Select>
-
-				<FormFieldErrors />
 			{/snippet}
+			<FormFieldErrors />
 		</FormControl>
-	</FormField>
+	</FormField> -->
 
 	<FormButton class="w-full" {disabled} formaction={$formData.id ? updateAction : createAction}>
 		{#if disabled && showLoader}

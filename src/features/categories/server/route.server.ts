@@ -3,8 +3,13 @@ import { zValidator } from '@hono/zod-validator';
 
 import { authenticate } from '$lib/server/middlewares';
 
-import { deletesSchema } from '../schemas';
-import { deleteCategories, getCategoryOptions, getPageCategory } from './service.server';
+import { categoryFormSchema, deletesSchema } from '../schemas';
+import {
+	createCategory,
+	deleteCategories,
+	getCategoryOptions,
+	getPageCategory
+} from './service.server';
 
 import { delay } from '$lib';
 
@@ -17,6 +22,16 @@ const app = new Hono()
 		const user = c.get('user');
 
 		return c.json(await getCategoryOptions(user.id));
+	})
+	.post('/', authenticate, zValidator('json', categoryFormSchema.omit({ id: true })), async (c) => {
+		if (DEV) await delay(1, 2);
+
+		const user = c.get('user');
+		const { name } = c.req.valid('json');
+
+		const newCategory = await createCategory(user.id, { name });
+
+		return c.json({ data: newCategory });
 	})
 	.delete('/', authenticate, zValidator('json', deletesSchema), async (c) => {
 		if (DEV) await delay(1, 2);

@@ -12,27 +12,28 @@
 	import Check from '@lucide/svelte/icons/check';
 	import CirclePlus from '@lucide/svelte/icons/circle-plus';
 
-	type Option = { label: string; value: string };
-
 	interface Props {
-		onChange: (option: Option) => void;
+		onValueChange?: (value: string) => void;
 		onCreate?: (value: string) => MaybePromise<void>;
-		options?: Option[];
+		options?: { label: string; value: string }[];
 		value?: string;
 		placeholder?: string;
 		disabled?: boolean;
-		widthClass?: string;
+	}
+
+	interface Extended {
+		name?: string;
 	}
 
 	let {
 		onCreate,
-		onChange,
+		onValueChange,
 		placeholder,
 		value = $bindable(''),
 		options = [],
 		disabled = false,
-		widthClass = 'w-42'
-	}: Props = $props();
+		...restProps
+	}: Props & Extended = $props();
 
 	let open = $state(false);
 	let query = $state('');
@@ -95,15 +96,14 @@
 {/snippet}
 
 <Popover bind:open>
-	<PopoverTrigger bind:ref={triggerRef}>
+	<PopoverTrigger bind:ref={triggerRef} {...restProps}>
 		{#snippet child({ props })}
-			<!-- if not  -->
 			<Input
 				{...props}
 				type={!open ? 'button' : 'text'}
-				value={!open ? selectedLabel : query}
-				class={cn(widthClass)}
+				value={!open ? (selectedLabel ?? placeholder) : query}
 				role="listbox"
+				class="w-full"
 				aria-expanded={open}
 				{placeholder}
 				tabindex={0}
@@ -115,7 +115,11 @@
 		{/snippet}
 	</PopoverTrigger>
 
-	<PopoverContent class={cn('p-0', widthClass)} sideOffset={10} trapFocus={false}>
+	<PopoverContent
+		class={cn('p-0', 'w-[var(--bits-popover-anchor-width)]')}
+		sideOffset={10}
+		trapFocus={false}
+	>
 		<Command filter={customFilter}>
 			<CommandPrimitive.Input hidden value={query} />
 
@@ -136,7 +140,8 @@
 							tabindex={0}
 							value={option.label}
 							onSelect={() => {
-								onChange(option);
+								onValueChange?.(option.value);
+								value = option.value;
 								closeAndFocusTrigger();
 							}}
 						>

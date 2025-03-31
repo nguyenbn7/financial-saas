@@ -69,7 +69,8 @@ export async function createAccount(userId: number, data: { name: string }) {
 			user_id: userId,
 			name: data.name
 		})
-		.execute();
+		.returning(['id', 'name'])
+		.executeTakeFirst();
 }
 
 export async function getAccountOptions(userId: number) {

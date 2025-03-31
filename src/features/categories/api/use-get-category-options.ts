@@ -3,7 +3,7 @@ import type { InferResponseType } from 'hono';
 import { client } from '$lib/rpc';
 import { createQuery } from '@tanstack/svelte-query';
 
-export default function getCategoryOptions() {
+export default function useGetCategoryOptions() {
 	const query = createQuery({
 		queryKey: ['category_options'],
 		queryFn: async () => {

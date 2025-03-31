@@ -58,4 +58,4 @@
 	</div>
 </DataTableLoader>
 
-<TransactionSheet bind:open form={transactionForm} accountOptions={[]} />
+<TransactionSheet bind:open form={transactionForm} />

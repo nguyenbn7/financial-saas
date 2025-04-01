@@ -61,7 +61,7 @@
 	const succeedCreateNewAccount = $derived($accountMutation.isSuccess);
 	const onCreateAccount = (name: string) => $accountMutation.mutate({ name });
 	const accountOptions = $derived(
-		($accountsQuery?.data ?? []).map((account) => ({
+		($accountsQuery.data ?? []).map((account) => ({
 			label: account.name,
 			value: account.id.toString()
 		}))
@@ -73,17 +73,26 @@
 		}
 	});
 
-	const categoriesQuery = useGetCategoryOptions();
+	let categoriesQuery = $state(useGetCategoryOptions());
 	const categoryMutation = useCreateCategory();
+	const succeedCreateNewCategory = $derived($categoryMutation.isSuccess);
 	const onCreateCategory = (name: string) => $categoryMutation.mutate({ name });
-	const categoryOptions = ($categoriesQuery.data ?? []).map((category) => ({
-		label: category.name,
-		value: category.id.toString()
-	}));
+	const categoryOptions = $derived(
+		($categoriesQuery.data ?? []).map((category) => ({
+			label: category.name,
+			value: category.id.toString()
+		}))
+	);
+
+	$effect(() => {
+		if (succeedCreateNewCategory) {
+			categoriesQuery = useGetCategoryOptions();
+		}
+	});
 
 	let disabledInternal = $derived(
 		disabled ||
-			$accountsQuery?.isFetching ||
+			$accountsQuery.isFetching ||
 			$accountMutation.isPending ||
 			$categoriesQuery.isFetching ||
 			$categoryMutation.isPending
@@ -105,6 +114,8 @@
 			showLoader={!deleting}
 			{onCreateAccount}
 			{accountOptions}
+			{onCreateCategory}
+			{categoryOptions}
 		/>
 
 		{#if $formData.id}

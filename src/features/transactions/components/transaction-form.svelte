@@ -22,14 +22,18 @@
 		showLoader?: boolean;
 		onCreateAccount: (name: string) => void;
 		accountOptions: { label: string; value: string }[];
+		onCreateCategory: (name: string) => void;
+		categoryOptions: { label: string; value: string }[];
 	}
 
 	let {
 		form,
 		createAction,
 		updateAction,
-		accountOptions,
 		onCreateAccount,
+		accountOptions,
+		onCreateCategory,
+		categoryOptions,
 		disabled = false,
 		showLoader = false
 	}: Props = $props();
@@ -48,15 +52,15 @@
 		</FormField>
 	{/if}
 
-	<FormField {form} name="id">
+	<FormField {form} name="accountId">
 		<FormControl>
 			{#snippet children({ props })}
 				<FormLabel>Account</FormLabel>
-				
+
 				<CreatableSelect
 					{...props}
 					placeholder="Select an account"
-					value={`${$formData.accountId}`}
+					value={$formData.accountId.toString()}
 					{disabled}
 					options={accountOptions}
 					onCreate={onCreateAccount}
@@ -68,31 +72,25 @@
 		<FormFieldErrors />
 	</FormField>
 
-	<!-- <CreatableSelect placeholder="Select an account" /> -->
-	<!-- <FormField {form} name="accountId">
+	<FormField {form} name="categoryId">
 		<FormControl>
 			{#snippet children({ props })}
-				<FormLabel>Account</FormLabel>
-				<Select
-					type="single"
-					value={`${$formData.accountId}`}
-					onValueChange={(value) => ($formData.accountId = Number(value))}
-					name={props.name}
-				>
-					<SelectTrigger class="mt-2"
-						>{accountOptions.find((a) => a.id === $formData.accountId)?.name ??
-							'Select an account'}</SelectTrigger
-					>
-					<SelectContent>
-						{#each accountOptions as option}
-							<SelectItem value={`${option.id}`} label={option.name} />
-						{/each}
-					</SelectContent>
-				</Select>
+				<FormLabel>Category</FormLabel>
+
+				<CreatableSelect
+					{...props}
+					placeholder="Select a category"
+					value={$formData.categoryId?.toString()}
+					{disabled}
+					options={categoryOptions}
+					onCreate={onCreateCategory}
+					onValueChange={(value) => ($formData.categoryId = Number(value))}
+				/>
 			{/snippet}
-			<FormFieldErrors />
 		</FormControl>
-	</FormField> -->
+
+		<FormFieldErrors />
+	</FormField>
 
 	<FormButton class="w-full" {disabled} formaction={$formData.id ? updateAction : createAction}>
 		{#if disabled && showLoader}

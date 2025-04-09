@@ -4,7 +4,7 @@
 
 	import '../app.css';
 
-	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { QueryClientProvider } from '@tanstack/svelte-query';
 
 	import { Toaster } from '$lib/components/ui/sonner';
 
@@ -16,13 +16,11 @@
 	}
 
 	let { data, children }: Props = $props();
-
-	const queryClient = new QueryClient();
 </script>
 
 <Toaster richColors closeButton theme="light" />
 
-<QueryClientProvider client={queryClient}>
+<QueryClientProvider>
 	{@render children()}
 </QueryClientProvider>
 

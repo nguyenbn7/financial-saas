@@ -1,23 +1,29 @@
 <script lang="ts">
-	import { DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
+	import {
+		DateFormatter,
+		type DateValue,
+		getLocalTimeZone,
+		parseDate
+	} from '@internationalized/date';
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import CalendarIcon from '@lucide/svelte/icons/calendar';
 
+	interface Props {
+		value?: Date;
+		disabled?: boolean;
+	}
+
+	let { value: _value = $bindable(), disabled = false }: Props = $props();
+
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
 	});
 
 	let contentRef = $state<HTMLElement | null>(null);
-
-	interface Props {
-		value?: DateValue;
-		disabled?: boolean;
-	}
-
-	let { value = $bindable(), disabled = false }: Props = $props();
+	let value = $state<DateValue | undefined>();
 </script>
 
 <Popover>
@@ -35,6 +41,18 @@
 		{/snippet}
 	</PopoverTrigger>
 	<PopoverContent bind:ref={contentRef} class="w-auto p-0">
-		<Calendar type="single" bind:value {disabled} initialFocus />
+		<Calendar
+			type="single"
+			bind:value
+			{disabled}
+			initialFocus
+			onValueChange={(v) => {
+				if (v) {
+					_value = v.toDate(getLocalTimeZone());
+				} else {
+					_value = undefined;
+				}
+			}}
+		/>
 	</PopoverContent>
 </Popover>

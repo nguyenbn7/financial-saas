@@ -99,7 +99,10 @@
 </script>
 
 <Sheet bind:open {onOpenChange}>
-	<SheetContent class="space-y-4" interactOutsideBehavior={disabledInternal ? 'ignore' : 'close'}>
+	<SheetContent
+		class="space-y-4 overflow-y-auto"
+		interactOutsideBehavior={disabledInternal ? 'ignore' : 'close'}
+	>
 		<SheetHeader>
 			<SheetTitle>New Transaction</SheetTitle>
 			<SheetDescription>Create a new transaction.</SheetDescription>

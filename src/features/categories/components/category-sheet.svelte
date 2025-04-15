@@ -60,7 +60,10 @@
 		onOpenChange?.(value);
 	}}
 >
-	<SheetContent class="space-y-4" interactOutsideBehavior={disabled ? 'ignore' : 'close'}>
+	<SheetContent
+		class="space-y-4 overflow-y-auto"
+		interactOutsideBehavior={disabled ? 'ignore' : 'close'}
+	>
 		<SheetHeader>
 			<SheetTitle>{$formData.id ? 'Edit ' : 'New '}Category</SheetTitle>
 			<SheetDescription>

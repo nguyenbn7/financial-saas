@@ -19,39 +19,7 @@
 		disabled?: boolean;
 	}
 
-	let {
-		value: _value = $bindable(),
-		placeholder,
-		disabled = false,
-		...restProps
-	}: Props = $props();
-
-	const formatter = new Intl.NumberFormat('en-US', {
-		style: 'currency',
-		currency: 'USD',
-		maximumFractionDigits: 2,
-		minimumFractionDigits: 2
-	});
-
-	let value = $state(formatter.format(_value / 100));
-
-	$effect(() => {
-		let numericValue = Number(value.replace(/\D/g, ''));
-		if (numericValue !== _value) numericValue = _value;
-		value = formatter.format(numericValue / 100);
-	});
+	let { value = $bindable(), placeholder, disabled = false, ...restProps }: Props = $props();
 </script>
 
-<Input
-	{...restProps}
-	bind:value={
-		() => value,
-		(newValue) => {
-			value = newValue;
-			const numericValue = Number(value.replace(/\D/g, ''));
-			_value = numericValue;
-		}
-	}
-	{placeholder}
-	{disabled}
-/>
+<Input type="currency" {placeholder} {disabled} {...restProps} bind:value />

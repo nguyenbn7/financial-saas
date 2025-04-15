@@ -127,12 +127,7 @@
 			{#snippet children({ props })}
 				<FormLabel>Amount</FormLabel>
 
-				<AmountInput
-					{...props}
-					bind:value={$formData.amount}
-					{disabled}
-					placeholder="Optional notes"
-				/>
+				<AmountInput {...props} bind:value={$formData.amount} {disabled} placeholder="$0.00" />
 			{/snippet}
 		</FormControl>
 

@@ -45,7 +45,7 @@
 		let trackingNumValue = $derived(Number(value));
 
 		$effect(() => {
-			let numericValue = Number(currency.replace(/\D/g, ''));
+			let numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
 
 			if (!isNaN(trackingNumValue) && numericValue !== trackingNumValue)
 				numericValue = trackingNumValue;
@@ -79,7 +79,10 @@
 			() => currency,
 			(newValue) => {
 				currency = newValue;
-				const numericValue = Number(currency.replace(/\D/g, ''));
+
+				if (newValue.at(-1) === '-') currency = `-${currency}`;
+
+				const numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
 				value = numericValue;
 			}
 		}

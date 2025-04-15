@@ -10,7 +10,7 @@
 	} from '$lib/components/ui/sheet';
 	import { Button } from '$lib/components/ui/button';
 
-	import { ConfirmDialog, getConfirmation } from '$lib/components/confirm-dialog';
+	import { confirm } from '$lib/components/confirm-dialog';
 
 	import { CategoryForm } from '.';
 
@@ -41,12 +41,11 @@
 
 	const { form: formData } = form;
 
-	let openConfirmDialog = $state(false);
-
 	async function onClick() {
-		openConfirmDialog = true;
-
-		const ok = await getConfirmation();
+		const ok = await confirm({
+			title: 'Are you sure?',
+			description: 'You are about to delete this category'
+		});
 
 		if (ok) {
 			return await onDelete?.($formData.id!);
@@ -85,9 +84,3 @@
 		{/if}
 	</SheetContent>
 </Sheet>
-
-<ConfirmDialog
-	bind:open={openConfirmDialog}
-	title="Are you sure?"
-	description="You are about to delete this category"
-/>

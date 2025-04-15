@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 
-	import { ConfirmDialog, getConfirmation } from '$lib/components/confirm-dialog';
+	import { confirm } from '$lib/components/confirm-dialog';
 
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 
@@ -21,12 +21,11 @@
 		disabled
 	}: Props = $props();
 
-	let open = $state(false);
-
 	async function onclick() {
-		open = true;
-
-		const ok = await getConfirmation();
+		const ok = await confirm({
+			title: confirmDialogTitle,
+			description: confirmDialogDescription
+		});
 
 		if (ok) return await onDeletes?.();
 	}
@@ -35,5 +34,3 @@
 <Button variant="outline-red" class="ml-auto font-normal hover:cursor-pointer" {onclick} {disabled}>
 	<Trash2 /> Delete{!selectedRowsCount ? '' : ` (${selectedRowsCount})`}
 </Button>
-
-<ConfirmDialog bind:open title={confirmDialogTitle} description={confirmDialogDescription} />

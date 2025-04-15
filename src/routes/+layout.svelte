@@ -9,6 +9,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 
 	import { BackToTop as BackToTopButton } from '$lib/components/button';
+	import { ConfirmDialog } from '$lib/components/confirm-dialog';
 
 	interface Props {
 		data: LayoutData;
@@ -19,6 +20,8 @@
 </script>
 
 <Toaster richColors closeButton theme="light" />
+
+<ConfirmDialog />
 
 <QueryClientProvider>
 	{@render children()}

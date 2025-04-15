@@ -8,7 +8,19 @@ import { ClientError } from '$lib';
 type Response = InferResponseType<typeof client.api.categories.$post>;
 type Request = InferRequestType<typeof client.api.categories.$post>['json'];
 
-export default function useCreateCategory() {
+type TData = Response;
+type TError = ClientError;
+type TContext = unknown;
+type TVariables = Request;
+
+interface Options {
+	onSuccess?: (data: TData, variables: TVariables, context: TContext) => Promise<unknown> | unknown;
+	onError?: (error: TError, variables: TVariables, context: TContext) => Promise<unknown> | unknown;
+}
+
+export default function useCreateCategory(options: Options = {}) {
+	const { onSuccess, onError } = options;
+
 	const mutation = createMutation<Response, ClientError, Request>({
 		mutationKey: ['create_category'],
 		mutationFn: async (json) => {
@@ -20,7 +32,9 @@ export default function useCreateCategory() {
 			}
 
 			return response.json();
-		}
+		},
+		onSuccess,
+		onError
 	});
 
 	return mutation;

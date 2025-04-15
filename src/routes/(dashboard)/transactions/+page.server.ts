@@ -1,9 +1,9 @@
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 import { parse, subDays } from 'date-fns';
 
 import { zod } from 'sveltekit-superforms/adapters';
-import { superValidate } from 'sveltekit-superforms';
+import { fail, superValidate } from 'sveltekit-superforms';
 
 import { querySchema, transactionFormSchema } from '$features/transactions/schemas';
 import { getTransactions } from '$features/transactions/server/service.server';
@@ -33,3 +33,38 @@ export const load = (async ({ parent, url }) => {
 
 	return { form, data };
 }) satisfies PageServerLoad;
+
+export const actions = {
+	create: async ({ locals, request }) => {
+		const { user } = locals;
+
+		if (!user) return fail(401);
+
+		const form = await superValidate(request, zod(transactionFormSchema));
+
+		if (!form.valid) return fail(400, { form });
+
+		console.log(form.data);
+
+		// await createCategory(user.id, form.data);
+
+		return { form };
+	}
+
+	// update: async ({ locals, request }) => {
+	// 	const { user } = locals; // TODO:
+
+	// 	if (!user) return fail(401);
+
+	// 	const form = await superValidate(
+	// 		request,
+	// 		zod(categoryFormSchema.extend({ id: z.number().min(1) })) // TODO:
+	// 	);
+
+	// 	if (!form.valid) return fail(400, { form });
+
+	// 	await updateCategory(user.id, form.data);
+
+	// 	return { form, pagination: await getPageCategory(user.id) };
+	// }
+} satisfies Actions;

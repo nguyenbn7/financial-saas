@@ -55,37 +55,17 @@
 		}
 	}
 
-	let accountsQuery = $state(useGetAccountOptions());
-	const accountMutation = useCreateAccount();
-	const succeedCreateNewAccount = $derived($accountMutation.isSuccess);
-	const onCreateAccount = (name: string) => $accountMutation.mutate({ name });
-	const accountOptions = $derived(
-		($accountsQuery.data ?? []).map((account) => ({
-			label: account.name,
-			value: account.id.toString()
-		}))
-	);
-
-	$effect(() => {
-		if (succeedCreateNewAccount) {
-			accountsQuery = useGetAccountOptions();
+	const accountsQuery = useGetAccountOptions();
+	const accountMutation = useCreateAccount({
+		onSuccess() {
+			$accountsQuery.refetch();
 		}
 	});
 
-	let categoriesQuery = $state(useGetCategoryOptions());
-	const categoryMutation = useCreateCategory();
-	const succeedCreateNewCategory = $derived($categoryMutation.isSuccess);
-	const onCreateCategory = (name: string) => $categoryMutation.mutate({ name });
-	const categoryOptions = $derived(
-		($categoriesQuery.data ?? []).map((category) => ({
-			label: category.name,
-			value: category.id.toString()
-		}))
-	);
-
-	$effect(() => {
-		if (succeedCreateNewCategory) {
-			categoriesQuery = useGetCategoryOptions();
+	const categoriesQuery = useGetCategoryOptions();
+	const categoryMutation = useCreateCategory({
+		onSuccess() {
+			$categoriesQuery.refetch();
 		}
 	});
 
@@ -114,10 +94,16 @@
 			{createAction}
 			{updateAction}
 			showLoader={!deleting}
-			{onCreateAccount}
-			{accountOptions}
-			{onCreateCategory}
-			{categoryOptions}
+			accountOptions={($accountsQuery.data ?? []).map((account) => ({
+				label: account.name,
+				value: account.id.toString()
+			}))}
+			onCreateAccount={(name) => $accountMutation.mutate({ name })}
+			categoryOptions={($categoriesQuery.data ?? []).map((category) => ({
+				label: category.name,
+				value: category.id.toString()
+			}))}
+			onCreateCategory={(name) => $categoryMutation.mutate({ name })}
 		/>
 
 		{#if $formData.id}

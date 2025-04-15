@@ -28,8 +28,6 @@ export const load = (async ({ parent }) => {
 
 export const actions = {
 	create: async ({ locals, request }) => {
-		if (DEV) await delay(1, 2);
-
 		const { user } = locals; // TODO:
 
 		if (!user) return fail(401);
@@ -44,8 +42,6 @@ export const actions = {
 	},
 
 	update: async ({ locals, request }) => {
-		if (DEV) await delay(1, 2);
-
 		const { user } = locals; // TODO:
 
 		if (!user) return fail(401);

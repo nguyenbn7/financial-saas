@@ -12,15 +12,11 @@ const { DEV } = import.meta.env;
 
 const app = new Hono()
 	.get('/options', authenticate, async (c) => {
-		if (DEV) await delay(0.5, 1);
-
 		const user = c.get('user');
 
 		return c.json(await getAccountOptions(user.id));
 	})
 	.post('/', authenticate, zValidator('json', accountFormSchema.omit({ id: true })), async (c) => {
-		if (DEV) await delay(1, 2);
-
 		const user = c.get('user');
 		const { name } = c.req.valid('json');
 
@@ -29,8 +25,6 @@ const app = new Hono()
 		return c.json({ data: newAccount });
 	})
 	.delete('/', authenticate, zValidator('json', deletesSchema), async (c) => {
-		if (DEV) await delay(1, 2);
-
 		const user = c.get('user');
 		const { ids } = c.req.valid('json');
 

@@ -17,15 +17,11 @@ const { DEV } = import.meta.env;
 
 const app = new Hono()
 	.get('/options', authenticate, async (c) => {
-		if (DEV) await delay(0.5, 1);
-
 		const user = c.get('user');
 
 		return c.json(await getCategoryOptions(user.id));
 	})
 	.post('/', authenticate, zValidator('json', categoryFormSchema.omit({ id: true })), async (c) => {
-		if (DEV) await delay(1, 2);
-
 		const user = c.get('user');
 		const { name } = c.req.valid('json');
 
@@ -34,8 +30,6 @@ const app = new Hono()
 		return c.json({ data: newCategory });
 	})
 	.delete('/', authenticate, zValidator('json', deletesSchema), async (c) => {
-		if (DEV) await delay(1, 2);
-
 		const user = c.get('user');
 		const { ids } = c.req.valid('json');
 

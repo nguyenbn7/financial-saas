@@ -76,6 +76,7 @@
 			$categoriesQuery.isFetching ||
 			$categoryMutation.isPending
 	);
+	
 </script>
 
 <Sheet bind:open {onOpenChange}>

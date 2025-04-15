@@ -6,15 +6,12 @@ import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
 import { superValidate } from 'sveltekit-superforms';
 
-import { delay } from '$lib';
 import { categoryFormSchema } from '$features/categories/schemas';
 import {
 	getPageCategory,
 	updateCategory,
 	createCategory
 } from '$features/categories/server/service.server';
-
-const { DEV } = import.meta.env;
 
 // TODO: handle search params for dynamic page, pageSize, search
 

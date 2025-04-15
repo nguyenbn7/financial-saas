@@ -6,7 +6,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { fail, superValidate } from 'sveltekit-superforms';
 
 import { querySchema, transactionFormSchema } from '$features/transactions/schemas';
-import { getTransactions } from '$features/transactions/server/service.server';
+import { createTransaction, getTransactions } from '$features/transactions/server/service.server';
 
 export const load = (async ({ parent, url }) => {
 	const { user } = await parent();
@@ -27,15 +27,20 @@ export const load = (async ({ parent, url }) => {
 	const startDate = from ? parse(from, 'yyyy-MM-dd', new Date()) : defaultFrom;
 	const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo;
 
-	const data = await getTransactions(user.id, { accountId: Number(accountId), startDate, endDate });
+	const transactions = await getTransactions({
+		userId: user.id,
+		accountId: accountId === undefined ? undefined : Number(accountId),
+		startDate,
+		endDate
+	});
 
 	const form = await superValidate(zod(transactionFormSchema));
 
-	return { form, data };
+	return { form, transactions };
 }) satisfies PageServerLoad;
 
 export const actions = {
-	create: async ({ locals, request }) => {
+	create: async ({ locals, request, url }) => {
 		const { user } = locals;
 
 		if (!user) return fail(401);
@@ -44,11 +49,34 @@ export const actions = {
 
 		if (!form.valid) return fail(400, { form });
 
-		console.log(form.data);
+		const transaction = await createTransaction({
+			...form.data
+		});
 
-		// await createCategory(user.id, form.data);
+		const query = url.searchParams
+			.entries()
+			.reduce((prev, curr) => Object.assign(prev, { [curr[0]]: curr[1] }), {}) as {
+			[x: string]: string;
+		};
 
-		return { form };
+		const result = await querySchema.parseAsync(query);
+
+		const { from, to, accountId } = result;
+
+		const defaultTo = new Date();
+		const defaultFrom = subDays(defaultTo, 30);
+
+		const startDate = from ? parse(from, 'yyyy-MM-dd', new Date()) : defaultFrom;
+		const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo;
+
+		const transactions = await getTransactions({
+			userId: user.id,
+			accountId: accountId === undefined ? undefined : Number(accountId),
+			startDate,
+			endDate
+		});
+
+		return { form, transactions };
 	}
 
 	// update: async ({ locals, request }) => {

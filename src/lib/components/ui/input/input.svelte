@@ -46,14 +46,11 @@
 		const trackingNumValue = $derived(Number(value));
 
 		$effect(() => {
-			let numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
-
-			if (isNaN(trackingNumValue) || numericValue !== trackingNumValue) {
-				numericValue = 0;
+			if (isNaN(trackingNumValue)) {
 				value = 0;
 			}
 
-			currency = currencyFormatter.format(numericValue / fractionDigits);
+			currency = currencyFormatter.format(value / fractionDigits);
 		});
 	}
 </script>

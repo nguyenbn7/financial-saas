@@ -4,10 +4,10 @@ import { createInsertSchema } from 'drizzle-zod';
 
 export const transactionFormSchema = createInsertSchema(transaction, {
 	date: z.coerce.date(),
-	accountId: z.coerce.number(),
-	categoryId: z.coerce.number().optional(),
-	payee: z.string(),
-	amount: z.coerce.number(),
+	accountId: z.number().min(1, 'Required'),
+	categoryId: z.number().optional(),
+	payee: z.string().min(1, 'Required'),
+	amount: z.number().min(1, 'Cannot be 0'),
 	notes: z.string().optional()
 });
 

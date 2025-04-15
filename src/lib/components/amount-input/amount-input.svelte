@@ -15,11 +15,10 @@
 
 	interface Props {
 		value: number;
-		placeholder?: string;
 		disabled?: boolean;
 	}
 
-	let { value = $bindable(), placeholder, disabled = false, ...restProps }: Props = $props();
+	let { value = $bindable(0), disabled = false, ...restProps }: Props = $props();
 
 	const isIncome = $derived(value > 0);
 	const isExpense = $derived(value < 0);
@@ -59,7 +58,7 @@
 		</Tooltip>
 	</TooltipProvider>
 
-	<Input type="currency" {placeholder} {disabled} {...restProps} bind:value class="pl-10" />
+	<Input type="currency" {disabled} {...restProps} bind:value class="pl-10" />
 
 	<p class="text-xs text-muted-foreground mt-2">
 		{#if isIncome}

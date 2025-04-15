@@ -35,20 +35,23 @@
 		...restProps
 	}: Props = $props();
 
+	const fractionDigits = Math.pow(10, options.maximumFractionDigits ?? 2);
 	const currencyFormatter = Intl.NumberFormat(locales, options);
 
-	const fractionDigits = Math.pow(10, options.maximumFractionDigits ?? 2);
-
-	let currency = $state(currencyFormatter.format(Number(value) / fractionDigits));
+	let currency = $state(
+		isNaN(Number(value)) ? '0' : currencyFormatter.format(Number(value) / fractionDigits)
+	);
 
 	if (type === 'currency') {
-		let trackingNumValue = $derived(Number(value));
+		const trackingNumValue = $derived(Number(value));
 
 		$effect(() => {
 			let numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
 
-			if (!isNaN(trackingNumValue) && numericValue !== trackingNumValue)
-				numericValue = trackingNumValue;
+			if (isNaN(trackingNumValue) || numericValue !== trackingNumValue) {
+				numericValue = 0;
+				value = 0;
+			}
 
 			currency = currencyFormatter.format(numericValue / fractionDigits);
 		});
@@ -79,9 +82,7 @@
 			() => currency,
 			(newValue) => {
 				currency = newValue;
-
 				if (newValue.at(-1) === '-') currency = `-${currency}`;
-
 				const numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
 				value = numericValue;
 			}

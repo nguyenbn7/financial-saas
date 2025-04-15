@@ -6,7 +6,7 @@
 
 	let promise: { resolve: (value: boolean) => void } | null = $state(null);
 
-	let autoOpen = $state(defaultAutoOpen);
+	let autoOpen = $state(false);
 	var titleFromFunction = $state(defaultTitle);
 	var descriptionFromFunction = $state(defaultDescription);
 

@@ -35,22 +35,25 @@
 		...restProps
 	}: Props = $props();
 
-	const fractionDigits = Math.pow(10, options.maximumFractionDigits ?? 2);
-	const currencyFormatter = Intl.NumberFormat(locales, options);
+	function correctNumValue(value: any) {
+		const numValue = Number(value);
 
-	let currency = $state(
-		isNaN(Number(value)) ? '0' : currencyFormatter.format(Number(value) / fractionDigits)
-	);
+		if (Number.isNaN(numValue)) return 0;
+
+		if (numValue >= Number.POSITIVE_INFINITY) return Number.MAX_VALUE;
+
+		if (numValue <= Number.NEGATIVE_INFINITY) return Number.MIN_VALUE;
+
+		return numValue;
+	}
+
+	const currencyFormatter = Intl.NumberFormat(locales, options);
+	const fractionDigits = Math.pow(10, options.maximumFractionDigits ?? 2);
+	let currency = $state(currencyFormatter.format(correctNumValue(value) / fractionDigits));
 
 	if (type === 'currency') {
-		const trackingNumValue = $derived(Number(value));
-
 		$effect(() => {
-			if (isNaN(trackingNumValue)) {
-				value = 0;
-			}
-
-			currency = currencyFormatter.format(value / fractionDigits);
+			currency = currencyFormatter.format(correctNumValue(value) / fractionDigits);
 		});
 	}
 </script>
@@ -78,10 +81,9 @@
 		bind:value={
 			() => currency,
 			(newValue) => {
-				currency = newValue;
-				if (newValue.at(-1) === '-') currency = `-${currency}`;
-				const numericValue = Number(currency.replace(/(?!^-)\D/g, ''));
-				value = numericValue;
+				if (newValue.at(-1) === '-') newValue = `-${newValue}`;
+				currency = newValue; // This one keep prevent user delete when display 0
+				value = Number(newValue.replace(/(?!^-)\D/g, ''));
 			}
 		}
 		{...restProps}

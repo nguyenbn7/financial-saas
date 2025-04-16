@@ -4,11 +4,12 @@
 
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
-	import { UserButton } from 'svelte-clerk/client';
+	import { ClerkLoaded, ClerkLoading, UserButton } from 'svelte-clerk/client';
 
 	import { Navigation } from '$lib/components/navigation';
 
 	import Logo from '$assets/logo.svg';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	interface LayoutProps {
 		data: LayoutData;
@@ -33,7 +34,13 @@
 				<Navigation />
 			</div>
 
-			<UserButton />
+			<ClerkLoading>
+				<LoaderCircle size={32} class="mr-1 text-white animate-spin" />
+			</ClerkLoading>
+
+			<ClerkLoaded>
+				<UserButton />
+			</ClerkLoaded>
 		</div>
 
 		<div class="mb-4 space-y-2">

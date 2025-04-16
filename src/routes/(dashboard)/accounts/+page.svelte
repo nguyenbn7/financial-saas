@@ -4,8 +4,8 @@
 
 	import { applyAction } from '$app/forms';
 
-	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
@@ -17,7 +17,7 @@
 	import { getColumns } from '$features/accounts/columns';
 	import { accountFormSchema } from '$features/accounts/schema';
 	import { AccountSheet } from '$features/accounts/components';
-	import { createDeleteAccountsClient } from '$features/accounts/api';
+	import { createDeleteAccountsClient, createGetAccountsClient } from '$features/accounts/api';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -27,21 +27,23 @@
 
 	let { data }: PageProps = $props();
 
-	const { form: serverFormData, accounts: serverAccountsData } = data;
-
-	let accounts = $state(serverAccountsData);
 	let openSheet = $state(false);
+	let accounts = $state(data.accounts);
 
 	const columns = getColumns({
-		onEdit(data) {
+		onEdit(account) {
 			openSheet = true;
-			accountForm.form.set({ ...data });
+			const { userId, ...data } = account;
+			form.form.set({ ...data });
 		}
 	});
 
 	const deletesClient = createDeleteAccountsClient({
 		onSuccess(data, variables, context) {
-			// TODO: refetch data again
+			const { accounts: newAccounts } = data;
+
+			accounts = newAccounts;
+
 			if (variables.ids.length === 1) {
 				openSheet = false;
 				toast.success('Account deleted');
@@ -60,12 +62,12 @@
 		}
 	});
 
-	const accountForm = superForm(serverFormData, {
+	const form = superForm(data.form, {
 		validators: zodClient(accountFormSchema),
-		async onUpdate({ form, result }) {
+		async onUpdate({ form: validatedForm, result }) {
 			if (result.status === 401) {
-				if (form.message) {
-					toast.error(form.message);
+				if (validatedForm.message) {
+					toast.error(validatedForm.message);
 				}
 				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
 			}
@@ -73,28 +75,28 @@
 			const { accounts: newAccounts } = result.data as FormResult<ActionData>;
 
 			if (newAccounts) {
-				accounts = accounts;
+				accounts = newAccounts;
 			}
 		},
 		onError({ result }) {
 			loading = false;
 			openSheet = false;
-			accountForm.reset();
+			form.reset();
 
 			if (result.error.message) toast.error(result.error.message);
 		},
-		onUpdated({ form }) {
+		onUpdated({ form: validatedForm }) {
+			if (!validatedForm.valid) return;
+
 			loading = false;
 			openSheet = false;
-			accountForm.reset();
+			form.reset();
 
-			if (form.valid && form.message) {
-				toast.success(form.message);
-			}
+			if (validatedForm.message) toast.success(validatedForm.message);
 		}
 	});
 
-	const { delayed } = accountForm;
+	const { delayed } = form;
 
 	let loading = $derived($deletesClient.isPending || $delayed);
 </script>
@@ -139,14 +141,12 @@
 </DataTableLoader>
 
 <AccountSheet
-	form={accountForm}
+	{form}
 	bind:open={openSheet}
 	disabled={loading}
 	deleting={$deletesClient.isPending}
 	onOpenChange={(open) => {
-		if (!open) accountForm.reset();
+		if (!open) form.reset();
 	}}
-	onDelete={(id) => {
-		$deletesClient.mutate({ ids: [id] });
-	}}
+	onDelete={(id) => $deletesClient.mutate({ ids: [id] })}
 />

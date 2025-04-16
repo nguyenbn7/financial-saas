@@ -53,9 +53,9 @@ const app = new Hono()
 		const userId = c.get('userId');
 		const { ids } = c.req.valid('json');
 
-		const deletedAccounts = await deleteAccounts({ ids, userId });
+		await deleteAccounts({ ids, userId });
 
-		return c.json({ deletedAccounts });
+		return c.json({ accounts: await getAccounts({ userId }) });
 	});
 
 export default app;

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { AccountFormValues } from '.';
-
+	import type { z } from 'zod';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import type { accountFormSchema } from '$features/accounts/schema';
 	import {
 		Sheet,
 		SheetContent,
@@ -19,9 +20,7 @@
 
 	interface Props {
 		open?: boolean;
-		form: AccountFormValues;
-		createAction?: string;
-		updateAction?: string;
+		form: SuperForm<z.infer<typeof accountFormSchema>, any>;
 		onOpenChange?: (value: boolean) => void;
 		onDelete?: (id: string) => MaybePromise<void>;
 		disabled?: boolean;
@@ -33,24 +32,11 @@
 		onOpenChange,
 		onDelete,
 		open = $bindable(false),
-		createAction = '?/create',
-		updateAction = '?/update',
 		disabled = false,
 		deleting = false
 	}: Props = $props();
 
 	const { form: formData } = form;
-
-	async function onClick() {
-		const ok = await confirm({
-			title: 'Are you sure?',
-			description: 'You are about to delete this account'
-		});
-
-		if (ok) {
-			return await onDelete?.($formData.id!);
-		}
-	}
 </script>
 
 <Sheet bind:open {onOpenChange}>
@@ -59,7 +45,7 @@
 		interactOutsideBehavior={disabled ? 'ignore' : 'close'}
 	>
 		<SheetHeader>
-			<SheetTitle>{$formData.id ? 'Edit ' : 'New '}Account</SheetTitle>
+			<SheetTitle>{$formData.id ? 'Edit Account' : 'New Account'}</SheetTitle>
 			<SheetDescription>
 				{$formData.id
 					? 'Edit an existing account.'
@@ -67,10 +53,24 @@
 			</SheetDescription>
 		</SheetHeader>
 
-		<AccountForm {form} {disabled} {createAction} {updateAction} showLoader={!deleting} />
+		<AccountForm {form} {disabled} disableLoader={deleting} />
 
 		{#if $formData.id}
-			<Button class="w-full" {disabled} variant="outline-red" onclick={onClick}>
+			<Button
+				class="w-full"
+				{disabled}
+				variant="outline-red"
+				onclick={async () => {
+					const ok = await confirm({
+						title: 'Are you sure?',
+						description: 'You are about to delete this account'
+					});
+
+					if (ok && $formData.id) {
+						return await onDelete?.($formData.id);
+					}
+				}}
+			>
 				{#if disabled && deleting}
 					<LoaderCircle size={16} class="mr-1 text-red-600 animate-spin" />
 					Deleting...

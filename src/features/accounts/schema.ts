@@ -1,8 +1,12 @@
 import { z } from 'zod';
 
 export const accountFormSchema = z.object({
-	id: z.string().min(1, 'Required'),
-	name: z.string().trim().min(1, { message: 'name is not empty or contains spaces' })
+	id: z.string().optional(),
+	name: z.string().trim().min(1, 'Required')
+});
+
+export const accountIdSchema = z.object({
+	id: z.string().trim().min(1, 'Required')
 });
 
 export const deletesSchema = z.object({

@@ -1,65 +1,62 @@
 <script lang="ts">
-	import type { AccountFormValues } from '.';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import type { accountFormSchema } from '$features/accounts/schema';
 
-	import {
-		FormButton,
-		FormControl,
-		FormField,
-		FormFieldErrors,
-		FormLabel
-	} from '$lib/components/ui/form';
+	import { z } from 'zod';
+
 	import { Input } from '$lib/components/ui/input';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 
-	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+	import { Form } from '$lib/components/form';
 
 	interface Props {
-		form: AccountFormValues;
-		createAction: string;
-		updateAction: string;
+		form: SuperForm<z.infer<typeof accountFormSchema>, any>;
 		disabled?: boolean;
-		showLoader?: boolean;
+		disableLoader?: boolean;
 	}
 
-	let { form, createAction, updateAction, disabled = false, showLoader = false }: Props = $props();
+	let { form, disabled = false, disableLoader = false }: Props = $props();
 
-	const { form: formData, enhance } = form;
+	const { form: formData } = form;
+	const createForm = $derived(!Boolean($formData.id));
 </script>
 
-<form method="post" class="space-y-4 mt-2" use:enhance>
-	{#if $formData.id}
-		<FormField {form} name="id">
+<Form
+	{form}
+	class="space-y-4 mt-2"
+	createButtonText="Create account"
+	updateButtonText="Update account"
+	{disabled}
+	{createForm}
+	{disableLoader}
+>
+	{#snippet content({ disabled })}
+		{#if $formData.id}
+			<FormField {form} name="id">
+				<FormControl>
+					{#snippet children({ props })}
+						<input {...props} hidden value={$formData.id} />
+					{/snippet}
+				</FormControl>
+			</FormField>
+		{/if}
+
+		<FormField {form} name="name">
 			<FormControl>
 				{#snippet children({ props })}
-					<Input {...props} value={$formData.id} hidden />
+					<FormLabel>Name</FormLabel>
+
+					<Input
+						{...props}
+						{disabled}
+						placeholder="e.g. Cash, Bank, Credit Card"
+						class="mt-2"
+						bind:value={$formData.name}
+					/>
 				{/snippet}
 			</FormControl>
+
+			<FormFieldErrors />
 		</FormField>
-	{/if}
-
-	<FormField {form} name="name">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Name</FormLabel>
-
-				<Input
-					{...props}
-					bind:value={$formData.name}
-					placeholder="e.g. Cash, Bank, Credit Card"
-					class="mt-2"
-					{disabled}
-				/>
-
-				<FormFieldErrors />
-			{/snippet}
-		</FormControl>
-	</FormField>
-
-	<FormButton class="w-full" {disabled} formaction={$formData.id ? updateAction : createAction}>
-		{#if disabled && showLoader}
-			<LoaderCircle size={16} class="mr-1 text-primary-foreground animate-spin" />
-			{$formData.id ? 'Saving...' : 'Creating...'}
-		{:else}
-			{$formData.id ? 'Save Changes' : 'Create account'}
-		{/if}
-	</FormButton>
-</form>
+	{/snippet}
+</Form>

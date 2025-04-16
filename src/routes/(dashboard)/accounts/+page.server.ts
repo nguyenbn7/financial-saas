@@ -5,7 +5,7 @@ import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { zod } from 'sveltekit-superforms/adapters';
 import { message, superValidate } from 'sveltekit-superforms';
 
-import { accountFormSchema } from '$features/accounts/schema';
+import { accountFormSchema, accountIdSchema } from '$features/accounts/schema';
 import { getAccounts, updateAccount, createAccount } from '$features/accounts/server/repository';
 
 export const load = (async ({ parent }) => {
@@ -20,7 +20,7 @@ export const actions = {
 	create: async ({ locals, request }) => {
 		const { userId } = locals.auth();
 
-		const form = await superValidate(request, zod(accountFormSchema.omit({ id: true })));
+		const form = await superValidate(request, zod(accountFormSchema));
 
 		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
@@ -36,7 +36,7 @@ export const actions = {
 	update: async ({ locals, request }) => {
 		const { userId } = locals.auth();
 
-		const form = await superValidate(request, zod(accountFormSchema));
+		const form = await superValidate(request, zod(accountFormSchema.extend(accountIdSchema.shape)));
 
 		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 

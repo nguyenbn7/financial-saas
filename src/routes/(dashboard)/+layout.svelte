@@ -1,25 +1,21 @@
-<script lang="ts" module>
-</script>
-
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { LayoutData } from './$types';
 
-	import Logo from '$assets/logo.svg';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
+
+	import { UserButton } from 'svelte-clerk/client';
 
 	import { Navigation } from '$lib/components/navigation';
 
-	import { UserButton } from '$features/auth/components';
+	import Logo from '$assets/logo.svg';
 
-	interface Props {
+	interface LayoutProps {
 		data: LayoutData;
 		children: Snippet;
 	}
 
-	let { data, children }: Props = $props();
-
-	let { user } = data;
+	let { data, children }: LayoutProps = $props();
 </script>
 
 <header class="bg-linear-to-b from-primary-700 to-primary-500 px-4 pt-8 pb-36 lg:px-14">
@@ -37,11 +33,13 @@
 				<Navigation />
 			</div>
 
-			<UserButton displayName={user.name} />
+			<UserButton />
 		</div>
 
 		<div class="mb-4 space-y-2">
-			<h2 class="text-2xl font-medium text-white lg:text-4xl">Welcome back, {user.name} 👋🏻</h2>
+			<h2 class="text-2xl font-medium text-white lg:text-4xl">
+				Welcome back, {data.userDisplayName} 👋🏻
+			</h2>
 			<p class="text-sm text-[#89b6fd] lg:text-base">This is your Financial Overview Report</p>
 		</div>
 	</div>

@@ -3,11 +3,12 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 
 export const load = (async ({ locals }) => {
-	const { userId } = locals.auth();
+	const user = await locals.currentUser();
 
-	if (!userId) redirect(307, '/sign-in');
+	if (!user) redirect(307, '/sign-in');
 
 	return {
-		userId
+		userId: user.id,
+		userDisplayName: user.fullName
 	};
 }) satisfies LayoutServerLoad;

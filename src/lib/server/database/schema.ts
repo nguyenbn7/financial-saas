@@ -15,7 +15,7 @@ export const accountRelations = relations(accountTable, ({ many }) => ({
 export type Account = InferSelectModel<typeof accountTable>;
 
 export const category = pgTable('category', {
-	id: serial().primaryKey(),
+	id: uuid().primaryKey().defaultRandom(),
 	name: varchar({ length: 255 }).notNull(),
 	userId: varchar({ length: 255 }).notNull()
 });
@@ -27,15 +27,15 @@ export const categoryRelations = relations(category, ({ many }) => ({
 export type Category = InferSelectModel<typeof category>;
 
 export const transaction = pgTable('transaction', {
-	id: serial().primaryKey(),
+	id: uuid().primaryKey().defaultRandom(),
 	amount: integer().notNull(),
 	payee: text().notNull(),
 	notes: text(),
 	date: timestamp({ mode: 'date' }).notNull(),
-	accountId: integer('account_id')
+	accountId: uuid('account_id')
 		.references(() => accountTable.id, { onDelete: 'cascade' })
 		.notNull(),
-	categoryId: integer('category_id').references(() => category.id, {
+	categoryId: uuid('category_id').references(() => category.id, {
 		onDelete: 'set null'
 	})
 });

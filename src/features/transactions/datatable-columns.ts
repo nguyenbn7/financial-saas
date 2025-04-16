@@ -4,7 +4,7 @@ import type { Transaction } from '.';
 import { Checkbox } from '$lib/components/ui/checkbox';
 import { renderComponent } from '$lib/components/ui/data-table';
 
-import { DataTableRowActions, DataTableSortColumn } from '$lib/components/datatable';
+import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
 interface GetColumnsProps {
 	onEdit?: (account: Transaction) => MaybePromise<void> | undefined;
@@ -33,7 +33,7 @@ export function getColumns({ onEdit }: GetColumnsProps) {
 		{
 			accessorKey: 'name',
 			header: ({ column }) =>
-				renderComponent(DataTableSortColumn, {
+				renderComponent(SortColumnButton, {
 					onclick: () => column.toggleSorting(),
 					isSorted: column.getIsSorted(),
 					text: 'Name'
@@ -42,7 +42,7 @@ export function getColumns({ onEdit }: GetColumnsProps) {
 		{
 			id: 'actions',
 			cell: ({ row }) =>
-				renderComponent(DataTableRowActions, {
+				renderComponent(CellActions, {
 					onEdit() {
 						return onEdit?.(row.original);
 					}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { FormResult } from 'sveltekit-superforms';
-	import type { ActionData, PageServerData } from './$types';
+	import type { ActionData, PageData } from './$types';
 
 	import { applyAction } from '$app/forms';
 
@@ -14,64 +14,23 @@
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
+	import { getColumns } from '$features/accounts/columns';
+	import { accountFormSchema } from '$features/accounts/schema';
 	import { AccountSheet } from '$features/accounts/components';
-	import { getColumns } from '$features/accounts/datatable-columns';
-	import { accountFormSchema } from '$features/accounts/schemas';
-	import { deleteAccounts } from '$features/accounts/api';
+	import { createDeleteAccountsClient } from '$features/accounts/api';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
-		data: PageServerData;
+		data: PageData;
 	}
 
 	let { data }: PageProps = $props();
 
-	const accountForm = superForm(data.form, {
-		validators: zodClient(accountFormSchema),
-		async onUpdate({ result }) {
-			if (result.status === 401) {
-				await applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-				toast.error('Unauthorized');
-				return;
-			}
+	const { form: serverFormData, accounts: serverAccountsData } = data;
 
-			const { pagination } = result.data as FormResult<ActionData>;
-
-			if (pagination) {
-				accounts = pagination.data;
-				page = pagination.page;
-				pageSize = pagination.pageSize;
-			}
-		},
-		onError() {
-			loading = false;
-			openSheet = false;
-			accountForm.reset();
-		},
-		onUpdated({ form }) {
-			loading = false;
-			openSheet = false;
-
-			if (form.valid) {
-				toast.success(form.data.id ? 'Account updated' : 'Account created');
-			}
-
-			accountForm.reset();
-		}
-	});
-
-	const { delayed } = accountForm;
-
-	const deletesClient = deleteAccounts();
-
-	let page = $state(data.pagination.page);
-	let accounts = $state(data.pagination.data);
-	let pageSize = $state(data.pagination.pageSize);
-
+	let accounts = $state(serverAccountsData);
 	let openSheet = $state(false);
-
-	let loading = $derived($deletesClient.isPending || $delayed);
 
 	const columns = getColumns({
 		onEdit(data) {
@@ -80,29 +39,64 @@
 		}
 	});
 
-	$effect(() => {
-		if ($deletesClient.isSuccess && $deletesClient.data) {
-			const { pagination } = $deletesClient.data;
-			accounts = pagination.data;
-			page = pagination.page;
-			pageSize = pagination.pageSize;
-
-			if ($deletesClient.variables.ids.length === 1) {
+	const deletesClient = createDeleteAccountsClient({
+		onSuccess(data, variables, context) {
+			// TODO: refetch data again
+			if (variables.ids.length === 1) {
 				openSheet = false;
 				toast.success('Account deleted');
 			} else {
 				toast.success('Accounts deleted');
 			}
-		} else if ($deletesClient.error) {
-			const { message, status } = $deletesClient.error;
+		},
+		async onError(error, variables, context) {
+			const { message, status } = error;
+
+			toast.error(message);
 
 			if (status === 401) {
-				toast.error(message);
-				applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-				return;
+				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
 			}
 		}
 	});
+
+	const accountForm = superForm(serverFormData, {
+		validators: zodClient(accountFormSchema),
+		async onUpdate({ form, result }) {
+			if (result.status === 401) {
+				if (form.message) {
+					toast.error(form.message);
+				}
+				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+			}
+
+			const { accounts: newAccounts } = result.data as FormResult<ActionData>;
+
+			if (newAccounts) {
+				accounts = accounts;
+			}
+		},
+		onError({ result }) {
+			loading = false;
+			openSheet = false;
+			accountForm.reset();
+
+			if (result.error.message) toast.error(result.error.message);
+		},
+		onUpdated({ form }) {
+			loading = false;
+			openSheet = false;
+			accountForm.reset();
+
+			if (form.valid && form.message) {
+				toast.success(form.message);
+			}
+		}
+	});
+
+	const { delayed } = accountForm;
+
+	let loading = $derived($deletesClient.isPending || $delayed);
 </script>
 
 <Metadata title="Financial Accounts" />
@@ -121,7 +115,7 @@
 			<CardContent>
 				<DataTable
 					data={accounts}
-					paginationState={{ pageIndex: page - 1, pageSize }}
+					paginationState={{ pageIndex: 0, pageSize: 5 }}
 					{columns}
 					filterKey="name"
 				>

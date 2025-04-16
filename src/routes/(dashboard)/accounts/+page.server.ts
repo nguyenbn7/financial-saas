@@ -1,60 +1,53 @@
 import type { Actions, PageServerLoad } from './$types';
 
-import { fail } from '@sveltejs/kit';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
-import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
-import { superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 
-import { delay } from '$lib';
-import { accountFormSchema } from '$features/accounts/schemas';
-import {
-	getPageAccount,
-	updateAccount,
-	createAccount
-} from '$features/accounts/server/service.server';
-
-const { DEV } = import.meta.env;
-
-// TODO: handle search params for dynamic page, pageSize, search
+import { accountFormSchema } from '$features/accounts/schema';
+import { getAccounts, updateAccount, createAccount } from '$features/accounts/server/repository';
 
 export const load = (async ({ parent }) => {
-	const { user } = await parent(); // TODO:
+	const { userId } = await parent();
 
 	const form = await superValidate(zod(accountFormSchema));
 
-	return { form, pagination: await getPageAccount(user.id) };
+	return { form, accounts: await getAccounts({ userId }) };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	create: async ({ locals, request }) => {
-		const { user } = locals; // TODO:
+		const { userId } = locals.auth();
 
-		if (!user) return fail(401);
+		const form = await superValidate(request, zod(accountFormSchema.omit({ id: true })));
 
-		const form = await superValidate(request, zod(accountFormSchema));
+		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
-		if (!form.valid) return fail(400, { form });
+		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		await createAccount(user.id, form.data);
+		await createAccount({ userId, ...form.data });
 
-		return { form, pagination: await getPageAccount(user.id) };
+		form.message = 'Account created';
+
+		return { form, accounts: await getAccounts({ userId }) };
 	},
 
 	update: async ({ locals, request }) => {
-		const { user } = locals; // TODO:
+		const { userId } = locals.auth();
 
-		if (!user) return fail(401);
+		const form = await superValidate(request, zod(accountFormSchema));
 
-		const form = await superValidate(
-			request,
-			zod(accountFormSchema.extend({ id: z.number().min(1) })) // TODO:
-		);
+		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
-		if (!form.valid) return fail(400, { form });
+		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		await updateAccount(user.id, form.data);
+		const { id, ...data } = form.data;
 
-		return { form, pagination: await getPageAccount(user.id) };
+		await updateAccount({ userId, id: form.data.id }, { ...data });
+
+		form.message = 'Account updated';
+
+		return { form, accounts: await getAccounts({ userId }) };
 	}
 } satisfies Actions;

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
-import { authenticate } from '$lib/server/middlewares';
+import { authenticate } from '$lib/server/api/middlewares';
 
 import { categoryFormSchema, deletesSchema } from '../schemas';
 import {

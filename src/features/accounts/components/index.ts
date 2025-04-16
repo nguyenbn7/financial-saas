@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { SuperForm } from 'sveltekit-superforms';
-import type { accountFormSchema } from '../schemas';
+import type { accountFormSchema } from '../schema';
 
 export type AccountFormValues = SuperForm<z.infer<typeof accountFormSchema>>;
 

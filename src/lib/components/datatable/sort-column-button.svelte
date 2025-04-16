@@ -1,13 +1,5 @@
-<script lang="ts" module>
-	import type { ComponentProps } from 'svelte';
-
-	export type DataTableSortColumnProps = ComponentProps<typeof Button> & {
-		text: string;
-		isSorted: false | SortDirection;
-	};
-</script>
-
 <script lang="ts">
+	import type { ComponentProps } from 'svelte';
 	import type { SortDirection } from '@tanstack/table-core';
 
 	import { Button } from '$lib/components/ui/button';
@@ -16,7 +8,17 @@
 	import ArrowUpNarrowWide from '@lucide/svelte/icons/arrow-up-wide-narrow';
 	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
 
-	let { text, isSorted, variant = 'ghost', ...restProps }: DataTableSortColumnProps = $props();
+	interface Props {
+		text: string;
+		isSorted: false | SortDirection;
+	}
+
+	let {
+		text,
+		isSorted,
+		variant = 'ghost',
+		...restProps
+	}: Props & ComponentProps<typeof Button> = $props();
 </script>
 
 <Button {variant} {...restProps}>

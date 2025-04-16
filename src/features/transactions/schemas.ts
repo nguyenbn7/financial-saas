@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { transaction } from '$lib/db.schemas';
+import { transaction } from '$lib/server/database/schema';
 import { createInsertSchema } from 'drizzle-zod';
 
 export const transactionFormSchema = createInsertSchema(transaction, {

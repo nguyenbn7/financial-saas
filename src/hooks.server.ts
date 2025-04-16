@@ -1,26 +1,24 @@
 import type { Handle } from '@sveltejs/kit';
 
-import { ACCESS_TOKEN } from '$features/auth/constants';
-import { verifyToken } from '$features/auth/server/service.server';
+import { withClerkHandler } from 'svelte-clerk/server';
 import { delay } from '$lib';
 
 const { DEV } = import.meta.env;
 
 export const handle: Handle = async ({ event, resolve }) => {
-	if (!event.url.pathname.startsWith('/api')) {
-		const { cookies, locals } = event;
-		const accessToken = cookies.get(ACCESS_TOKEN);
+	if (
+		DEV &&
+		(event.request.method === 'POST' ||
+			event.request.method === 'PUT' ||
+			event.request.method === 'DELETE')
+	)
+		await delay(1, 2);
 
-		if (!accessToken) locals.user = undefined;
-		else locals.user = await verifyToken(accessToken);
+	if (event.url.pathname.startsWith('/api')) {
+		if (DEV && event.request.method === 'GET') await delay(0.5, 1);
+
+		return resolve(event);
 	}
 
-	// Stimulate delay of request except Get page
-	if (DEV) {
-		if (event.url.pathname.startsWith('/api') && event.request.method === 'GET')
-			await delay(0.5, 1);
-		else await delay(1, 2);
-	}
-
-	return resolve(event);
+	return withClerkHandler()({ event, resolve });
 };

@@ -1,35 +1,23 @@
 import { relations, type InferSelectModel } from 'drizzle-orm';
 
-import { integer, pgTable, serial, text, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { integer, pgTable, serial, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export const user = pgTable('user', {
-	id: serial().primaryKey(),
+export const accountTable = pgTable('account', {
+	id: uuid().primaryKey().defaultRandom(),
 	name: varchar({ length: 255 }).notNull(),
-	username: varchar({ length: 255 }).notNull(),
-	email: varchar({ length: 255 }).notNull(),
-	password: varchar({ length: 255 }).notNull(),
-	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').defaultNow()
+	userId: varchar({ length: 255 }).notNull()
 });
 
-export type User = InferSelectModel<typeof user>;
-
-export const account = pgTable('account', {
-	id: serial().primaryKey(),
-	name: varchar({ length: 256 }).notNull(),
-	userId: integer('user_id').notNull()
-});
-
-export const accountRelations = relations(account, ({ many }) => ({
+export const accountRelations = relations(accountTable, ({ many }) => ({
 	transactions: many(transaction)
 }));
 
-export type Account = InferSelectModel<typeof account>;
+export type Account = InferSelectModel<typeof accountTable>;
 
 export const category = pgTable('category', {
 	id: serial().primaryKey(),
-	name: varchar({ length: 256 }).notNull(),
-	userId: integer('user_id').notNull()
+	name: varchar({ length: 255 }).notNull(),
+	userId: varchar({ length: 255 }).notNull()
 });
 
 export const categoryRelations = relations(category, ({ many }) => ({
@@ -45,7 +33,7 @@ export const transaction = pgTable('transaction', {
 	notes: text(),
 	date: timestamp({ mode: 'date' }).notNull(),
 	accountId: integer('account_id')
-		.references(() => account.id, { onDelete: 'cascade' })
+		.references(() => accountTable.id, { onDelete: 'cascade' })
 		.notNull(),
 	categoryId: integer('category_id').references(() => category.id, {
 		onDelete: 'set null'
@@ -53,9 +41,9 @@ export const transaction = pgTable('transaction', {
 });
 
 export const transactionRelations = relations(transaction, ({ one }) => ({
-	account: one(account, {
+	account: one(accountTable, {
 		fields: [transaction.accountId],
-		references: [account.id]
+		references: [accountTable.id]
 	}),
 	category: one(category, {
 		fields: [transaction.categoryId],

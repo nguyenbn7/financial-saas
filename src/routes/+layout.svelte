@@ -8,17 +8,19 @@
 
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 
+	import { ClerkProvider } from 'svelte-clerk';
+
 	import { Toaster } from '$lib/components/ui/sonner';
 
 	import { BackToTop as BackToTopButton } from '$lib/components/button';
 	import { ConfirmDialog } from '$lib/components/confirm-dialog';
 
-	interface Props {
+	interface LayoutProps {
 		data: LayoutData;
 		children: Snippet;
 	}
 
-	let { data, children }: Props = $props();
+	let { data, children }: LayoutProps = $props();
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -31,10 +33,12 @@
 
 <Toaster richColors closeButton theme="light" />
 
-<ConfirmDialog />
-
 <QueryClientProvider client={queryClient}>
-	{@render children()}
+	<ClerkProvider>
+		{@render children()}
+	</ClerkProvider>
 </QueryClientProvider>
 
 <BackToTopButton />
+
+<ConfirmDialog />

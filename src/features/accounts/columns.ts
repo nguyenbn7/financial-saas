@@ -1,16 +1,18 @@
 import type { ColumnDef } from '@tanstack/table-core';
-import type { Account } from '.';
-
+import type { Accounts } from '$features/accounts/api';
 import { Checkbox } from '$lib/components/ui/checkbox';
 import { renderComponent } from '$lib/components/ui/data-table';
+import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
-import { DataTableRowActions, DataTableSortColumn } from '$lib/components/datatable';
+type Account = ArrayElement<Accounts['accounts']>;
 
-interface GetColumnsProps {
+interface Props {
 	onEdit?: (account: Account) => MaybePromise<void> | undefined;
 }
 
-export function getColumns({ onEdit }: GetColumnsProps) {
+export function getColumns(props: Props = {}) {
+	const { onEdit } = props;
+
 	const columns: ColumnDef<Account>[] = [
 		{
 			id: 'select',
@@ -33,7 +35,7 @@ export function getColumns({ onEdit }: GetColumnsProps) {
 		{
 			accessorKey: 'name',
 			header: ({ column }) =>
-				renderComponent(DataTableSortColumn, {
+				renderComponent(SortColumnButton, {
 					onclick: () => column.toggleSorting(),
 					isSorted: column.getIsSorted(),
 					text: 'Name'
@@ -42,10 +44,8 @@ export function getColumns({ onEdit }: GetColumnsProps) {
 		{
 			id: 'actions',
 			cell: ({ row }) =>
-				renderComponent(DataTableRowActions, {
-					onEdit() {
-						return onEdit?.(row.original);
-					}
+				renderComponent(CellActions, {
+					onEdit: () => onEdit?.(row.original)
 				})
 		}
 	];

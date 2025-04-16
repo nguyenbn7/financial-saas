@@ -23,7 +23,7 @@
 		createAction?: string;
 		updateAction?: string;
 		onOpenChange?: (value: boolean) => void;
-		onDelete?: (id: number) => MaybePromise<void>;
+		onDelete?: (id: string) => MaybePromise<void>;
 		disabled?: boolean;
 		deleting?: boolean;
 	}

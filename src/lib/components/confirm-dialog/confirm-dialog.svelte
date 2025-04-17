@@ -82,7 +82,7 @@
 </script>
 
 <AlertDialog bind:open>
-	<AlertDialogContent>
+	<AlertDialogContent class="z-[1000]">
 		<AlertDialogHeader>
 			<AlertDialogTitle>
 				{dialogTitle}

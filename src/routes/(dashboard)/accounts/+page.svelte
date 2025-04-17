@@ -103,7 +103,7 @@
 	const { delayed, form: formData } = form;
 
 	let loading = $derived(
-		$deleteAccountsClient.isPending || $delayed || $getAccountsClient.isPending
+		$deleteAccountsClient.isPending || $delayed || $getAccountsClient.isFetching
 	);
 </script>
 

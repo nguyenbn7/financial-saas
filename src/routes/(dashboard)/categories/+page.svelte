@@ -106,7 +106,7 @@
 	const { delayed, form: formData } = form;
 
 	let loading = $derived(
-		$deleteCategoriesClient.isPending || $delayed || $getCategoriesClient.isPending
+		$deleteCategoriesClient.isPending || $delayed || $getCategoriesClient.isFetching
 	);
 </script>
 

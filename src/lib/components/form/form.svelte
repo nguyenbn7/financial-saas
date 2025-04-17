@@ -26,7 +26,7 @@
 		createAction = '?/create',
 		createButtonText = 'Create',
 		updateAction = '?/update',
-		updateButtonText = 'Update',
+		updateButtonText = 'Save changes',
 		disabled: _disabled = false,
 		disableLoader = false,
 		content
@@ -49,7 +49,7 @@
 		{#if !disabled || disableLoader}
 			{createForm ? createButtonText : updateButtonText}
 		{:else}
-			{createForm ? 'Creating...' : 'Saving Changes...'}
+			{createForm ? 'Creating...' : 'Saving...'}
 			<LoaderCircle class="animate-spin ml-2" />
 		{/if}
 	</FormButton>

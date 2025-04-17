@@ -25,7 +25,6 @@
 	{form}
 	class="space-y-4 mt-2"
 	createButtonText="Create account"
-	updateButtonText="Update account"
 	{disabled}
 	{createForm}
 	{disableLoader}

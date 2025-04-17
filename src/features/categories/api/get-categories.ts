@@ -2,22 +2,22 @@ import type { InferResponseType } from 'hono';
 import { client } from '$lib/rpc';
 import { createQuery } from '@tanstack/svelte-query';
 
-type Response = InferResponseType<typeof client.api.accounts.$get>;
+type Response = InferResponseType<typeof client.api.categories.$get>;
 
 interface Params {
 	initialData: Response;
 	enabled?: boolean;
 }
 
-export default function createGetAccountsClient(
-	params: Params = { initialData: { accounts: [] }, enabled: true }
+export default function createGetCategoriesClient(
+	params: Params = { initialData: { categories: [] }, enabled: true }
 ) {
 	const { initialData, enabled } = params;
 
 	const query = createQuery({
-		queryKey: ['get', 'accounts'],
+		queryKey: ['get', 'categories'],
 		queryFn: async () => {
-			const response = await client.api.accounts.$get();
+			const response = await client.api.categories.$get();
 
 			return response.json();
 		},
@@ -28,4 +28,4 @@ export default function createGetAccountsClient(
 	return query;
 }
 
-export type Accounts = Response['accounts'];
+export type Categories = Response['categories'];

@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { transaction } from '$lib/server/database/schema';
+import { transactionTable } from '$lib/server/database/schema';
 import { createInsertSchema } from 'drizzle-zod';
 
-export const transactionFormSchema = createInsertSchema(transaction, {
+export const transactionFormSchema = createInsertSchema(transactionTable, {
 	date: z.coerce.date(),
 	accountId: z.number().min(1, 'Required'),
 	categoryId: z.number().nullable().default(null),

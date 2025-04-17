@@ -10,12 +10,13 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
+	import { confirm } from '$lib/components/confirm-dialog';
+	import { Sheet } from '$lib/components/sheet';
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
 	import { getColumns } from '$features/accounts/columns';
 	import { accountFormSchema } from '$features/accounts/schema';
-	import { Sheet } from '$lib/components/sheet';
 	import { AccountForm } from '$features/accounts/components';
 	import { createDeleteAccountsClient, createGetAccountsClient } from '$features/accounts/api';
 
@@ -43,7 +44,7 @@
 		}
 	});
 
-	const deletesClient = createDeleteAccountsClient({
+	const deleteAccountsClient = createDeleteAccountsClient({
 		async onError(error, variables, context) {
 			const { message, status } = error;
 
@@ -101,7 +102,9 @@
 
 	const { delayed, form: formData } = form;
 
-	let loading = $derived($deletesClient.isPending || $delayed || $getAccountsClient.isPending);
+	let loading = $derived(
+		$deleteAccountsClient.isPending || $delayed || $getAccountsClient.isPending
+	);
 </script>
 
 <Metadata title="Financial Accounts" />
@@ -128,12 +131,18 @@
 						{#if selectedRows.length > 0}
 							<DataTableDeletesButton
 								selectedRowsCount={selectedRows.length}
-								disabled={$deletesClient.isPending}
-								onDeletes={() => {
-									const ids = selectedRows.map((r) => r.original.id);
-									$deletesClient.mutate({ ids });
+								disabled={$deleteAccountsClient.isPending}
+								onDeletes={async () => {
+									const ok = await confirm({
+										title: 'Are you sure?',
+										description: 'You are about to delete these accounts'
+									});
+
+									if (ok) {
+										const ids = selectedRows.map((r) => r.original.id);
+										$deleteAccountsClient.mutate({ ids });
+									}
 								}}
-								confirmDialogDescription="You are about to delete these accounts"
 							/>
 						{/if}
 					{/snippet}
@@ -147,12 +156,19 @@
 	bind:open={openSheet}
 	disabled={loading}
 	showDeleteButton={!!$formData.id}
-	showDeleteButtonLoader={$deletesClient.isPending}
+	showDeleteButtonLoader={$deleteAccountsClient.isPending}
 	onOpenChange={(open) => {
 		if (!open) form.reset();
 	}}
-	onDelete={() => {
-		if ($formData.id) $deletesClient.mutate({ ids: [$formData.id] });
+	onDelete={async () => {
+		const ok = await confirm({
+			title: 'Are you sure?',
+			description: 'You are about to delete this account'
+		});
+
+		if (ok && $formData.id) {
+			$deleteAccountsClient.mutate({ ids: [$formData.id] });
+		}
 	}}
 >
 	{#snippet title()}
@@ -165,5 +181,5 @@
 			: 'Create a new account to track your transactions.'}
 	{/snippet}
 
-	<AccountForm {form} disabled={loading} disableLoader={$deletesClient.isPending} />
+	<AccountForm {form} disabled={loading} disableLoader={$deleteAccountsClient.isPending} />
 </Sheet>

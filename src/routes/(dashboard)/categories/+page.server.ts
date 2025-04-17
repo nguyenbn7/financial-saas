@@ -1,57 +1,66 @@
 import type { Actions, PageServerLoad } from './$types';
 
-import { fail } from '@sveltejs/kit';
+import { StatusCodes } from 'http-status-codes';
 
-import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
-import { superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 
-import { categoryFormSchema } from '$features/categories/schemas';
+import { categoryFormSchema, categoryIdSchema } from '$features/categories/schema';
 import {
-	getPageCategory,
 	updateCategory,
-	createCategory
-} from '$features/categories/server/service.server';
-
-// TODO: handle search params for dynamic page, pageSize, search
+	createCategory,
+	getCategories
+} from '$features/categories/server/repository';
 
 export const load = (async ({ parent }) => {
-	const { user } = await parent(); // TODO:
+	const { userId } = await parent();
 
 	const form = await superValidate(zod(categoryFormSchema));
 
-	return { form, pagination: await getPageCategory(user.id) };
+	return { form, categories: await getCategories({ userId }) };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	create: async ({ locals, request }) => {
-		const { user } = locals; // TODO:
-
-		if (!user) return fail(401);
+		const { userId } = locals.auth();
 
 		const form = await superValidate(request, zod(categoryFormSchema));
 
-		if (!form.valid) return fail(400, { form });
+		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
-		await createCategory(user.id, form.data);
+		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		return { form, pagination: await getPageCategory(user.id) };
+		const createdCategories = await createCategory({ userId, ...form.data });
+
+		const createdCategory = createdCategories.at(0);
+
+		if (!createdCategory)
+			return message(form, 'Cannot create category', { status: StatusCodes.CONFLICT });
+
+		return message(form, 'Category created');
 	},
 
 	update: async ({ locals, request }) => {
-		const { user } = locals; // TODO:
-
-		if (!user) return fail(401);
+		const { userId } = locals.auth();
 
 		const form = await superValidate(
 			request,
-			zod(categoryFormSchema.extend({ id: z.number().min(1) })) // TODO:
+			zod(categoryFormSchema.extend(categoryIdSchema.shape))
 		);
 
-		if (!form.valid) return fail(400, { form });
+		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
-		await updateCategory(user.id, form.data);
+		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		return { form, pagination: await getPageCategory(user.id) };
+		const { id, ...data } = form.data;
+
+		const updatedCategories = await updateCategory({ userId, id: form.data.id }, { ...data });
+
+		const updatedCategory = updatedCategories.at(0);
+
+		if (!updatedCategory)
+			return message(form, 'Cannot update category', { status: StatusCodes.CONFLICT });
+
+		return message(form, 'Category updated');
 	}
 } satisfies Actions;

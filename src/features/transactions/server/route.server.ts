@@ -3,7 +3,7 @@ import { zValidator } from '@hono/zod-validator';
 
 import { parse, subDays } from 'date-fns';
 
-import { authenticate } from '$lib/server/api/middlewares';
+import { authenticate } from '$lib/server/api/middleware';
 
 import { deletesSchema, querySchema } from '../schemas';
 import { deleteTransactions, getTransactions } from './service.server';

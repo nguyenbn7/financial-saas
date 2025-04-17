@@ -9,8 +9,12 @@ import { clerkMiddleware } from '@hono/clerk-auth';
 
 import { clerkMiddlewareAuthenticated } from '$lib/server/api/middleware';
 
-import { accountFormSchema, deletesSchema } from '$features/accounts/schema';
-import { createAccount, deleteAccounts, getAccounts } from '$features/accounts/server/repository';
+import { categoryFormSchema, deletesSchema } from '$features/categories/schema';
+import {
+	createCategory,
+	deleteCategories,
+	getCategories
+} from '$features/categories/server/repository';
 
 const app = new Hono()
 	.use(
@@ -24,40 +28,40 @@ const app = new Hono()
 		const userId = c.get('userId');
 
 		return c.json({
-			accounts: await getAccounts({ userId })
+			categories: await getCategories({ userId })
 		});
 	})
-	.post('/', zValidator('json', accountFormSchema), async (c) => {
+	.post('/', zValidator('json', categoryFormSchema), async (c) => {
 		const userId = c.get('userId');
 		const { name } = c.req.valid('json');
 
-		const result = await createAccount({ userId, name });
+		const result = await createCategory({ userId, name });
 
-		const account = result.at(0);
+		const category = result.at(0);
 
-		if (!account)
+		if (!category)
 			return c.json(
 				{
 					error: {
 						code: StatusCodes.CONFLICT,
-						message: 'Cannot create account'
+						message: 'Cannot create category'
 					}
 				},
 				StatusCodes.CONFLICT
 			);
 
 		return c.json({
-			account
+			category
 		});
 	})
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
 		const { ids } = c.req.valid('json');
 
-		const deletedAccountIds = await deleteAccounts({ ids, userId });
+		const deletedCategoryIds = await deleteCategories({ userId, ids });
 
 		return c.json({
-			deletedAccountIds
+			deletedCategoryIds
 		});
 	});
 

@@ -9,24 +9,24 @@ export const accountTable = pgTable('account', {
 });
 
 export const accountRelations = relations(accountTable, ({ many }) => ({
-	transactions: many(transaction)
+	transactions: many(transactionTable)
 }));
 
 export type Account = InferSelectModel<typeof accountTable>;
 
-export const category = pgTable('category', {
+export const categoryTable = pgTable('category', {
 	id: uuid().primaryKey().defaultRandom(),
 	name: varchar({ length: 255 }).notNull(),
 	userId: varchar({ length: 255 }).notNull()
 });
 
-export const categoryRelations = relations(category, ({ many }) => ({
-	transactions: many(transaction)
+export const categoryRelations = relations(categoryTable, ({ many }) => ({
+	transactions: many(transactionTable)
 }));
 
-export type Category = InferSelectModel<typeof category>;
+export type Category = InferSelectModel<typeof categoryTable>;
 
-export const transaction = pgTable('transaction', {
+export const transactionTable = pgTable('transaction', {
 	id: uuid().primaryKey().defaultRandom(),
 	amount: integer().notNull(),
 	payee: text().notNull(),
@@ -35,20 +35,20 @@ export const transaction = pgTable('transaction', {
 	accountId: uuid('account_id')
 		.references(() => accountTable.id, { onDelete: 'cascade' })
 		.notNull(),
-	categoryId: uuid('category_id').references(() => category.id, {
+	categoryId: uuid('category_id').references(() => categoryTable.id, {
 		onDelete: 'set null'
 	})
 });
 
-export const transactionRelations = relations(transaction, ({ one }) => ({
+export const transactionRelations = relations(transactionTable, ({ one }) => ({
 	account: one(accountTable, {
-		fields: [transaction.accountId],
+		fields: [transactionTable.accountId],
 		references: [accountTable.id]
 	}),
-	category: one(category, {
-		fields: [transaction.categoryId],
-		references: [category.id]
+	category: one(categoryTable, {
+		fields: [transactionTable.categoryId],
+		references: [categoryTable.id]
 	})
 }));
 
-export type Transaction = InferSelectModel<typeof transaction>;
+export type Transaction = InferSelectModel<typeof transactionTable>;

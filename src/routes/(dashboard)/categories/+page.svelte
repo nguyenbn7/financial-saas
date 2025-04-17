@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { FormResult } from 'sveltekit-superforms';
-	import type { ActionData, PageServerData } from './$types';
+	import type { PageData } from './$types';
 
 	import { applyAction } from '$app/forms';
 
@@ -11,98 +10,104 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
+	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
+	import { Sheet } from '$lib/components/sheet';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { getColumns } from '$features/categories/datatable-columns';
-	import { CategorySheet } from '$features/categories/components';
-	import { categoryFormSchema } from '$features/categories/schemas';
-	import { deleteCategories } from '$features/categories/api';
+	import { getColumns } from '$features/categories/columns';
+	import { CategoryForm } from '$features/categories/components';
+	import { categoryFormSchema } from '$features/categories/schema';
+	import {
+		createDeleteCategoriesClient,
+		createGetCategoriesClient
+	} from '$features/categories/api';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
-		data: PageServerData;
+		data: PageData;
 	}
 
 	let { data }: PageProps = $props();
 
-	const categoriesForm = superForm(data.form, {
-		validators: zodClient(categoryFormSchema),
-		async onUpdate({ result }) {
-			if (result.status === 401) {
-				await applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-				toast.error('Unauthorized');
-				return;
-			}
-
-			const { pagination } = result.data as FormResult<ActionData>;
-
-			if (pagination) {
-				categories = pagination.data;
-				page = pagination.page;
-				pageSize = pagination.pageSize;
-			}
-		},
-		onError() {
-			loading = false;
-			openSheet = false;
-			categoriesForm.reset();
-		},
-		onUpdated({ form }) {
-			loading = false;
-			openSheet = false;
-
-			if (form.valid) {
-				toast.success(form.data.id ? 'Category updated' : 'Category created');
-			}
-
-			categoriesForm.reset();
-		}
+	const getCategoriesClient = createGetCategoriesClient({
+		initialData: { categories: data.categories },
+		enabled: false
 	});
-
-	const { delayed } = categoriesForm;
-
-	const deletesClient = deleteCategories();
-
-	let page = $state(data.pagination.page);
-	let categories = $state(data.pagination.data);
-	let pageSize = $state(data.pagination.pageSize);
 
 	let openSheet = $state(false);
-
-	let loading = $derived($deletesClient.isPending || $delayed);
+	let categories = $derived($getCategoriesClient.data.categories);
 
 	const columns = getColumns({
-		onEdit(data) {
+		onEdit(category) {
 			openSheet = true;
-			categoriesForm.form.set({ ...data });
+			const { userId, ...data } = category;
+			form.form.set({ ...data });
 		}
 	});
 
-	$effect(() => {
-		if ($deletesClient.isSuccess && $deletesClient.data) {
-			const { pagination } = $deletesClient.data;
-			categories = pagination.data;
-			page = pagination.page;
-			pageSize = pagination.pageSize;
+	const deleteCategoriesClient = createDeleteCategoriesClient({
+		async onError(error, variables, context) {
+			const { message, status } = error;
 
-			if ($deletesClient.variables.ids.length === 1) {
+			toast.error(message);
+
+			if (status === 401) {
+				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+			}
+		},
+		onSuccess(data, variables, context) {
+			if (variables.ids.length === 1) {
 				openSheet = false;
 				toast.success('Category deleted');
 			} else {
 				toast.success('Categories deleted');
 			}
-		} else if ($deletesClient.error) {
-			const { message, status } = $deletesClient.error;
 
-			if (status === 401) {
-				toast.error(message);
-				applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-				return;
-			}
+			$getCategoriesClient.refetch();
 		}
 	});
+
+	const form = superForm(data.form, {
+		validators: zodClient(categoryFormSchema),
+		async onUpdate({ form: validatedForm, result }) {
+			if (result.status === 401) {
+				if (validatedForm.message) {
+					toast.error(validatedForm.message);
+				}
+
+				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+			}
+		},
+		onError({ result }) {
+			loading = false;
+			openSheet = false;
+			form.reset();
+
+			if (result.error.message) toast.error(result.error.message);
+		},
+		onUpdated({ form: validatedForm }) {
+			if (!validatedForm.valid && validatedForm.message) {
+				toast.error(validatedForm.message);
+				return;
+			}
+
+			loading = false;
+			openSheet = false;
+			form.reset();
+
+			if (validatedForm.message) toast.success(validatedForm.message);
+
+			$getCategoriesClient.refetch();
+		}
+	});
+
+	const { delayed, form: formData } = form;
+
+	let loading = $derived(
+		$deleteCategoriesClient.isPending || $delayed || $getCategoriesClient.isPending
+	);
 </script>
 
 <Metadata title="Financial Categories" />
@@ -121,7 +126,7 @@
 			<CardContent>
 				<DataTable
 					data={categories}
-					paginationState={{ pageIndex: page - 1, pageSize }}
+					paginationState={{ pageIndex: 0, pageSize: 5 }}
 					{columns}
 					filterKey="name"
 				>
@@ -129,12 +134,18 @@
 						{#if selectedRows.length > 0}
 							<DataTableDeletesButton
 								selectedRowsCount={selectedRows.length}
-								disabled={$deletesClient.isPending}
-								onDeletes={() => {
-									const ids = selectedRows.map((r) => r.original.id);
-									$deletesClient.mutate({ ids });
+								disabled={$deleteCategoriesClient.isPending}
+								onDeletes={async () => {
+									const ok = await confirm({
+										title: 'Are you sure?',
+										description: 'You are about to delete these categories'
+									});
+
+									if (ok) {
+										const ids = selectedRows.map((r) => r.original.id);
+										$deleteCategoriesClient.mutate({ ids });
+									}
 								}}
-								confirmDialogDescription="You are about to delete these categories"
 							/>
 						{/if}
 					{/snippet}
@@ -144,15 +155,34 @@
 	</div>
 </DataTableLoader>
 
-<CategorySheet
-	form={categoriesForm}
+<Sheet
 	bind:open={openSheet}
 	disabled={loading}
-	deleting={$deletesClient.isPending}
+	showDeleteButton={!!$formData.id}
+	showDeleteButtonLoader={$deleteCategoriesClient.isPending}
 	onOpenChange={(open) => {
-		if (!open) categoriesForm.reset();
+		if (!open) form.reset();
 	}}
-	onDelete={(id) => {
-		$deletesClient.mutate({ ids: [id] });
+	onDelete={async () => {
+		const ok = await confirm({
+			title: 'Are you sure?',
+			description: 'You are about to delete this category'
+		});
+
+		if (ok && $formData.id) {
+			$deleteCategoriesClient.mutate({ ids: [$formData.id] });
+		}
 	}}
-/>
+>
+	{#snippet title()}
+		{$formData.id ? 'Edit Category' : 'New Category'}
+	{/snippet}
+
+	{#snippet description()}
+		{$formData.id
+			? 'Edit an existing category.'
+			: 'Create a new category to organize your transactions.'}
+	{/snippet}
+
+	<CategoryForm {form} disabled={loading} disableLoader={$deleteCategoriesClient.isPending} />
+</Sheet>

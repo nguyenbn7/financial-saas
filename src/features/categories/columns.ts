@@ -1,16 +1,18 @@
 import type { ColumnDef } from '@tanstack/table-core';
-import type { Category } from '.';
-
+import type { Categories } from '$features/categories/api';
 import { Checkbox } from '$lib/components/ui/checkbox';
 import { renderComponent } from '$lib/components/ui/data-table';
-
 import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
-interface GetColumnsProps {
+type Category = ArrayElement<Categories>;
+
+interface Props {
 	onEdit?: (account: Category) => MaybePromise<void> | undefined;
 }
 
-export function getColumns({ onEdit }: GetColumnsProps) {
+export function getColumns(props: Props = {}) {
+	const { onEdit } = props;
+
 	const columns: ColumnDef<Category>[] = [
 		{
 			id: 'select',
@@ -43,9 +45,7 @@ export function getColumns({ onEdit }: GetColumnsProps) {
 			id: 'actions',
 			cell: ({ row }) =>
 				renderComponent(CellActions, {
-					onEdit() {
-						return onEdit?.(row.original);
-					}
+					onEdit: () => onEdit?.(row.original)
 				})
 		}
 	];

@@ -4,7 +4,7 @@ import { Checkbox } from '$lib/components/ui/checkbox';
 import { renderComponent } from '$lib/components/ui/data-table';
 import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
-type Account = ArrayElement<Accounts['accounts']>;
+type Account = ArrayElement<Accounts>;
 
 interface Props {
 	onEdit?: (account: Account) => MaybePromise<void> | undefined;

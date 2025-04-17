@@ -134,7 +134,7 @@
 	const { delayed, form: formData } = form;
 
 	let loading = $derived(
-		$deleteTransactionsClient.isPending || $delayed || $getTransactionsClient.isPending
+		$deleteTransactionsClient.isPending || $delayed || $getTransactionsClient.isFetching
 	);
 
 	let disabledForm = $derived(

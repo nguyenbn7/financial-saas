@@ -11,7 +11,7 @@ export async function createCategory(data: { userId: string; name: string }) {
 			name,
 			userId
 		})
-		.execute();
+		.returning();
 }
 
 export async function updateCategory(
@@ -25,7 +25,7 @@ export async function updateCategory(
 		.update(categoryTable)
 		.set({ name })
 		.where(and(eq(categoryTable.id, id), eq(categoryTable.userId, userId)))
-		.execute();
+		.returning();
 }
 
 export async function deleteCategories(searchParams: { ids: string[]; userId: string }) {

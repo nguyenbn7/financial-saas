@@ -4,10 +4,10 @@ export const transactionFormSchema = z.object({
 	id: z.string().optional(),
 	date: z.coerce.date(),
 	accountId: z.string().min(1, 'Required'),
-	categoryId: z.string().optional(),
+	categoryId: z.string().nullable().default(null),
 	payee: z.string().trim().min(1, 'Required'),
 	amount: z.number().refine((v) => v !== 0, { message: 'Cannot be 0' }),
-	notes: z.string().optional()
+	notes: z.string().nullable().default(null)
 });
 
 export const querySchema = z.object({

@@ -71,7 +71,7 @@
 		onEdit(transaction) {
 			openSheet = true;
 
-			// form.form.set({ ...transaction });
+			form.form.set({ ...transaction });
 		}
 	});
 

@@ -1,5 +1,4 @@
 import type { InferRequestType, InferResponseType } from 'hono';
-import type { ClientError } from '$lib/error';
 import { client } from '$lib/rpc';
 import { createQuery } from '@tanstack/svelte-query';
 
@@ -21,9 +20,10 @@ export default function createGetTransactionsClient(
 	const { initialData, enabled } = params;
 
 	const query = createQuery({
+		// TODO:
 		queryKey: ['get', 'transactions', searchParams],
-		queryFn: async ({ queryKey }) => {
-			const query = (queryKey.at(-1) as SearchParams | undefined) ?? {
+		queryFn: async () => {
+			const query = {
 				accountId: undefined,
 				from: undefined,
 				to: undefined

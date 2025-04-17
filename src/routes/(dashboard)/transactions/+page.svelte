@@ -164,7 +164,7 @@
 					data={transactions}
 					paginationState={{ pageIndex: 0, pageSize: 5 }}
 					{columns}
-					filterKey="name"
+					filterKey="date"
 				>
 					{#snippet deleteBulk(selectedRows)}
 						{#if selectedRows.length > 0}

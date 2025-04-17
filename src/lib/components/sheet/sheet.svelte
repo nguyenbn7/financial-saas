@@ -13,14 +13,14 @@
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 
 	interface Props {
-		title: string;
-		description: string;
+		title: Snippet;
+		description: Snippet;
+		children: Snippet;
 		open?: boolean;
 		disabled?: boolean;
 		showDeleteButton?: boolean;
 		showDeleteButtonLoader?: boolean;
 		onDelete?: (MouseEventHandler<HTMLButtonElement> & MouseEventHandler<HTMLAnchorElement>) | null;
-		content: Snippet;
 		onOpenChange?: (value: boolean) => void;
 	}
 
@@ -33,7 +33,7 @@
 		onOpenChange,
 		showDeleteButton = false,
 		showDeleteButtonLoader = false,
-		content
+		children
 	}: Props = $props();
 </script>
 
@@ -43,11 +43,11 @@
 		interactOutsideBehavior={disabled ? 'ignore' : 'close'}
 	>
 		<SheetHeader>
-			<SheetTitle>{title}</SheetTitle>
-			<SheetDescription>{description}</SheetDescription>
+			<SheetTitle>{@render title()}</SheetTitle>
+			<SheetDescription>{@render description()}</SheetDescription>
 		</SheetHeader>
 
-		{@render content()}
+		{@render children()}
 
 		{#if showDeleteButton}
 			<Button class="w-full" {disabled} variant="outline-red" onclick={onDelete}>

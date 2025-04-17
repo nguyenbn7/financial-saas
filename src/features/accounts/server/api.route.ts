@@ -26,7 +26,7 @@ const app = new Hono()
 			accounts: await getAccounts({ userId })
 		});
 	})
-	.post('/', zValidator('json', accountFormSchema.omit({ id: true })), async (c) => {
+	.post('/', zValidator('json', accountFormSchema), async (c) => {
 		const userId = c.get('userId');
 		const { name } = c.req.valid('json');
 
@@ -53,9 +53,11 @@ const app = new Hono()
 		const userId = c.get('userId');
 		const { ids } = c.req.valid('json');
 
-		await deleteAccounts({ ids, userId });
+		const deletedAccountIds = await deleteAccounts({ ids, userId });
 
-		return c.json({ accounts: await getAccounts({ userId }) });
+		return c.json({
+			deletedAccountIds
+		});
 	});
 
 export default app;

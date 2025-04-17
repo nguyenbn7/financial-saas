@@ -5,17 +5,14 @@ import { and, asc, count, desc, eq, inArray } from 'drizzle-orm';
 const DEFAULT_PAGE_SIZE = 5;
 const DEFAULT_PAGE = 1;
 
-export async function getAccountPage(
-	conditions: { userId: string },
-	pageable: { page: number; pageSize: number; orders: string[] } = {
-		page: DEFAULT_PAGE,
-		pageSize: DEFAULT_PAGE_SIZE,
-		orders: ['']
-	}
-) {
-	const { userId } = conditions;
-
-	let { page, pageSize, orders } = pageable;
+export async function getAccountPage(searchParams: {
+	userId: string;
+	page: number;
+	pageSize: number;
+	orders: string[];
+}) {
+	const { userId } = searchParams;
+	let { page, pageSize, orders } = searchParams;
 
 	page = page < 1 ? DEFAULT_PAGE : page;
 	pageSize = pageSize < 1 ? DEFAULT_PAGE_SIZE : pageSize;
@@ -53,14 +50,14 @@ export async function getAccountPage(
 	};
 }
 
-export async function getAccounts(conditions: { userId: string }) {
-	const { userId } = conditions;
+export async function getAccounts(searchParams: { userId: string }) {
+	const { userId } = searchParams;
 
 	return db.select().from(accountTable).where(eq(accountTable.userId, userId));
 }
 
-export async function deleteAccounts(conditions: { ids: string[]; userId: string }) {
-	const { ids, userId } = conditions;
+export async function deleteAccounts(searchParams: { ids: string[]; userId: string }) {
+	const { ids, userId } = searchParams;
 
 	return db
 		.delete(accountTable)
@@ -69,10 +66,10 @@ export async function deleteAccounts(conditions: { ids: string[]; userId: string
 }
 
 export async function updateAccount(
-	conditions: { id: string; userId: string },
+	searchParams: { id: string; userId: string },
 	data: { name: string }
 ) {
-	const { id, userId } = conditions;
+	const { id, userId } = searchParams;
 	const { name } = data;
 	return db
 		.update(accountTable)

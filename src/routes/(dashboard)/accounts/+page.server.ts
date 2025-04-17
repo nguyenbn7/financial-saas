@@ -26,11 +26,14 @@ export const actions = {
 
 		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		await createAccount({ userId, ...form.data });
+		const createdAccounts = await createAccount({ userId, ...form.data });
 
-		form.message = 'Account created';
+		const createdAccount = createdAccounts.at(0);
 
-		return { form, accounts: await getAccounts({ userId }) };
+		if (!createdAccount)
+			return message(form, 'Cannot create account', { status: StatusCodes.CONFLICT });
+
+		return message(form, 'Account created');
 	},
 
 	update: async ({ locals, request }) => {
@@ -44,10 +47,13 @@ export const actions = {
 
 		const { id, ...data } = form.data;
 
-		await updateAccount({ userId, id: form.data.id }, { ...data });
+		const updatedAccounts = await updateAccount({ userId, id: form.data.id }, { ...data });
 
-		form.message = 'Account updated';
+		const updatedAccount = updatedAccounts.at(0);
 
-		return { form, accounts: await getAccounts({ userId }) };
+		if (!updatedAccount)
+			return message(form, 'Cannot update account', { status: StatusCodes.CONFLICT });
+
+		return message(form, 'Account updated');
 	}
 } satisfies Actions;

@@ -46,9 +46,9 @@
 	{@render content({ disabled })}
 
 	<FormButton {disabled} class="w-full">
-		{#if !disabled}
+		{#if !disabled || disableLoader}
 			{createForm ? createButtonText : updateButtonText}
-		{:else if !disableLoader}
+		{:else}
 			{createForm ? 'Creating...' : 'Saving Changes...'}
 			<LoaderCircle class="animate-spin ml-2" />
 		{/if}

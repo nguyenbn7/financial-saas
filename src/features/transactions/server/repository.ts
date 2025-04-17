@@ -59,8 +59,8 @@ export async function createTransaction(data: {
 	payee: string;
 	accountId: string;
 	date: Date;
-	categoryId?: string;
-	notes?: string;
+	categoryId?: string | null;
+	notes?: string | null;
 }) {
 	const { amount, payee, accountId, date, categoryId, notes } = data;
 

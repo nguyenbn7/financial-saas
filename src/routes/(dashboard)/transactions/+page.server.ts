@@ -58,7 +58,7 @@ export const load = (async ({ parent, url }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-	create: async ({ locals, request, url }) => {
+	create: async ({ locals, request }) => {
 		const { userId } = locals.auth();
 
 		const form = await superValidate(request, zod(transactionFormSchema));

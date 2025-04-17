@@ -116,8 +116,8 @@
 			if (result.error.message) toast.error(result.error.message);
 		},
 		onUpdated({ form: validatedForm }) {
-			if (!validatedForm.valid && validatedForm.message) {
-				toast.error(validatedForm.message);
+			if (!validatedForm.valid) {
+				if (validatedForm.message) toast.error(validatedForm.message);
 				return;
 			}
 
@@ -215,7 +215,7 @@
 	{/snippet}
 
 	{#snippet description()}
-		{$formData.id ? 'Edit an existing category.' : 'Create a new transaction.'}
+		{$formData.id ? 'Edit an existing transaction.' : 'Create a new transaction.'}
 	{/snippet}
 
 	<TransactionForm

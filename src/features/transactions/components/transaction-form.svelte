@@ -39,7 +39,7 @@
 <Form
 	{form}
 	class="space-y-4 mt-2"
-	createButtonText="Create category"
+	createButtonText="Create transaction"
 	{disabled}
 	{createForm}
 	{disableLoader}
@@ -49,7 +49,7 @@
 			<FormField {form} name="id">
 				<FormControl>
 					{#snippet children({ props })}
-						<input {...props} value={$formData.id} hidden {disabled} />
+						<input {...props} value={$formData.id} hidden />
 					{/snippet}
 				</FormControl>
 			</FormField>
@@ -60,7 +60,7 @@
 				{#snippet children({ props })}
 					<DatePicker bind:value={$formData.date} {disabled} />
 
-					<input {...props} hidden value={$formData.date} {disabled} />
+					<input {...props} hidden value={$formData.date} />
 				{/snippet}
 			</FormControl>
 
@@ -82,7 +82,7 @@
 						onValueChange={(value) => ($formData.accountId = value)}
 					/>
 
-					<input {...props} hidden value={$formData.accountId} {disabled} />
+					<input {...props} hidden value={$formData.accountId} />
 				{/snippet}
 			</FormControl>
 
@@ -96,14 +96,14 @@
 
 					<CreatableSelect
 						placeholder="Select a category"
-						value={$formData.categoryId}
+						value={$formData.categoryId ?? undefined}
 						{disabled}
 						options={categoryOptions}
 						onCreate={onCreateCategory}
 						onValueChange={(value) => ($formData.categoryId = value)}
 					/>
 
-					<input {...props} hidden value={$formData.categoryId} {disabled} />
+					<input {...props} hidden value={$formData.categoryId} />
 				{/snippet}
 			</FormControl>
 
@@ -128,7 +128,7 @@
 					<FormLabel>Amount</FormLabel>
 
 					<AmountInput bind:value={$formData.amount} {disabled} />
-					<input {...props} {disabled} hidden value={$formData.amount} />
+					<input {...props} hidden value={$formData.amount} />
 				{/snippet}
 			</FormControl>
 

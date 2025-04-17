@@ -1,15 +1,21 @@
 import type { Actions, PageServerLoad } from './$types';
 
+import { StatusCodes } from 'http-status-codes';
+
 import { parse, subDays } from 'date-fns';
 
 import { zod } from 'sveltekit-superforms/adapters';
-import { fail, superValidate } from 'sveltekit-superforms';
+import { message, superValidate } from 'sveltekit-superforms';
 
-import { querySchema, transactionFormSchema } from '$features/transactions/schemas';
-import { createTransaction, getTransactions } from '$features/transactions/server/service.server';
+import { getAccounts } from '$features/accounts/server/repository';
+
+import { getCategories } from '$features/categories/server/repository';
+
+import { querySchema, transactionFormSchema } from '$features/transactions/schema';
+import { createTransaction, getTransactions } from '$features/transactions/server/repository';
 
 export const load = (async ({ parent, url }) => {
-	const { user } = await parent();
+	const { userId } = await parent();
 
 	const query = url.searchParams
 		.entries()
@@ -17,9 +23,13 @@ export const load = (async ({ parent, url }) => {
 		[x: string]: string;
 	};
 
-	const result = await querySchema.parseAsync(query);
+	const result = await querySchema.safeParseAsync(query);
 
-	const { from, to, accountId } = result;
+	const { from, to, accountId } = result.data ?? {
+		from: undefined,
+		to: undefined,
+		accountId: undefined
+	};
 
 	const defaultTo = new Date();
 	const defaultFrom = subDays(defaultTo, 30);
@@ -28,55 +38,41 @@ export const load = (async ({ parent, url }) => {
 	const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo;
 
 	const transactions = await getTransactions({
-		userId: user.id,
-		accountId: accountId === undefined ? undefined : Number(accountId),
+		userId,
+		accountId,
 		startDate,
 		endDate
 	});
 
+	const accounts = await getAccounts({
+		userId
+	});
+
+	const categories = await getCategories({
+		userId
+	});
+
 	const form = await superValidate(zod(transactionFormSchema));
 
-	return { form, transactions };
+	return { form, transactions, accounts, categories };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	create: async ({ locals, request, url }) => {
-		const { user } = locals;
-
-		if (!user) return fail(401);
+		const { userId } = locals.auth();
 
 		const form = await superValidate(request, zod(transactionFormSchema));
 
-		if (!form.valid) return fail(400, { form });
+		if (!userId) return message(form, 'Login required', { status: StatusCodes.UNAUTHORIZED });
 
-		const transaction = await createTransaction({
-			...form.data
-		});
+		if (!form.valid) return message(form, 'Invalid data', { status: StatusCodes.BAD_REQUEST });
 
-		const query = url.searchParams
-			.entries()
-			.reduce((prev, curr) => Object.assign(prev, { [curr[0]]: curr[1] }), {}) as {
-			[x: string]: string;
-		};
+		const [createdTransaction] = await createTransaction({ ...form.data });
 
-		const result = await querySchema.parseAsync(query);
+		if (!createdTransaction)
+			return message(form, 'Cannot create transaction', { status: StatusCodes.CONFLICT });
 
-		const { from, to, accountId } = result;
-
-		const defaultTo = new Date();
-		const defaultFrom = subDays(defaultTo, 30);
-
-		const startDate = from ? parse(from, 'yyyy-MM-dd', new Date()) : defaultFrom;
-		const endDate = to ? parse(to, 'yyyy-MM-dd', new Date()) : defaultTo;
-
-		const transactions = await getTransactions({
-			userId: user.id,
-			accountId: accountId === undefined ? undefined : Number(accountId),
-			startDate,
-			endDate
-		});
-
-		return { form, transactions };
+		return message(form, 'Transaction created');
 	}
 
 	// update: async ({ locals, request }) => {

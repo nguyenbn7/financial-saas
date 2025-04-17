@@ -1,28 +1,21 @@
 <script lang="ts">
-	import type { TransactionFormValues } from '.';
+	import type { z } from 'zod';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import type { transactionFormSchema } from '$features/transactions/schema';
 
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import {
-		FormButton,
-		FormControl,
-		FormField,
-		FormFieldErrors,
-		FormLabel
-	} from '$lib/components/ui/form';
+	import { FormControl, FormField, FormFieldErrors, FormLabel } from '$lib/components/ui/form';
 
+	import { Form } from '$lib/components/form';
 	import { DatePicker } from '$lib/components/date-picker';
 	import { AmountInput } from '$lib/components/amount-input';
 	import { CreatableSelect } from '$lib/components/select';
 
-	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
-
 	interface Props {
-		form: TransactionFormValues;
-		createAction: string;
-		updateAction: string;
+		form: SuperForm<z.infer<typeof transactionFormSchema>, any>;
 		disabled?: boolean;
-		showLoader?: boolean;
+		disableLoader?: boolean;
 		onCreateAccount: (name: string) => void;
 		accountOptions: { label: string; value: string }[];
 		onCreateCategory: (name: string) => void;
@@ -31,128 +24,132 @@
 
 	let {
 		form,
-		createAction,
-		updateAction,
+		disabled = false,
+		disableLoader = false,
 		onCreateAccount,
 		accountOptions,
 		onCreateCategory,
-		categoryOptions,
-		disabled = false,
-		showLoader = false
+		categoryOptions
 	}: Props = $props();
 
-	const { form: formData, enhance } = form;
+	const { form: formData } = form;
+	const createForm = $derived(!Boolean($formData.id));
 </script>
 
-<form method="post" class="space-y-4 pt-2" use:enhance>
-	{#if $formData.id}
-		<FormField {form} name="id">
+<Form
+	{form}
+	class="space-y-4 mt-2"
+	createButtonText="Create category"
+	{disabled}
+	{createForm}
+	{disableLoader}
+>
+	{#snippet content({ disabled })}
+		{#if $formData.id}
+			<FormField {form} name="id">
+				<FormControl>
+					{#snippet children({ props })}
+						<input {...props} value={$formData.id} hidden {disabled} />
+					{/snippet}
+				</FormControl>
+			</FormField>
+		{/if}
+
+		<FormField {form} name="date">
 			<FormControl>
 				{#snippet children({ props })}
-					<input {...props} value={$formData.id} hidden {disabled} />
+					<DatePicker bind:value={$formData.date} {disabled} />
+
+					<input {...props} hidden value={$formData.date} {disabled} />
 				{/snippet}
 			</FormControl>
+
+			<FormFieldErrors />
 		</FormField>
-	{/if}
 
-	<FormField {form} name="date">
-		<FormControl>
-			{#snippet children({ props })}
-				<DatePicker bind:value={$formData.date} {disabled} />
+		<FormField {form} name="accountId">
+			<FormControl>
+				{#snippet children({ props })}
+					<FormLabel>Account</FormLabel>
 
-				<input {...props} hidden value={$formData.date} {disabled} />
-			{/snippet}
-		</FormControl>
+					<CreatableSelect
+						{...props}
+						placeholder="Select an account"
+						value={$formData.accountId}
+						{disabled}
+						options={accountOptions}
+						onCreate={onCreateAccount}
+						onValueChange={(value) => ($formData.accountId = value)}
+					/>
 
-		<FormFieldErrors />
-	</FormField>
+					<input {...props} hidden value={$formData.accountId} {disabled} />
+				{/snippet}
+			</FormControl>
 
-	<FormField {form} name="accountId">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Account</FormLabel>
+			<FormFieldErrors />
+		</FormField>
 
-				<CreatableSelect
-					{...props}
-					placeholder="Select an account"
-					value={$formData.accountId.toString()}
-					{disabled}
-					options={accountOptions}
-					onCreate={onCreateAccount}
-					onValueChange={(value) => ($formData.accountId = Number(value))}
-				/>
+		<FormField {form} name="categoryId">
+			<FormControl>
+				{#snippet children({ props })}
+					<FormLabel>Category</FormLabel>
 
-				<input {...props} hidden value={$formData.accountId} {disabled} />
-			{/snippet}
-		</FormControl>
+					<CreatableSelect
+						placeholder="Select a category"
+						value={$formData.categoryId}
+						{disabled}
+						options={categoryOptions}
+						onCreate={onCreateCategory}
+						onValueChange={(value) => ($formData.categoryId = value)}
+					/>
 
-		<FormFieldErrors />
-	</FormField>
+					<input {...props} hidden value={$formData.categoryId} {disabled} />
+				{/snippet}
+			</FormControl>
 
-	<FormField {form} name="categoryId">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Category</FormLabel>
+			<FormFieldErrors />
+		</FormField>
 
-				<CreatableSelect
-					placeholder="Select a category"
-					value={$formData.categoryId?.toString()}
-					{disabled}
-					options={categoryOptions}
-					onCreate={onCreateCategory}
-					onValueChange={(value) => ($formData.categoryId = Number(value))}
-				/>
+		<FormField {form} name="payee">
+			<FormControl>
+				{#snippet children({ props })}
+					<FormLabel>Payee</FormLabel>
 
-				<input {...props} hidden value={$formData.categoryId} {disabled} />
-			{/snippet}
-		</FormControl>
+					<Input {...props} bind:value={$formData.payee} {disabled} placeholder="Add a payee" />
+				{/snippet}
+			</FormControl>
 
-		<FormFieldErrors />
-	</FormField>
+			<FormFieldErrors />
+		</FormField>
 
-	<FormField {form} name="payee">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Payee</FormLabel>
+		<FormField {form} name="amount">
+			<FormControl>
+				{#snippet children({ props })}
+					<FormLabel>Amount</FormLabel>
 
-				<Input {...props} bind:value={$formData.payee} {disabled} placeholder="Add a payee" />
-			{/snippet}
-		</FormControl>
+					<AmountInput bind:value={$formData.amount} {disabled} />
+					<input {...props} {disabled} hidden value={$formData.amount} />
+				{/snippet}
+			</FormControl>
 
-		<FormFieldErrors />
-	</FormField>
+			<FormFieldErrors />
+		</FormField>
 
-	<FormField {form} name="amount">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Amount</FormLabel>
+		<FormField {form} name="notes">
+			<FormControl>
+				{#snippet children({ props })}
+					<FormLabel>Notes</FormLabel>
 
-				<AmountInput bind:value={$formData.amount} {disabled} />
-				<input {...props} {disabled} hidden value={$formData.amount} />
-			{/snippet}
-		</FormControl>
+					<Textarea
+						{...props}
+						bind:value={$formData.notes}
+						{disabled}
+						placeholder="Optional notes"
+					/>
+				{/snippet}
+			</FormControl>
 
-		<FormFieldErrors />
-	</FormField>
-
-	<FormField {form} name="notes">
-		<FormControl>
-			{#snippet children({ props })}
-				<FormLabel>Notes</FormLabel>
-
-				<Textarea {...props} bind:value={$formData.notes} {disabled} placeholder="Optional notes" />
-			{/snippet}
-		</FormControl>
-
-		<FormFieldErrors />
-	</FormField>
-
-	<FormButton class="w-full" {disabled} formaction={$formData.id ? updateAction : createAction}>
-		{#if disabled && showLoader}
-			<LoaderCircle size={16} class="mr-1 text-primary-foreground animate-spin" />
-			{$formData.id ? 'Saving...' : 'Creating...'}
-		{:else}
-			{$formData.id ? 'Save Changes' : 'Create transaction'}
-		{/if}
-	</FormButton>
-</form>
+			<FormFieldErrors />
+		</FormField>
+	{/snippet}
+</Form>

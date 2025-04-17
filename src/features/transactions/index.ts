@@ -1,3 +1,3 @@
-import type { getTransactions } from './server/service.server';
+import type { getTransactions } from './server/repository';
 
 export type Transaction = ArrayElement<AsyncReturnType<typeof getTransactions>>;

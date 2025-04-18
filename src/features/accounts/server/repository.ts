@@ -56,6 +56,15 @@ export async function getAccounts(searchParams: { userId: string }) {
 	return db.select().from(accountTable).where(eq(accountTable.userId, userId));
 }
 
+export async function getAccount(searchParams: { id: string; userId: string }) {
+	const { id, userId } = searchParams;
+
+	return db
+		.select()
+		.from(accountTable)
+		.where(and(eq(accountTable.id, id), eq(accountTable.userId, userId)));
+}
+
 export async function deleteAccounts(searchParams: { ids: string[]; userId: string }) {
 	const { ids, userId } = searchParams;
 

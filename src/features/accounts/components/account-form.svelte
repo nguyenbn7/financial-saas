@@ -10,15 +10,17 @@
 	import { Form } from '$lib/components/form';
 
 	interface Props {
+		id?: string;
 		form: SuperForm<z.infer<typeof accountFormSchema>, any>;
 		disabled?: boolean;
 		disableLoader?: boolean;
 	}
 
-	let { form, disabled = false, disableLoader = false }: Props = $props();
+	let { id, form, disabled = false, disableLoader = false }: Props = $props();
 
 	const { form: formData } = form;
-	const createForm = $derived(!Boolean($formData.id));
+	
+	const createForm = $derived(!Boolean(id));
 </script>
 
 <Form
@@ -30,16 +32,6 @@
 	{disableLoader}
 >
 	{#snippet content({ disabled })}
-		{#if $formData.id}
-			<FormField {form} name="id">
-				<FormControl>
-					{#snippet children({ props })}
-						<input {...props} hidden value={$formData.id} />
-					{/snippet}
-				</FormControl>
-			</FormField>
-		{/if}
-
 		<FormField {form} name="name">
 			<FormControl>
 				{#snippet children({ props })}

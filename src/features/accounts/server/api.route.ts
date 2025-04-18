@@ -9,8 +9,14 @@ import { clerkMiddleware } from '@hono/clerk-auth';
 
 import { clerkMiddlewareAuthenticated } from '$lib/server/api/middleware';
 
-import { accountFormSchema, deletesSchema } from '$features/accounts/schema';
-import { createAccount, deleteAccounts, getAccounts } from '$features/accounts/server/repository';
+import { accountFormSchema, accountIdSchema, deletesSchema } from '$features/accounts/schema';
+import {
+	createAccount,
+	deleteAccounts,
+	getAccount,
+	getAccounts,
+	updateAccount
+} from '$features/accounts/server/repository';
 
 const app = new Hono()
 	.use(
@@ -23,17 +29,38 @@ const app = new Hono()
 	.get('/', async (c) => {
 		const userId = c.get('userId');
 
+		const accounts = await getAccounts({ userId });
+
 		return c.json({
-			accounts: await getAccounts({ userId })
+			accounts
+		});
+	})
+	.get('/:id', zValidator('param', accountIdSchema), async (c) => {
+		const userId = c.get('userId');
+		const { id } = c.req.valid('param');
+
+		const [account] = await getAccount({ id, userId });
+
+		if (!account)
+			return c.json(
+				{
+					error: {
+						code: StatusCodes.NOT_FOUND,
+						message: 'Account not found'
+					}
+				},
+				StatusCodes.NOT_FOUND
+			);
+
+		return c.json({
+			account
 		});
 	})
 	.post('/', zValidator('json', accountFormSchema), async (c) => {
 		const userId = c.get('userId');
 		const { name } = c.req.valid('json');
 
-		const result = await createAccount({ userId, name });
-
-		const account = result.at(0);
+		const [account] = await createAccount({ userId, name });
 
 		if (!account)
 			return c.json(
@@ -50,6 +77,35 @@ const app = new Hono()
 			account
 		});
 	})
+	.put(
+		'/:id',
+		zValidator('param', accountIdSchema),
+		zValidator('json', accountFormSchema),
+		async (c) => {
+			const userId = c.get('userId');
+			const { id } = c.req.valid('param');
+			const { name } = c.req.valid('json');
+
+			const [existedAccount] = await getAccount({ id, userId });
+
+			if (!existedAccount)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.NOT_FOUND,
+							message: 'Account not found'
+						}
+					},
+					StatusCodes.NOT_FOUND
+				);
+
+			const [account] = await updateAccount({ id, userId }, { name });
+
+			return c.json({
+				account
+			});
+		}
+	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
 		const { ids } = c.req.valid('json');

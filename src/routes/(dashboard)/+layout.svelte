@@ -10,6 +10,8 @@
 
 	import Logo from '$assets/logo.svg';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+	import { NewAccountSheet } from '$features/accounts/components/new-account-sheet';
+	import { EditAccountSheet } from '$features/accounts/components/edit-account-sheet';
 
 	interface LayoutProps {
 		data: LayoutData;
@@ -53,3 +55,6 @@
 </header>
 
 {@render children()}
+
+<NewAccountSheet />
+<EditAccountSheet />

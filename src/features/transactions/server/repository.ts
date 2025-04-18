@@ -102,8 +102,8 @@ export async function updateTransaction(
 		payee: string;
 		accountId: string;
 		date: Date;
-		categoryId?: string;
-		notes?: string;
+		categoryId?: string | null;
+		notes?: string | null;
 	}
 ) {
 	const { id, userId } = searchParams;

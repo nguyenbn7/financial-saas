@@ -6,23 +6,32 @@ type Response = InferResponseType<typeof client.api.transactions.$get>;
 
 type Transaction = Omit<ArrayElement<Response['transactions']>, 'date'> & { date: Date };
 
+export type Transactions = Array<Transaction>;
+
 type SearchParams = InferRequestType<typeof client.api.transactions.$get>['query'];
 
 interface Params {
-	initialData: { transactions: Transactions };
-	enabled?: boolean;
+	ssrData?: Transactions;
 }
 
 export default function createGetTransactionsClient(
-	params: Params = { initialData: { transactions: [] }, enabled: true },
+	params: Params = { ssrData: undefined },
 	searchParams: SearchParams = { accountId: undefined, from: undefined, to: undefined }
 ) {
-	const { initialData, enabled } = params;
+	let { ssrData } = params;
 
-	const query = createQuery({
+	const query = createQuery<{ transactions: Transactions }, Error>({
 		// TODO:
 		queryKey: ['get', 'transactions', searchParams],
 		queryFn: async () => {
+			if (ssrData && ssrData.length > 0) {
+				const response = {
+					transactions: ssrData
+				};
+				ssrData = [];
+				return response;
+			}
+
 			const query = {
 				accountId: undefined,
 				from: undefined,
@@ -35,12 +44,8 @@ export default function createGetTransactionsClient(
 			return {
 				transactions: data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))
 			};
-		},
-		initialData,
-		enabled
+		}
 	});
 
 	return query;
 }
-
-export type Transactions = Array<Transaction>;

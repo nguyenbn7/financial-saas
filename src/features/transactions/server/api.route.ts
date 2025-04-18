@@ -1,6 +1,8 @@
 import { CLERK_SECRET_KEY } from '$env/static/private';
 import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
 
+import { StatusCodes } from 'http-status-codes';
+
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { clerkMiddleware } from '@hono/clerk-auth';
@@ -9,8 +11,19 @@ import { clerkMiddlewareAuthenticated } from '$lib/server/api/middleware';
 
 import { parse, subDays } from 'date-fns';
 
-import { deletesSchema, querySchema } from '../schema';
-import { deleteTransactions, getTransactions } from './repository';
+import {
+	deletesSchema,
+	querySchema,
+	transactionFormSchema,
+	transactionIdSchema
+} from '$features/transactions/schema';
+import {
+	createTransaction,
+	deleteTransactions,
+	getTransaction,
+	getTransactions,
+	updateTransaction
+} from '$features/transactions/server/repository';
 
 const app = new Hono()
 	.use(
@@ -40,12 +53,92 @@ const app = new Hono()
 			})
 		});
 	})
+	.get('/:id', zValidator('param', transactionIdSchema), async (c) => {
+		const userId = c.get('userId');
+		const { id } = c.req.valid('param');
+
+		const [transaction] = await getTransaction({ id, userId });
+
+		if (!transaction)
+			return c.json(
+				{
+					error: {
+						code: StatusCodes.NOT_FOUND,
+						message: 'Transaction not found'
+					}
+				},
+				StatusCodes.NOT_FOUND
+			);
+
+		return c.json({
+			transaction
+		});
+	})
+	.post('/', zValidator('json', transactionFormSchema), async (c) => {
+		const formData = c.req.valid('json');
+
+		const [transaction] = await createTransaction({ ...formData });
+
+		if (!transaction)
+			return c.json(
+				{
+					error: {
+						code: StatusCodes.CONFLICT,
+						message: 'Cannot create transaction'
+					}
+				},
+				StatusCodes.CONFLICT
+			);
+
+		return c.json({
+			transaction
+		});
+	})
+	.put(
+		'/:id',
+		zValidator('param', transactionIdSchema),
+		zValidator('json', transactionFormSchema),
+		async (c) => {
+			const userId = c.get('userId');
+			const { id } = c.req.valid('param');
+			const formData = c.req.valid('json');
+
+			const [existedTransaction] = await getTransaction({ id, userId });
+
+			if (!existedTransaction)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.NOT_FOUND,
+							message: 'Transaction not found'
+						}
+					},
+					StatusCodes.NOT_FOUND
+				);
+
+			const [transaction] = await updateTransaction({ id, userId }, { ...formData });
+
+			if (!transaction)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.CONFLICT,
+							message: 'Cannot update transaction'
+						}
+					},
+					StatusCodes.CONFLICT
+				);
+
+			return c.json({
+				transaction
+			});
+		}
+	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
+		const formData = c.req.valid('json');
 
-		const { ids } = c.req.valid('json');
-
-		const deletedTransactionIds = await deleteTransactions({ ids, userId });
+		const deletedTransactionIds = await deleteTransactions({ ...formData, userId });
 
 		return c.json({
 			deletedTransactionIds

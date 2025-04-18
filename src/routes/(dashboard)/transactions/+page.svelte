@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { applyAction } from '$app/forms';
+	import { goto } from '$app/navigation';
 
-	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
@@ -12,20 +11,15 @@
 
 	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
-	import { Sheet } from '$lib/components/sheet';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { createCreateAccountClient, createGetAccountsClient } from '$features/accounts/api';
-
-	import { createCreateCategoryClient, createGetCategoriesClient } from '$features/categories/api';
-
 	import { getColumns } from '$features/transactions/columns';
-	import { TransactionForm } from '$features/transactions/components';
-	import { transactionFormSchema } from '$features/transactions/schema';
 	import {
 		createDeleteTransactionsClient,
 		createGetTransactionsClient
 	} from '$features/transactions/api';
+	import { openNewTransactionSheet } from '$features/transactions/components/new-transaction-sheet';
+	import { openEditTransactionSheet } from '$features/transactions/components/edit-transaction-sheet';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -35,44 +29,16 @@
 
 	let { data }: PageProps = $props();
 
+	const queryClient = useQueryClient();
+
 	const getTransactionsClient = createGetTransactionsClient({
-		initialData: { transactions: data.transactions },
-		enabled: false
+		ssrData: data.transactions
 	});
 
-	const getAccountsClient = createGetAccountsClient({
-		initialData: { accounts: data.accounts },
-		enabled: false
-	});
-
-	const createAccountClient = createCreateAccountClient({
-		onSuccess() {
-			$getAccountsClient.refetch();
-		}
-	});
-
-	const getCategoriesClient = createGetCategoriesClient({
-		initialData: { categories: data.categories },
-		enabled: false
-	});
-
-	const createCategoryClient = createCreateCategoryClient({
-		onSuccess() {
-			$getCategoriesClient.refetch();
-		}
-	});
-
-	let openSheet = $state(false);
-	let transactions = $derived($getTransactionsClient.data.transactions);
-	let accounts = $derived($getAccountsClient.data.accounts);
-	let categories = $derived($getCategoriesClient.data.categories);
+	let transactions = $derived($getTransactionsClient.data?.transactions ?? []);
 
 	const columns = getColumns({
-		onEdit(transaction) {
-			openSheet = true;
-
-			form.form.set({ ...transaction });
-		}
+		onEdit: (transaction) => openEditTransactionSheet(transaction.id)
 	});
 
 	const deleteTransactionsClient = createDeleteTransactionsClient({
@@ -82,68 +48,19 @@
 			toast.error(message);
 
 			if (status === 401) {
-				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+				queryClient.invalidateQueries({ queryKey: ['get', 'transactions'], type: 'inactive' });
+
+				return goto('/sign-in', { invalidateAll: true });
 			}
 		},
-		onSuccess(data, variables, context) {
-			if (variables.ids.length === 1) {
-				openSheet = false;
-				toast.success('Transaction deleted');
-			} else {
-				toast.success('Transactions deleted');
-			}
+		onSuccess() {
+			toast.success('Transactions deleted');
 
-			$getTransactionsClient.refetch();
+			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		}
 	});
 
-	const form = superForm(data.form, {
-		validators: zodClient(transactionFormSchema),
-		async onUpdate({ form: validatedForm, result }) {
-			if (result.status === 401) {
-				if (validatedForm.message) {
-					toast.error(validatedForm.message);
-				}
-
-				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-			}
-		},
-		onError({ result }) {
-			loading = false;
-			openSheet = false;
-			form.reset();
-
-			if (result.error.message) toast.error(result.error.message);
-		},
-		onUpdated({ form: validatedForm }) {
-			if (!validatedForm.valid) {
-				if (validatedForm.message) toast.error(validatedForm.message);
-				return;
-			}
-
-			loading = false;
-			openSheet = false;
-			form.reset();
-
-			if (validatedForm.message) toast.success(validatedForm.message);
-
-			$getTransactionsClient.refetch();
-		}
-	});
-
-	const { delayed, form: formData } = form;
-
-	let loading = $derived(
-		$deleteTransactionsClient.isPending || $delayed || $getTransactionsClient.isFetching
-	);
-
-	let disabledForm = $derived(
-		loading ||
-			$getAccountsClient.isFetching ||
-			$createAccountClient.isPending ||
-			$getCategoriesClient.isFetching ||
-			$createCategoryClient.isPending
-	);
+	let loading = $derived($deleteTransactionsClient.isPending || $getTransactionsClient.isFetching);
 </script>
 
 <Metadata title="Transactions History" />
@@ -154,7 +71,7 @@
 			<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 				<CardTitle class="text-xl line-clamp-1">Transactions History</CardTitle>
 
-				<Button size="sm" onclick={() => (openSheet = true)}>
+				<Button size="sm" onclick={openNewTransactionSheet}>
 					<Plus />Add new
 				</Button>
 			</CardHeader>
@@ -190,47 +107,3 @@
 		</Card>
 	</div>
 </DataTableLoader>
-
-<Sheet
-	bind:open={openSheet}
-	disabled={loading}
-	showDeleteButton={!!$formData.id}
-	showDeleteButtonLoader={$deleteTransactionsClient.isPending}
-	onOpenChange={(open) => {
-		if (!open) form.reset();
-	}}
-	onDelete={async () => {
-		const ok = await confirm({
-			title: 'Are you sure?',
-			description: 'You are about to delete this transaction'
-		});
-
-		if (ok && $formData.id) {
-			$deleteTransactionsClient.mutate({ ids: [$formData.id] });
-		}
-	}}
->
-	{#snippet title()}
-		{$formData.id ? 'Edit Transaction' : 'New Transaction'}
-	{/snippet}
-
-	{#snippet description()}
-		{$formData.id ? 'Edit an existing transaction.' : 'Create a new transaction.'}
-	{/snippet}
-
-	<TransactionForm
-		{form}
-		disabled={disabledForm}
-		disableLoader={$deleteTransactionsClient.isPending}
-		accountOptions={accounts.map((account) => ({
-			label: account.name,
-			value: account.id.toString()
-		}))}
-		onCreateAccount={(name) => $createAccountClient.mutate({ name })}
-		categoryOptions={categories.map((category) => ({
-			label: category.name,
-			value: category.id.toString()
-		}))}
-		onCreateCategory={(name) => $createCategoryClient.mutate({ name })}
-	/>
-</Sheet>

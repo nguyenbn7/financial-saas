@@ -58,9 +58,9 @@ const app = new Hono()
 	})
 	.post('/', zValidator('json', accountFormSchema), async (c) => {
 		const userId = c.get('userId');
-		const { name } = c.req.valid('json');
+		const formData = c.req.valid('json');
 
-		const [account] = await createAccount({ userId, name });
+		const [account] = await createAccount({ userId, ...formData });
 
 		if (!account)
 			return c.json(
@@ -84,7 +84,7 @@ const app = new Hono()
 		async (c) => {
 			const userId = c.get('userId');
 			const { id } = c.req.valid('param');
-			const { name } = c.req.valid('json');
+			const formData = c.req.valid('json');
 
 			const [existedAccount] = await getAccount({ id, userId });
 
@@ -99,7 +99,7 @@ const app = new Hono()
 					StatusCodes.NOT_FOUND
 				);
 
-			const [account] = await updateAccount({ id, userId }, { name });
+			const [account] = await updateAccount({ id, userId }, { ...formData });
 
 			if (!account)
 				return c.json(
@@ -119,9 +119,9 @@ const app = new Hono()
 	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
-		const { ids } = c.req.valid('json');
+		const formData = c.req.valid('json');
 
-		const deletedAccountIds = await deleteAccounts({ ids, userId });
+		const deletedAccountIds = await deleteAccounts({ ...formData, userId });
 
 		return c.json({
 			deletedAccountIds

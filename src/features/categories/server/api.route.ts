@@ -58,9 +58,9 @@ const app = new Hono()
 	})
 	.post('/', zValidator('json', categoryFormSchema), async (c) => {
 		const userId = c.get('userId');
-		const { name } = c.req.valid('json');
+		const formData = c.req.valid('json');
 
-		const result = await createCategory({ userId, name });
+		const result = await createCategory({ userId, ...formData });
 
 		const category = result.at(0);
 
@@ -86,7 +86,7 @@ const app = new Hono()
 		async (c) => {
 			const userId = c.get('userId');
 			const { id } = c.req.valid('param');
-			const { name } = c.req.valid('json');
+			const formData = c.req.valid('json');
 
 			const [existedCategory] = await getCategory({ id, userId });
 
@@ -101,7 +101,7 @@ const app = new Hono()
 					StatusCodes.NOT_FOUND
 				);
 
-			const [category] = await updateCategory({ id, userId }, { name });
+			const [category] = await updateCategory({ id, userId }, { ...formData });
 
 			if (!category)
 				return c.json(
@@ -121,9 +121,9 @@ const app = new Hono()
 	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
-		const { ids } = c.req.valid('json');
+		const formData = c.req.valid('json');
 
-		const deletedCategoryIds = await deleteCategories({ userId, ids });
+		const deletedCategoryIds = await deleteCategories({ ...formData, userId });
 
 		return c.json({
 			deletedCategoryIds

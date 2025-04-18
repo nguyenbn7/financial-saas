@@ -45,7 +45,7 @@
 		async onError(error, variables, context) {
 			const { message, status } = error;
 
-			toast.error(error.message);
+			toast.error(message);
 
 			if (status === 401) {
 				open = false;
@@ -68,6 +68,8 @@
 			}
 		}
 	});
+
+	let disabled = $derived($createAccountClient.isPending);
 </script>
 
 <Sheet
@@ -87,6 +89,6 @@
 			<SheetDescription>Create a new account to track your transactions.</SheetDescription>
 		</SheetHeader>
 
-		<AccountForm {form} disabled={$createAccountClient.isPending} />
+		<AccountForm {form} {disabled} />
 	</SheetContent>
 </Sheet>

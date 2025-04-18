@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const transactionFormSchema = z.object({
-	id: z.string().optional(),
 	date: z.coerce.date(),
 	accountId: z.string().min(1, 'Required'),
 	categoryId: z.string().nullable().default(null),
@@ -14,6 +13,10 @@ export const querySchema = z.object({
 	from: z.string().optional(),
 	to: z.string().optional(),
 	accountId: z.string().optional()
+});
+
+export const transactionIdSchema = z.object({
+	id: z.string().trim().min(1, 'Required')
 });
 
 export const deletesSchema = z.object({

@@ -13,6 +13,7 @@
 	import { CreatableSelect } from '$lib/components/select';
 
 	interface Props {
+		id?: string;
 		form: SuperForm<z.infer<typeof transactionFormSchema>, any>;
 		disabled?: boolean;
 		disableLoader?: boolean;
@@ -23,6 +24,7 @@
 	}
 
 	let {
+		id,
 		form,
 		disabled = false,
 		disableLoader = false,
@@ -33,7 +35,7 @@
 	}: Props = $props();
 
 	const { form: formData } = form;
-	const createForm = $derived(!Boolean($formData.id));
+	const createForm = $derived(!Boolean(id));
 </script>
 
 <Form
@@ -45,16 +47,6 @@
 	{disableLoader}
 >
 	{#snippet content({ disabled })}
-		{#if $formData.id}
-			<FormField {form} name="id">
-				<FormControl>
-					{#snippet children({ props })}
-						<input {...props} value={$formData.id} hidden />
-					{/snippet}
-				</FormControl>
-			</FormField>
-		{/if}
-
 		<FormField {form} name="date">
 			<FormControl>
 				{#snippet children({ props })}

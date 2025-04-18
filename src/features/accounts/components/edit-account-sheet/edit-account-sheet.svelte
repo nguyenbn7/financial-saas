@@ -36,7 +36,7 @@
 	import { accountFormSchema } from '$features/accounts/schema';
 	import { AccountForm } from '$features/accounts/components';
 	import {
-		createUpdateAccountsClient,
+		createUpdateAccountClient,
 		createGetAccountClient,
 		createDeleteAccountsClient
 	} from '$features/accounts/api';
@@ -49,7 +49,7 @@
 	let getAccountClient = $derived(id ? createGetAccountClient({ id }) : undefined);
 	let account = $derived($getAccountClient?.data?.account ?? undefined);
 
-	const updateAccountClient = createUpdateAccountsClient({
+	const updateAccountClient = createUpdateAccountClient({
 		onSuccess() {
 			open = false;
 			toast.success('Account updated');

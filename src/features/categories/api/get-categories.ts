@@ -4,15 +4,14 @@ import { createQuery } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.categories.$get>;
 
+export type Categories = Response['categories'];
+
 interface Params {
-	initialData: Response;
-	enabled?: boolean;
+	ssrData?: Categories;
 }
 
-export default function createGetCategoriesClient(
-	params: Params = { initialData: { categories: [] }, enabled: true }
-) {
-	const { initialData, enabled } = params;
+export default function createGetCategoriesClient(params: Params = { ssrData: undefined }) {
+	let { ssrData } = params;
 
 	const query = createQuery({
 		queryKey: ['get', 'categories'],
@@ -21,11 +20,10 @@ export default function createGetCategoriesClient(
 
 			return response.json();
 		},
-		initialData,
-		enabled
+		initialData: {
+			categories: ssrData ?? []
+		}
 	});
 
 	return query;
 }
-
-export type Categories = Response['categories'];

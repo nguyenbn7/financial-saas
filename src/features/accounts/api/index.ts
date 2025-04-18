@@ -8,6 +8,6 @@ export { default as createGetAccountClient } from './get-account';
 
 export { default as createCreateAccountClient } from './create-account';
 
-export { default as createUpdateAccountsClient } from './update-account';
+export { default as createUpdateAccountClient } from './update-account';
 
 export { default as createDeleteAccountsClient } from './delete-accounts';

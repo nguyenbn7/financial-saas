@@ -101,6 +101,17 @@ const app = new Hono()
 
 			const [account] = await updateAccount({ id, userId }, { name });
 
+			if (!account)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.CONFLICT,
+							message: 'Cannot update account'
+						}
+					},
+					StatusCodes.CONFLICT
+				);
+
 			return c.json({
 				account
 			});

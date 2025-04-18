@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { applyAction } from '$app/forms';
+	import { goto } from '$app/navigation';
 
-	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
@@ -12,16 +11,15 @@
 
 	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
-	import { Sheet } from '$lib/components/sheet';
 	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
 
 	import { getColumns } from '$features/categories/columns';
-	import { CategoryForm } from '$features/categories/components';
-	import { categoryFormSchema } from '$features/categories/schema';
 	import {
 		createDeleteCategoriesClient,
 		createGetCategoriesClient
 	} from '$features/categories/api';
+	import { openNewCategorySheet } from '$features/categories/components/new-category-sheet';
+	import { openEditCategorySheet } from '$features/categories/components/edit-category-sheet';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -31,20 +29,14 @@
 
 	let { data }: PageProps = $props();
 
-	const getCategoriesClient = createGetCategoriesClient({
-		initialData: { categories: data.categories },
-		enabled: false
-	});
+	const queryClient = useQueryClient();
 
-	let openSheet = $state(false);
+	const getCategoriesClient = createGetCategoriesClient({ ssrData: [...data.categories] });
+
 	let categories = $derived($getCategoriesClient.data.categories);
 
 	const columns = getColumns({
-		onEdit(category) {
-			openSheet = true;
-			const { userId, ...data } = category;
-			form.form.set({ ...data });
-		}
+		onEdit: (category) => openEditCategorySheet(category.id)
 	});
 
 	const deleteCategoriesClient = createDeleteCategoriesClient({
@@ -54,60 +46,19 @@
 			toast.error(message);
 
 			if (status === 401) {
-				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
+				queryClient.invalidateQueries({ queryKey: ['get', 'accounts'], type: 'inactive' });
+
+				return goto('/sign-in', { invalidateAll: true });
 			}
 		},
-		onSuccess(data, variables, context) {
-			if (variables.ids.length === 1) {
-				openSheet = false;
-				toast.success('Category deleted');
-			} else {
-				toast.success('Categories deleted');
-			}
+		onSuccess() {
+			toast.success('Accounts deleted');
 
-			$getCategoriesClient.refetch();
+			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
 		}
 	});
 
-	const form = superForm(data.form, {
-		validators: zodClient(categoryFormSchema),
-		async onUpdate({ form: validatedForm, result }) {
-			if (result.status === 401) {
-				if (validatedForm.message) {
-					toast.error(validatedForm.message);
-				}
-
-				return applyAction({ type: 'redirect', location: '/sign-in', status: 303 });
-			}
-		},
-		onError({ result }) {
-			loading = false;
-			openSheet = false;
-			form.reset();
-
-			if (result.error.message) toast.error(result.error.message);
-		},
-		onUpdated({ form: validatedForm }) {
-			if (!validatedForm.valid) {
-				if (validatedForm.message) toast.error(validatedForm.message);
-				return;
-			}
-
-			loading = false;
-			openSheet = false;
-			form.reset();
-
-			if (validatedForm.message) toast.success(validatedForm.message);
-
-			$getCategoriesClient.refetch();
-		}
-	});
-
-	const { delayed, form: formData } = form;
-
-	let loading = $derived(
-		$deleteCategoriesClient.isPending || $delayed || $getCategoriesClient.isFetching
-	);
+	let loading = $derived($deleteCategoriesClient.isPending || $getCategoriesClient.isFetching);
 </script>
 
 <Metadata title="Financial Categories" />
@@ -118,7 +69,7 @@
 			<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 				<CardTitle class="text-xl line-clamp-1">Categories page</CardTitle>
 
-				<Button size="sm" onclick={() => (openSheet = true)}>
+				<Button size="sm" onclick={openNewCategorySheet}>
 					<Plus />Add new
 				</Button>
 			</CardHeader>
@@ -154,35 +105,3 @@
 		</Card>
 	</div>
 </DataTableLoader>
-
-<Sheet
-	bind:open={openSheet}
-	disabled={loading}
-	showDeleteButton={!!$formData.id}
-	showDeleteButtonLoader={$deleteCategoriesClient.isPending}
-	onOpenChange={(open) => {
-		if (!open) form.reset();
-	}}
-	onDelete={async () => {
-		const ok = await confirm({
-			title: 'Are you sure?',
-			description: 'You are about to delete this category'
-		});
-
-		if (ok && $formData.id) {
-			$deleteCategoriesClient.mutate({ ids: [$formData.id] });
-		}
-	}}
->
-	{#snippet title()}
-		{$formData.id ? 'Edit Category' : 'New Category'}
-	{/snippet}
-
-	{#snippet description()}
-		{$formData.id
-			? 'Edit an existing category.'
-			: 'Create a new category to organize your transactions.'}
-	{/snippet}
-
-	<CategoryForm {form} disabled={loading} disableLoader={$deleteCategoriesClient.isPending} />
-</Sheet>

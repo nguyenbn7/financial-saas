@@ -9,11 +9,13 @@ import { clerkMiddleware } from '@hono/clerk-auth';
 
 import { clerkMiddlewareAuthenticated } from '$lib/server/api/middleware';
 
-import { categoryFormSchema, deletesSchema } from '$features/categories/schema';
+import { categoryFormSchema, categoryIdSchema, deletesSchema } from '$features/categories/schema';
 import {
 	createCategory,
 	deleteCategories,
-	getCategories
+	getCategories,
+	getCategory,
+	updateCategory
 } from '$features/categories/server/repository';
 
 const app = new Hono()
@@ -27,8 +29,31 @@ const app = new Hono()
 	.get('/', async (c) => {
 		const userId = c.get('userId');
 
+		const categories = await getCategories({ userId });
+
 		return c.json({
-			categories: await getCategories({ userId })
+			categories
+		});
+	})
+	.get('/:id', zValidator('param', categoryIdSchema), async (c) => {
+		const userId = c.get('userId');
+		const { id } = c.req.valid('param');
+
+		const [category] = await getCategory({ id, userId });
+
+		if (!category)
+			return c.json(
+				{
+					error: {
+						code: StatusCodes.NOT_FOUND,
+						message: 'Category not found'
+					}
+				},
+				StatusCodes.NOT_FOUND
+			);
+
+		return c.json({
+			category
 		});
 	})
 	.post('/', zValidator('json', categoryFormSchema), async (c) => {
@@ -54,6 +79,46 @@ const app = new Hono()
 			category
 		});
 	})
+	.put(
+		'/:id',
+		zValidator('param', categoryIdSchema),
+		zValidator('json', categoryFormSchema),
+		async (c) => {
+			const userId = c.get('userId');
+			const { id } = c.req.valid('param');
+			const { name } = c.req.valid('json');
+
+			const [existedCategory] = await getCategory({ id, userId });
+
+			if (!existedCategory)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.NOT_FOUND,
+							message: 'Account not found'
+						}
+					},
+					StatusCodes.NOT_FOUND
+				);
+
+			const [category] = await updateCategory({ id, userId }, { name });
+
+			if (!category)
+				return c.json(
+					{
+						error: {
+							code: StatusCodes.CONFLICT,
+							message: 'Cannot update category'
+						}
+					},
+					StatusCodes.CONFLICT
+				);
+
+			return c.json({
+				category
+			});
+		}
+	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
 		const userId = c.get('userId');
 		const { ids } = c.req.valid('json');

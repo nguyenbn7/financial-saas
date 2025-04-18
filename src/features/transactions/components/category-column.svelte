@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { openEditCategorySheet } from '$features/categories/components/edit-category-sheet';
 	import { cn } from '$lib/utils';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 
@@ -14,8 +15,7 @@
 <button
 	class={cn('flex items-center cursor-pointer hover:underline', !category && 'text-rose-500')}
 	onclick={() => {
-		// TODO: open sheet
-		console.log(categoryId);
+		if (categoryId) openEditCategorySheet(categoryId);
 	}}
 >
 	{#if category}

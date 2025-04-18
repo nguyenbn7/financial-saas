@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { openEditAccountSheet } from '$features/accounts/components/edit-account-sheet';
+
 	interface Props {
 		account: string;
 		accountId: string;
@@ -10,8 +12,7 @@
 <button
 	class="flex items-center cursor-pointer hover:underline"
 	onclick={() => {
-		// TODO: open sheet
-		console.log(accountId);
+		openEditAccountSheet(accountId);
 	}}
 >
 	{account}

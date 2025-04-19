@@ -1,25 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { goto } from '$app/navigation';
-
-	import { useQueryClient } from '@tanstack/svelte-query';
-
-	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
-	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
+	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { getColumns } from '$features/categories/columns';
+	import { useNewCategory } from '$features/categories/hooks/use-new-category';
+	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
+	import { createCategoryDataTableColumns } from '$features/categories/columns';
 	import {
 		createDeleteCategoriesClient,
 		createGetCategoriesClient
 	} from '$features/categories/api';
-	import { openNewCategorySheet } from '$features/categories/components/new-category-sheet';
-	import { openEditCategorySheet } from '$features/categories/components/edit-category-sheet';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -27,34 +22,29 @@
 		data: PageData;
 	}
 
+	const { onOpen: openNewCategorySheet } = useNewCategory();
+	const { onOpen: openEditCategorySheet } = useEditCategory();
+
 	let { data }: PageProps = $props();
 
-	const queryClient = useQueryClient();
-
 	const getCategoriesClient = createGetCategoriesClient({ ssrData: [...data.categories] });
+	const deleteCategoriesClient = createDeleteCategoriesClient();
 
-	let categories = $derived($getCategoriesClient.data.categories);
+	const columns = createCategoryDataTableColumns({
+		onEdit: (category) => openEditCategorySheet(category.id),
+		async onDelete(category) {
+			const ok = await confirm({
+				title: 'Are you sure?',
+				description: 'You are about to delete this category'
+			});
 
-	const columns = getColumns({
-		onEdit: (category) => openEditCategorySheet(category.id)
-	});
-
-	const deleteCategoriesClient = createDeleteCategoriesClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
+			if (ok) {
+				$deleteCategoriesClient.mutate({ ids: [category.id] });
 			}
-		},
-		onSuccess() {
-			toast.success('Accounts deleted');
-
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
 		}
 	});
+
+	let categories = $derived($getCategoriesClient.data.categories);
 
 	let loading = $derived($deleteCategoriesClient.isPending || $getCategoriesClient.isFetching);
 </script>
@@ -79,9 +69,9 @@
 					{columns}
 					filterKey="name"
 				>
-					{#snippet deleteBulk(selectedRows)}
+					{#snippet SelectedRowAction(selectedRows)}
 						{#if selectedRows.length > 0}
-							<DataTableDeletesButton
+							<DeleteBulkButton
 								selectedRowsCount={selectedRows.length}
 								disabled={$deleteCategoriesClient.isPending}
 								onDeletes={async () => {

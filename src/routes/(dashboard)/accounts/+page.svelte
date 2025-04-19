@@ -1,22 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { goto } from '$app/navigation';
-
-	import { useQueryClient } from '@tanstack/svelte-query';
-
-	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
-	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
+	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { getColumns } from '$features/accounts/columns';
+	import { useNewAccount } from '$features/accounts/hooks/use-new-account';
+	import { useEditAccount } from '$features/accounts/hooks/use-edit-account';
+	import { createAccountDataTableColumns } from '$features/accounts/columns';
 	import { createDeleteAccountsClient, createGetAccountsClient } from '$features/accounts/api';
-	import { openNewAccountSheet } from '$features/accounts/components/new-account-sheet';
-	import { openEditAccountSheet } from '$features/accounts/components/edit-account-sheet';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -24,34 +19,31 @@
 		data: PageData;
 	}
 
+	const { onOpen: openNewAccountSheet } = useNewAccount();
+	const { onOpen: openEditAccountSheet } = useEditAccount();
+
 	let { data }: PageProps = $props();
 
-	const queryClient = useQueryClient();
-
 	const getAccountsClient = createGetAccountsClient({ ssrData: [...data.accounts] });
+	const deleteAccountsClient = createDeleteAccountsClient();
 
-	let accounts = $derived($getAccountsClient.data.accounts);
-
-	const columns = getColumns({
-		onEdit: (account) => openEditAccountSheet(account.id)
-	});
-
-	const deleteAccountsClient = createDeleteAccountsClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
-			}
+	const columns = createAccountDataTableColumns({
+		onEdit(account) {
+			openEditAccountSheet(account.id);
 		},
-		onSuccess() {
-			toast.success('Accounts deleted');
+		async onDelete(account) {
+			const ok = await confirm({
+				title: 'Are you sure?',
+				description: 'You are about to delete this account'
+			});
 
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
+			if (ok) {
+				$deleteAccountsClient.mutate({ ids: [account.id] });
+			}
 		}
 	});
+
+	let accounts = $derived($getAccountsClient.data.accounts);
 
 	let loading = $derived($deleteAccountsClient.isPending || $getAccountsClient.isFetching);
 </script>
@@ -76,9 +68,9 @@
 					{columns}
 					filterKey="name"
 				>
-					{#snippet deleteBulk(selectedRows)}
+					{#snippet SelectedRowAction(selectedRows)}
 						{#if selectedRows.length > 0}
-							<DataTableDeletesButton
+							<DeleteBulkButton
 								selectedRowsCount={selectedRows.length}
 								disabled={$deleteAccountsClient.isPending}
 								onDeletes={async () => {

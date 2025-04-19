@@ -11,12 +11,9 @@
 
 	import { Navigation } from '$lib/components/navigation';
 
-	import { NewAccountSheet } from '$features/accounts/components/new-account-sheet';
-	import { EditAccountSheet } from '$features/accounts/components/edit-account-sheet';
-	import { NewCategorySheet } from '$features/categories/components/new-category-sheet';
-	import { EditCategorySheet } from '$features/categories/components/edit-category-sheet';
-	import { NewTransactionSheet } from '$features/transactions/components/new-transaction-sheet';
-	import { EditTransactionSheet } from '$features/transactions/components/edit-transaction-sheet';
+	import { NewAccountSheet, EditAccountSheet } from '$features/accounts/components';
+	import { NewCategorySheet, EditCategorySheet } from '$features/categories/components';
+	import { NewTransactionSheet, EditTransactionSheet } from '$features/transactions/components';
 
 	import Logo from '$assets/logo.svg';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';

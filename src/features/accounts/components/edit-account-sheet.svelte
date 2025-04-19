@@ -1,26 +1,8 @@
-<script lang="ts" module>
-	let open = $state(false);
-	let id: string | undefined = $state();
-
-	export function openEditAccountSheet(accountId: string) {
-		id = accountId;
-		open = true;
-	}
-
-	export function closeEditAccountSheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -33,6 +15,7 @@
 
 	import { confirm } from '$lib/components/confirm-dialog';
 
+	import { useEditAccount } from '$features/accounts/hooks/use-edit-account';
 	import { accountFormSchema } from '$features/accounts/schema';
 	import { AccountForm } from '$features/accounts/components';
 	import {
@@ -46,54 +29,25 @@
 
 	const queryClient = useQueryClient();
 
-	let getAccountClient = $derived(id ? createGetAccountClient({ id }) : undefined);
-	let account = $derived(id ? ($getAccountClient?.data?.account ?? undefined) : undefined);
+	const { isOpen, accountId, onClose } = useEditAccount();
+
+	let getAccountClient = $derived(
+		$accountId ? createGetAccountClient({ id: $accountId }) : undefined
+	);
+	let account = $derived($getAccountClient?.data?.account);
 
 	const updateAccountClient = createUpdateAccountClient({
-		async onSuccess() {
-			open = false;
-			toast.success('Account updated');
+		async onSuccess(data, variables, context) {
+			onClose();
 
-			if (id) {
-				await queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
-				id = undefined;
-			}
-			await queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
-			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
+			const { param } = variables;
 
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
+			await queryClient.invalidateQueries({ queryKey: ['get', 'account', param.id] });
 		}
 	});
 
 	const deleteAccountsClient = createDeleteAccountsClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		},
-		async onSuccess() {
-			open = false;
-			toast.success('Account deleted');
-
-			if (id) {
-				await queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
-				id = undefined;
-			}
-			await queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
-			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(accountFormSchema)), {
@@ -104,33 +58,23 @@
 			if (validatedForm.valid && account) {
 				$updateAccountClient.mutate({ param: { id: account.id }, json: validatedForm.data });
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	const { form: formData } = form;
 
 	$effect(() => {
 		if (account) formData.set({ ...account });
+		else form.reset(defaults(zod(accountFormSchema)));
 	});
 
-	let disabled = $derived(
-		$updateAccountClient.isPending ||
-			$getAccountClient?.isFetching ||
-			$deleteAccountsClient.isPending
-	);
+	let disableLoader = $derived($deleteAccountsClient.isPending || $getAccountClient?.isFetching);
+
+	let disabled = $derived($updateAccountClient.isPending || disableLoader);
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (id) {
-			queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
-			id = undefined;
-		}
-
-		form.reset(defaults(zod(accountFormSchema)));
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$updateAccountClient.isPending ? 'ignore' : 'close'}
@@ -140,7 +84,7 @@
 			<SheetDescription>Edit an existing account.</SheetDescription>
 		</SheetHeader>
 
-		<AccountForm {id} {form} {disabled} disableLoader={$deleteAccountsClient.isPending} />
+		<AccountForm id={$accountId} {form} {disabled} {disableLoader} />
 
 		<Button
 			class="w-full"
@@ -152,8 +96,8 @@
 					description: 'You are about to delete this account'
 				});
 
-				if (ok && id) {
-					$deleteAccountsClient.mutate({ ids: [id] });
+				if (ok && $accountId) {
+					$deleteAccountsClient.mutate({ ids: [$accountId] });
 				}
 			}}
 		>

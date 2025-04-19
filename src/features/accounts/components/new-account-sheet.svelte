@@ -1,24 +1,6 @@
-<script lang="ts" module>
-	let open = $state(false);
-
-	export function openNewAccountSheet() {
-		open = true;
-	}
-
-	export function closeNewAccountSheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
-	import { useQueryClient } from '@tanstack/svelte-query';
-
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import {
 		Sheet,
@@ -28,29 +10,15 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
+	import { useNewAccount } from '$features/accounts/hooks/use-new-account';
 	import { accountFormSchema } from '$features/accounts/schema';
 	import { createCreateAccountClient } from '$features/accounts/api';
 	import { AccountForm } from '$features/accounts/components';
 
-	const queryClient = useQueryClient();
+	const { isOpen, onClose } = useNewAccount();
 
 	const createAccountClient = createCreateAccountClient({
-		onSuccess() {
-			open = false;
-			toast.success('Account created');
-
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(accountFormSchema)), {
@@ -62,20 +30,18 @@
 			if (validatedForm.valid) {
 				$createAccountClient.mutate(validatedForm.data);
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	let disabled = $derived($createAccountClient.isPending);
+
+	$effect(() => {
+		if (!$isOpen) form.reset();
+	});
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (!value) {
-			form.reset();
-		}
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$createAccountClient.isPending ? 'ignore' : 'close'}

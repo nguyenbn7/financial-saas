@@ -6,12 +6,13 @@ import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
 type Account = ArrayElement<Accounts>;
 
-interface Props {
-	onEdit?: (account: Account) => MaybePromise<void> | undefined;
+interface Params {
+	onEdit?: (account: Account) => MaybePromise<unknown> | null | undefined;
+	onDelete?: (account: Account) => MaybePromise<unknown> | null | undefined;
 }
 
-export function getColumns(props: Props = {}) {
-	const { onEdit } = props;
+export function createAccountDataTableColumns(params: Params = {}) {
+	const { onEdit, onDelete } = params;
 
 	const columns: ColumnDef<Account>[] = [
 		{
@@ -45,7 +46,8 @@ export function getColumns(props: Props = {}) {
 			id: 'actions',
 			cell: ({ row }) =>
 				renderComponent(CellActions, {
-					onEdit: () => onEdit?.(row.original)
+					onEdit: () => onEdit?.(row.original),
+					onDelete: () => onDelete?.(row.original)
 				})
 		}
 	];

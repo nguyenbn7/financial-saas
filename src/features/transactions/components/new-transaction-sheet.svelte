@@ -1,24 +1,8 @@
-<script lang="ts" module>
-	let open = $state(false);
-
-	export function openNewTransactionSheet() {
-		open = true;
-	}
-
-	export function closeNewTransactionSheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import {
 		Sheet,
@@ -32,50 +16,27 @@
 
 	import { createCreateCategoryClient, createGetCategoriesClient } from '$features/categories/api';
 
+	import { useNewTransaction } from '$features/transactions/hooks/use-new-transaction';
 	import { transactionFormSchema } from '$features/transactions/schema';
 	import { createCreateTransactionClient } from '$features/transactions/api';
 	import { TransactionForm } from '$features/transactions/components';
 
+	const { isOpen, onClose } = useNewTransaction();
+
 	const queryClient = useQueryClient();
 
 	const getAccountsClient = createGetAccountsClient();
+	const createAccountClient = createCreateAccountClient();
 
-	let accounts = $derived(open ? $getAccountsClient.data.accounts : []);
-
-	const createAccountClient = createCreateAccountClient({
-		onSuccess() {
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
-		}
-	});
+	let accounts = $derived($isOpen ? $getAccountsClient.data.accounts : []);
 
 	const getCategoriesClient = createGetCategoriesClient();
+	const createCategoryClient = createCreateCategoryClient();
 
-	let categories = $derived(open ? $getCategoriesClient.data.categories : []);
-
-	const createCategoryClient = createCreateCategoryClient({
-		onSuccess() {
-			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
-		}
-	});
+	let categories = $derived($isOpen ? $getCategoriesClient.data.categories : []);
 
 	const createTransactionClient = createCreateTransactionClient({
-		onSuccess() {
-			open = false;
-
-			toast.success('Transaction created');
-
-			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(transactionFormSchema)), {
@@ -87,7 +48,8 @@
 			if (validatedForm.valid) {
 				$createTransactionClient.mutate(validatedForm.data);
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	let disabled = $derived(
@@ -97,16 +59,13 @@
 			$getCategoriesClient.isFetching ||
 			$createCategoryClient.isPending
 	);
+
+	$effect(() => {
+		if (!$isOpen) form.reset();
+	});
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (!value) {
-			form.reset();
-		}
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$createTransactionClient.isPending ? 'ignore' : 'close'}

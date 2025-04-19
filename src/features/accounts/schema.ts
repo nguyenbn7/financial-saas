@@ -9,5 +9,5 @@ export const accountIdSchema = z.object({
 });
 
 export const deletesSchema = z.object({
-	ids: z.string().array()
+	ids: z.string().array().min(1)
 });

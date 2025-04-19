@@ -12,14 +12,15 @@
 	import { cn } from '$lib/utils';
 
 	import Edit from '@lucide/svelte/icons/edit';
+	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import MoreHorizontal from '@lucide/svelte/icons/more-horizontal';
-
 
 	interface Props {
 		onEdit?: MouseEventHandler<HTMLDivElement> | null | undefined;
+		onDelete?: MouseEventHandler<HTMLDivElement> | null | undefined;
 	}
 
-	let { onEdit }: Props = $props();
+	let { onEdit, onDelete }: Props = $props();
 </script>
 
 <DropdownMenu>
@@ -29,6 +30,9 @@
 	<DropdownMenuContent align="end">
 		<DropdownMenuItem class="cursor-pointer" onclick={onEdit}>
 			<Edit /> Edit
+		</DropdownMenuItem>
+		<DropdownMenuItem class="cursor-pointer" onclick={onDelete}>
+			<Trash2 /> Delete
 		</DropdownMenuItem>
 	</DropdownMenuContent>
 </DropdownMenu>

@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { openEditCategorySheet } from '$features/categories/components/edit-category-sheet';
 	import { cn } from '$lib/utils';
+	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
+	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 
 	interface Props {
@@ -10,12 +11,16 @@
 	}
 
 	let { id, category, categoryId }: Props = $props();
+
+	const { onOpen: openEditCategorySheet } = useEditCategory();
+	const { onOpen: openEditTransactionSheet } = useEditTransaction();
 </script>
 
 <button
 	class={cn('flex items-center cursor-pointer hover:underline', !category && 'text-rose-500')}
 	onclick={() => {
 		if (categoryId) openEditCategorySheet(categoryId);
+		else openEditTransactionSheet(id);
 	}}
 >
 	{#if category}

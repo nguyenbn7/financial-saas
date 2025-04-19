@@ -1,26 +1,8 @@
-<script lang="ts" module>
-	let open = $state(false);
-	let id: string | undefined = $state();
-
-	export function openEditTransactionSheet(transactionId: string) {
-		id = transactionId;
-		open = true;
-	}
-
-	export function closeEditTransactionSheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -37,6 +19,7 @@
 
 	import { createCreateCategoryClient, createGetCategoriesClient } from '$features/categories/api';
 
+	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
 	import { transactionFormSchema } from '$features/transactions/schema';
 	import { TransactionForm } from '$features/transactions/components';
 	import {
@@ -50,72 +33,35 @@
 
 	const queryClient = useQueryClient();
 
+	const { isOpen, transactionId, onClose } = useEditTransaction();
+
 	const getAccountsClient = createGetAccountsClient();
+	const createAccountClient = createCreateAccountClient();
 
-	let accounts = $derived(open ? $getAccountsClient.data.accounts : []);
-
-	const createAccountClient = createCreateAccountClient({
-		onSuccess() {
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
-		}
-	});
+	let accounts = $derived($isOpen ? $getAccountsClient.data.accounts : []);
 
 	const getCategoriesClient = createGetCategoriesClient();
+	const createCategoryClient = createCreateCategoryClient();
 
-	let categories = $derived(open ? $getCategoriesClient.data.categories : []);
+	let categories = $derived($isOpen ? $getCategoriesClient.data.categories : []);
 
-	const createCategoryClient = createCreateCategoryClient({
-		onSuccess() {
-			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
-		}
-	});
-
-	let getTransactionClient = $derived(id ? createGetTransactionClient({ id }) : undefined);
+	let getTransactionClient = $derived(
+		$transactionId ? createGetTransactionClient({ id: $transactionId }) : undefined
+	);
 	let transaction = $derived($getTransactionClient?.data?.transaction ?? undefined);
 
 	const updateTransactionClient = createUpdateTransactionClient({
-		onSuccess() {
-			open = false;
-			toast.success('Transaction updated');
+		async onSuccess(data, variables, context) {
+			onClose();
 
-			if (id) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
-				id = undefined;
-			}
-			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
+			const { param } = variables;
 
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
+			await queryClient.invalidateQueries({ queryKey: ['get', 'transaction', param.id] });
 		}
 	});
 
 	const deleteTransactionsClient = createDeleteTransactionsClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		},
-		onSuccess() {
-			open = false;
-			toast.success('Transaction deleted');
-
-			if (id) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
-				id = undefined;
-			}
-			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(transactionFormSchema)), {
@@ -129,36 +75,30 @@
 					json: validatedForm.data
 				});
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	const { form: formData } = form;
 
 	$effect(() => {
 		if (transaction) formData.set({ ...transaction });
+		else form.reset(defaults(zod(transactionFormSchema)));
 	});
 
-	let disabled = $derived(
+	let disableLoader = $derived(
 		$deleteTransactionsClient.isPending ||
-			$updateTransactionClient.isPending ||
+			$getTransactionClient?.isFetching ||
 			$getAccountsClient.isFetching ||
 			$createAccountClient.isPending ||
 			$getCategoriesClient.isFetching ||
 			$createCategoryClient.isPending
 	);
+
+	let disabled = $derived($updateTransactionClient.isPending || disableLoader);
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (id) {
-			queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
-			id = undefined;
-		}
-
-		form.reset(defaults(zod(transactionFormSchema)));
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$updateTransactionClient.isPending ? 'ignore' : 'close'}
@@ -169,10 +109,10 @@
 		</SheetHeader>
 
 		<TransactionForm
-			{id}
+			id={$transactionId}
 			{form}
 			{disabled}
-			disableLoader={$deleteTransactionsClient.isPending}
+			{disableLoader}
 			accountOptions={accounts.map((account) => ({
 				label: account.name,
 				value: account.id.toString()
@@ -195,8 +135,8 @@
 					description: 'You are about to delete this transaction'
 				});
 
-				if (ok && id) {
-					$deleteTransactionsClient.mutate({ ids: [id] });
+				if (ok && $transactionId) {
+					$deleteTransactionsClient.mutate({ ids: [$transactionId] });
 				}
 			}}
 		>
@@ -204,7 +144,7 @@
 				<LoaderCircle size={16} class="mr-1 text-red-600 animate-spin" />
 				Deleting...
 			{:else}
-				<Trash size={16} class="mr-1" />Delete account
+				<Trash size={16} class="mr-1" />Delete transaction
 			{/if}
 		</Button>
 	</SheetContent>

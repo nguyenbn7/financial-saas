@@ -6,12 +6,13 @@ import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
 type Category = ArrayElement<Categories>;
 
-interface Props {
-	onEdit?: (account: Category) => MaybePromise<void> | undefined;
+interface Params {
+	onEdit?: (category: Category) => MaybePromise<void> | undefined;
+	onDelete?: (category: Category) => MaybePromise<void> | undefined;
 }
 
-export function getColumns(props: Props = {}) {
-	const { onEdit } = props;
+export function createCategoryDataTableColumns(params: Params = {}) {
+	const { onEdit, onDelete } = params;
 
 	const columns: ColumnDef<Category>[] = [
 		{
@@ -45,7 +46,8 @@ export function getColumns(props: Props = {}) {
 			id: 'actions',
 			cell: ({ row }) =>
 				renderComponent(CellActions, {
-					onEdit: () => onEdit?.(row.original)
+					onEdit: () => onEdit?.(row.original),
+					onDelete: () => onDelete?.(row.original)
 				})
 		}
 	];

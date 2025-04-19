@@ -36,14 +36,14 @@
 		columns: ColumnDef<TData, TValue>[];
 		filterKey: string;
 		paginationState?: PaginationState;
-		deleteBulk?: Snippet<[Row<TData>[]]>;
+		SelectedRowAction?: Snippet<[Row<TData>[]]>;
 	};
 
 	let {
 		data,
 		columns,
 		filterKey,
-		deleteBulk,
+		SelectedRowAction,
 		paginationState = { pageIndex: 0, pageSize: 5 }
 	}: DataTableProps<TData, TValue> = $props();
 
@@ -120,7 +120,7 @@
 			}}
 			class="max-w-sm"
 		/>
-		{@render deleteBulk?.(table.getFilteredSelectedRowModel().rows)}
+		{@render SelectedRowAction?.(table.getFilteredSelectedRowModel().rows)}
 	</div>
 	<div class="rounded-md border">
 		<Table>

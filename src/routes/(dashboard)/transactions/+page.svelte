@@ -1,25 +1,20 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { goto } from '$app/navigation';
-
-	import { useQueryClient } from '@tanstack/svelte-query';
-
-	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
-	import { DataTable, DataTableDeletesButton, DataTableLoader } from '$lib/components/datatable';
+	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { getColumns } from '$features/transactions/columns';
+	import { useNewTransaction } from '$features/transactions/hooks/use-new-transaction';
+	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
+	import { createTransactionDataTableColumns } from '$features/transactions/columns';
 	import {
 		createDeleteTransactionsClient,
 		createGetTransactionsClient
 	} from '$features/transactions/api';
-	import { openNewTransactionSheet } from '$features/transactions/components/new-transaction-sheet';
-	import { openEditTransactionSheet } from '$features/transactions/components/edit-transaction-sheet';
 
 	import Plus from '@lucide/svelte/icons/plus';
 
@@ -27,36 +22,33 @@
 		data: PageData;
 	}
 
+	const { onOpen: openNewTransactionSheet } = useNewTransaction();
+	const { onOpen: openEditTransactionSheet } = useEditTransaction();
+
 	let { data }: PageProps = $props();
 
-	const queryClient = useQueryClient();
-
 	const getTransactionsClient = createGetTransactionsClient({
-		ssrData: data.transactions
+		ssrData: [...data.transactions]
 	});
+	const deleteTransactionsClient = createDeleteTransactionsClient();
 
-	let transactions = $derived($getTransactionsClient.data?.transactions ?? []);
-
-	const columns = getColumns({
-		onEdit: (transaction) => openEditTransactionSheet(transaction.id)
-	});
-
-	const deleteTransactionsClient = createDeleteTransactionsClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
-			}
+	const columns = createTransactionDataTableColumns({
+		onEdit(transaction) {
+			openEditTransactionSheet(transaction.id);
 		},
-		onSuccess() {
-			toast.success('Transactions deleted');
+		async onDelete(transaction) {
+			const ok = await confirm({
+				title: 'Are you sure?',
+				description: 'You are about to delete this transaction'
+			});
 
-			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
+			if (ok) {
+				$deleteTransactionsClient.mutate({ ids: [transaction.id] });
+			}
 		}
 	});
+
+	let transactions = $derived($getTransactionsClient.data.transactions);
 
 	let loading = $derived($deleteTransactionsClient.isPending || $getTransactionsClient.isFetching);
 </script>
@@ -79,11 +71,11 @@
 					data={transactions}
 					paginationState={{ pageIndex: 0, pageSize: 5 }}
 					{columns}
-					filterKey="date"
+					filterKey="payee"
 				>
-					{#snippet deleteBulk(selectedRows)}
+					{#snippet SelectedRowAction(selectedRows)}
 						{#if selectedRows.length > 0}
-							<DataTableDeletesButton
+							<DeleteBulkButton
 								selectedRowsCount={selectedRows.length}
 								disabled={$deleteTransactionsClient.isPending}
 								onDeletes={async () => {

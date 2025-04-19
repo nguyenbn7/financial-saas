@@ -8,12 +8,13 @@ import { AccountColumn, AmountBadge, CategoryColumn } from '$features/transactio
 
 type Transaction = ArrayElement<Transactions>;
 
-interface Props {
-	onEdit?: (account: Transaction) => MaybePromise<void> | undefined;
+interface Params {
+	onEdit?: (transaction: Transaction) => MaybePromise<unknown> | null | undefined;
+	onDelete?: (transaction: Transaction) => MaybePromise<unknown> | null | undefined;
 }
 
-export function getColumns(props: Props = {}) {
-	const { onEdit } = props;
+export function createTransactionDataTableColumns(params: Params = {}) {
+	const { onEdit, onDelete } = params;
 
 	const columns: ColumnDef<Transaction>[] = [
 		{
@@ -106,7 +107,8 @@ export function getColumns(props: Props = {}) {
 			id: 'actions',
 			cell: ({ row }) =>
 				renderComponent(CellActions, {
-					onEdit: () => onEdit?.(row.original)
+					onEdit: () => onEdit?.(row.original),
+					onDelete: () => onDelete?.(row.original)
 				})
 		}
 	];

@@ -1,24 +1,6 @@
-<script lang="ts" module>
-	let open = $state(false);
-
-	export function openNewCategorySheet() {
-		open = true;
-	}
-
-	export function closeNewCategorySheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
-	import { useQueryClient } from '@tanstack/svelte-query';
-
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import {
 		Sheet,
@@ -28,29 +10,15 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
+	import { useNewCategory } from '$features/categories/hooks/use-new-category';
 	import { categoryFormSchema } from '$features/categories/schema';
 	import { createCreateCategoryClient } from '$features/categories/api';
 	import { CategoryForm } from '$features/categories/components';
 
-	const queryClient = useQueryClient();
+	const { isOpen, onClose } = useNewCategory();
 
 	const createCategoryClient = createCreateCategoryClient({
-		onSuccess() {
-			open = false;
-			toast.success('Category created');
-
-			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(categoryFormSchema)), {
@@ -62,20 +30,18 @@
 			if (validatedForm.valid) {
 				$createCategoryClient.mutate(validatedForm.data);
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	let disabled = $derived($createCategoryClient.isPending);
+
+	$effect(() => {
+		if (!$isOpen) form.reset();
+	});
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (!value) {
-			form.reset();
-		}
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$createCategoryClient.isPending ? 'ignore' : 'close'}

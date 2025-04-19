@@ -98,12 +98,13 @@
 <Popover bind:open>
 	<PopoverTrigger bind:ref={triggerRef} {...restProps}>
 		{#snippet child({ props })}
+			<!-- TODO: add chevron -->
 			<Input
 				{...props}
 				type={!open ? 'button' : 'text'}
 				value={!open ? (selectedLabel ?? placeholder) : query}
 				role="listbox"
-				class="w-full"
+				class={cn('w-full', !open && 'text-left')}
 				aria-expanded={open}
 				{placeholder}
 				tabindex={0}

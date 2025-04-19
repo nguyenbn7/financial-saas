@@ -1,26 +1,8 @@
-<script lang="ts" module>
-	let open = $state(false);
-	let id: string | undefined = $state();
-
-	export function openEditCategorySheet(categoryId: string) {
-		id = categoryId;
-		open = true;
-	}
-
-	export function closeEditCategorySheet() {
-		open = false;
-	}
-</script>
-
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
-
-	import { toast } from 'svelte-sonner';
 
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -33,6 +15,7 @@
 
 	import { confirm } from '$lib/components/confirm-dialog';
 
+	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
 	import { categoryFormSchema } from '$features/categories/schema';
 	import { CategoryForm } from '$features/categories/components';
 	import {
@@ -46,54 +29,25 @@
 
 	const queryClient = useQueryClient();
 
-	let getCategoryClient = $derived(id ? createGetCategoryClient({ id }) : undefined);
-	let category = $derived($getCategoryClient?.data?.category ?? undefined);
+	const { isOpen, categoryId, onClose } = useEditCategory();
+
+	let getCategoryClient = $derived(
+		$categoryId ? createGetCategoryClient({ id: $categoryId }) : undefined
+	);
+	let category = $derived($getCategoryClient?.data?.category);
 
 	const updateCategoryClient = createUpdateCategoryClient({
-		async onSuccess() {
-			open = false;
-			toast.success('Category updated');
+		async onSuccess(data, variables, context) {
+			onClose();
 
-			if (id) {
-				await queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
-				id = undefined;
-			}
-			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
-			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		},
-		async onError(error, variables, context) {
-			const { message, status } = error;
+			const { param } = variables;
 
-			toast.error(message);
-
-			if (status === 401) {
-				open = false;
-				return goto('/sign-in', { invalidateAll: true });
-			}
+			await queryClient.invalidateQueries({ queryKey: ['get', 'category', param.id] });
 		}
 	});
 
 	const deleteCategoriesClient = createDeleteCategoriesClient({
-		async onError(error, variables, context) {
-			const { message, status } = error;
-
-			toast.error(message);
-
-			if (status === 401) {
-				return goto('/sign-in', { invalidateAll: true });
-			}
-		},
-		async onSuccess() {
-			open = false;
-			toast.success('Category deleted');
-
-			if (id) {
-				await queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
-				id = undefined;
-			}
-			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
-			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
-		}
+		onSuccess: () => onClose()
 	});
 
 	const form = superForm(defaults(zod(categoryFormSchema)), {
@@ -104,33 +58,23 @@
 			if (validatedForm.valid && category) {
 				$updateCategoryClient.mutate({ param: { id: category.id }, json: validatedForm.data });
 			}
-		}
+		},
+		resetForm: false
 	});
 
 	const { form: formData } = form;
 
 	$effect(() => {
 		if (category) formData.set({ ...category });
+		else form.reset(defaults(zod(categoryFormSchema)));
 	});
 
-	let disabled = $derived(
-		$updateCategoryClient.isPending ||
-			$getCategoryClient?.isFetching ||
-			$deleteCategoriesClient.isPending
-	);
+	let disableLoader = $derived($deleteCategoriesClient.isPending || $getCategoryClient?.isFetching);
+
+	let disabled = $derived($updateCategoryClient.isPending || disableLoader);
 </script>
 
-<Sheet
-	bind:open
-	onOpenChange={(value) => {
-		if (id) {
-			queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
-			id = undefined;
-		}
-
-		form.reset(defaults(zod(categoryFormSchema)));
-	}}
->
+<Sheet open={$isOpen} onOpenChange={onClose}>
 	<SheetContent
 		class="space-y-4 overflow-y-auto"
 		interactOutsideBehavior={$updateCategoryClient.isPending ? 'ignore' : 'close'}
@@ -140,7 +84,7 @@
 			<SheetDescription>Edit an existing category.</SheetDescription>
 		</SheetHeader>
 
-		<CategoryForm {id} {form} {disabled} disableLoader={$deleteCategoriesClient.isPending} />
+		<CategoryForm id={$categoryId} {form} {disabled} {disableLoader} />
 
 		<Button
 			class="w-full"
@@ -152,8 +96,8 @@
 					description: 'You are about to delete this category'
 				});
 
-				if (ok && id) {
-					$deleteCategoriesClient.mutate({ ids: [id] });
+				if (ok && $categoryId) {
+					$deleteCategoriesClient.mutate({ ids: [$categoryId] });
 				}
 			}}
 		>

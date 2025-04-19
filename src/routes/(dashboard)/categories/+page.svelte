@@ -46,8 +46,6 @@
 			toast.error(message);
 
 			if (status === 401) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'accounts'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		},

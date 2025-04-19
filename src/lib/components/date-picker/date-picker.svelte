@@ -3,6 +3,8 @@
 		DateFormatter,
 		type DateValue,
 		getLocalTimeZone,
+		parseAbsolute,
+		parseAbsoluteToLocal,
 		parseDate
 	} from '@internationalized/date';
 	import { cn } from '$lib/utils';
@@ -23,7 +25,9 @@
 	});
 
 	let contentRef = $state<HTMLElement | null>(null);
-	let value = $state<DateValue | undefined>();
+	let value = $derived<DateValue | undefined>(
+		_value ? parseAbsoluteToLocal(_value.toISOString()) : undefined
+	);
 </script>
 
 <Popover>

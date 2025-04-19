@@ -37,7 +37,6 @@
 	const createCategoryClient = createCreateCategoryClient({
 		onSuccess() {
 			open = false;
-
 			toast.success('Category created');
 
 			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
@@ -49,9 +48,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'categories'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}

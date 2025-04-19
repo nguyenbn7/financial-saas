@@ -77,6 +77,11 @@
 		onSuccess() {
 			open = false;
 			toast.success('Transaction updated');
+
+			if (id) {
+				queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
+				id = undefined;
+			}
 			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		},
 		async onError(error, variables, context) {
@@ -86,9 +91,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'transactions'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}
@@ -101,16 +103,17 @@
 			toast.error(message);
 
 			if (status === 401) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'transactions'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		},
 		onSuccess() {
 			open = false;
-
 			toast.success('Transaction deleted');
 
+			if (id) {
+				queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
+				id = undefined;
+			}
 			queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		}
 	});
@@ -148,13 +151,12 @@
 <Sheet
 	bind:open
 	onOpenChange={(value) => {
-		if (!value) {
-			if (id) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id], type: 'inactive' });
-				id = undefined;
-			}
-			form.reset();
+		if (id) {
+			queryClient.invalidateQueries({ queryKey: ['get', 'transaction', id] });
+			id = undefined;
 		}
+
+		form.reset(defaults(zod(transactionFormSchema)));
 	}}
 >
 	<SheetContent

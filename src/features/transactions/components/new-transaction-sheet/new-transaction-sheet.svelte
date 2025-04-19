@@ -73,9 +73,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'transactions'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}

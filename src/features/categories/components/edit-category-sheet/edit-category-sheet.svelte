@@ -50,10 +50,16 @@
 	let category = $derived($getCategoryClient?.data?.category ?? undefined);
 
 	const updateCategoryClient = createUpdateCategoryClient({
-		onSuccess() {
+		async onSuccess() {
 			open = false;
 			toast.success('Category updated');
+
+			if (id) {
+				await queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
+				id = undefined;
+			}
 			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		},
 		async onError(error, variables, context) {
 			const { message, status } = error;
@@ -62,9 +68,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'categories'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}
@@ -77,17 +80,19 @@
 			toast.error(message);
 
 			if (status === 401) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'categories'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		},
-		onSuccess() {
+		async onSuccess() {
 			open = false;
-
 			toast.success('Category deleted');
 
+			if (id) {
+				await queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
+				id = undefined;
+			}
 			queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		}
 	});
 
@@ -118,13 +123,12 @@
 <Sheet
 	bind:open
 	onOpenChange={(value) => {
-		if (!value) {
-			if (id) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'category', id], type: 'inactive' });
-				id = undefined;
-			}
-			form.reset();
+		if (id) {
+			queryClient.invalidateQueries({ queryKey: ['get', 'category', id] });
+			id = undefined;
 		}
+
+		form.reset(defaults(zod(categoryFormSchema)));
 	}}
 >
 	<SheetContent

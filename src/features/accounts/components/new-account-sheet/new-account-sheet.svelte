@@ -37,7 +37,6 @@
 	const createAccountClient = createCreateAccountClient({
 		onSuccess() {
 			open = false;
-
 			toast.success('Account created');
 
 			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
@@ -49,9 +48,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'accounts'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}

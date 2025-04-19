@@ -47,13 +47,19 @@
 	const queryClient = useQueryClient();
 
 	let getAccountClient = $derived(id ? createGetAccountClient({ id }) : undefined);
-	let account = $derived($getAccountClient?.data?.account ?? undefined);
+	let account = $derived(id ? ($getAccountClient?.data?.account ?? undefined) : undefined);
 
 	const updateAccountClient = createUpdateAccountClient({
-		onSuccess() {
+		async onSuccess() {
 			open = false;
 			toast.success('Account updated');
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
+
+			if (id) {
+				await queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
+				id = undefined;
+			}
+			await queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		},
 		async onError(error, variables, context) {
 			const { message, status } = error;
@@ -62,9 +68,6 @@
 
 			if (status === 401) {
 				open = false;
-
-				queryClient.invalidateQueries({ queryKey: ['get', 'accounts'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		}
@@ -77,17 +80,19 @@
 			toast.error(message);
 
 			if (status === 401) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'accounts'], type: 'inactive' });
-
 				return goto('/sign-in', { invalidateAll: true });
 			}
 		},
-		onSuccess() {
+		async onSuccess() {
 			open = false;
-
 			toast.success('Account deleted');
 
-			queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
+			if (id) {
+				await queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
+				id = undefined;
+			}
+			await queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
 		}
 	});
 
@@ -118,13 +123,12 @@
 <Sheet
 	bind:open
 	onOpenChange={(value) => {
-		if (!value) {
-			if (id) {
-				queryClient.invalidateQueries({ queryKey: ['get', 'account', id], type: 'inactive' });
-				id = undefined;
-			}
-			form.reset();
+		if (id) {
+			queryClient.invalidateQueries({ queryKey: ['get', 'account', id] });
+			id = undefined;
 		}
+
+		form.reset(defaults(zod(accountFormSchema)));
 	}}
 >
 	<SheetContent

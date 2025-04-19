@@ -52,13 +52,15 @@
 		resetForm: false
 	});
 
-	let disabled = $derived(
-		$createTransactionClient.isPending ||
-			$getAccountsClient.isFetching ||
+	let disableLoader = $derived(
+		$getAccountsClient.isFetching ||
 			$createAccountClient.isPending ||
 			$getCategoriesClient.isFetching ||
 			$createCategoryClient.isPending
 	);
+
+	// TODO: fix disable
+	let disabled = $derived($createTransactionClient.isPending || disableLoader);
 
 	$effect(() => {
 		if (!$isOpen) form.reset();
@@ -78,6 +80,7 @@
 		<TransactionForm
 			{form}
 			{disabled}
+			{disableLoader}
 			accountOptions={accounts.map((account) => ({
 				label: account.name,
 				value: account.id.toString()

@@ -87,15 +87,17 @@
 	});
 
 	let disableLoader = $derived(
-		$deleteTransactionsClient.isPending ||
-			$getTransactionClient?.isFetching ||
+		$getTransactionClient?.isFetching ||
 			$getAccountsClient.isFetching ||
 			$createAccountClient.isPending ||
 			$getCategoriesClient.isFetching ||
 			$createCategoryClient.isPending
 	);
 
-	let disabled = $derived($updateTransactionClient.isPending || disableLoader);
+	// TODO: fix disable
+	let disabled = $derived(
+		$updateTransactionClient.isPending || $deleteTransactionsClient.isPending || disableLoader
+	);
 </script>
 
 <Sheet open={$isOpen} onOpenChange={onClose}>

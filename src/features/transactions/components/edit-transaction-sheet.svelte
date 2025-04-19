@@ -94,7 +94,6 @@
 			$createCategoryClient.isPending
 	);
 
-	// TODO: fix disable
 	let disabled = $derived(
 		$updateTransactionClient.isPending || $deleteTransactionsClient.isPending || disableLoader
 	);

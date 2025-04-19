@@ -25,13 +25,14 @@
 	const queryClient = new QueryClient({
 		defaultOptions: {
 			queries: {
-				enabled: browser
+				enabled: browser,
+				refetchOnWindowFocus: false
 			}
 		}
 	});
 </script>
 
-<Toaster richColors closeButton theme="light" />
+<Toaster richColors closeButton theme="light" position="top-right" />
 
 <QueryClientProvider client={queryClient}>
 	<ClerkProvider>

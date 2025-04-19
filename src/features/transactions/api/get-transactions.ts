@@ -18,18 +18,19 @@ export default function createGetTransactionsClient(
 	params: Params = { ssrData: undefined },
 	searchParams: SearchParams = { accountId: undefined, from: undefined, to: undefined }
 ) {
-	let { ssrData } = params;
+	const { ssrData } = params;
+	let transactions: Transactions = [];
 
 	const query = createQuery<{ transactions: Transactions }, Error>({
 		// TODO:
 		queryKey: ['get', 'transactions', searchParams],
 		queryFn: async () => {
-			if (ssrData && ssrData.length > 0) {
-				const response = {
-					transactions: ssrData
+			if (ssrData && transactions.length < 1) {
+				transactions = [...ssrData];
+
+				return {
+					transactions
 				};
-				ssrData = [];
-				return response;
 			}
 
 			const query = {
@@ -41,9 +42,14 @@ export default function createGetTransactionsClient(
 			const response = await client.api.transactions.$get({ query });
 
 			const data = await response.json();
+			transactions = [...data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))];
+
 			return {
-				transactions: data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))
+				transactions
 			};
+		},
+		initialData: {
+			transactions
 		}
 	});
 

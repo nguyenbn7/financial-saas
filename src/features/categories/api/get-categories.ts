@@ -11,17 +11,30 @@ interface Params {
 }
 
 export default function createGetCategoriesClient(params: Params = { ssrData: undefined }) {
-	let { ssrData } = params;
+	const { ssrData } = params;
+	let categories: Categories = [];
 
 	const query = createQuery({
 		queryKey: ['get', 'categories'],
 		queryFn: async () => {
+			if (ssrData && categories.length < 1) {
+				categories = [...ssrData];
+				return {
+					categories
+				};
+			}
+
 			const response = await client.api.categories.$get();
 
-			return response.json();
+			const data = await response.json();
+			categories = [...data.categories];
+
+			return {
+				categories
+			};
 		},
 		initialData: {
-			categories: ssrData ?? []
+			categories
 		}
 	});
 

@@ -11,25 +11,30 @@ interface Params {
 }
 
 export default function createGetAccountsClient(params: Params = { ssrData: undefined }) {
-	let { ssrData } = params;
+	const { ssrData } = params;
+	let accounts: Accounts = [];
 
 	const query = createQuery<Response, Error>({
 		queryKey: ['get', 'accounts'],
 		queryFn: async () => {
-			if (ssrData && ssrData.length > 0) {
-				const response = {
-					accounts: ssrData
+			if (ssrData && accounts.length < 1) {
+				accounts = [...ssrData];
+				return {
+					accounts
 				};
-				ssrData = [];
-				return response;
 			}
 
 			const response = await client.api.accounts.$get();
 
-			return response.json();
+			const data = await response.json();
+			accounts = [...data.accounts];
+
+			return {
+				accounts
+			};
 		},
 		initialData: {
-			accounts: ssrData ?? []
+			accounts
 		}
 	});
 

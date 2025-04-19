@@ -4,6 +4,9 @@
 
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
+	import toLower from 'lodash/toLower';
+	import startCase from 'lodash/startCase';
+
 	import { ClerkLoaded, ClerkLoading, UserButton } from 'svelte-clerk/client';
 
 	import { Navigation } from '$lib/components/navigation';
@@ -52,7 +55,11 @@
 
 		<div class="mb-4 space-y-2">
 			<h2 class="text-2xl font-medium text-white lg:text-4xl">
-				Welcome back, {data.userDisplayName} 👋🏻
+				{#if data.userDisplayName}
+					Welcome back, {startCase(toLower(data.userDisplayName))} 👋🏻
+				{:else}
+					Welcome to Financial Portal 👋🏻
+				{/if}
 			</h2>
 			<p class="text-sm text-[#89b6fd] lg:text-base">This is your Financial Overview Report</p>
 		</div>

@@ -9,6 +9,6 @@ export const load = (async ({ locals }) => {
 
 	return {
 		userId: user.id,
-		userDisplayName: user.fullName
+		userDisplayName: user.fullName ?? user.username
 	};
 }) satisfies LayoutServerLoad;

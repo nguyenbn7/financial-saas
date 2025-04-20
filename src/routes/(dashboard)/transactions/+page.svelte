@@ -64,10 +64,14 @@
 <Metadata title="Transactions History" />
 
 <DataTableLoader {loading}>
-	{#if variant === VARIANTS.IMPORT}
-		<ImportCard />
-	{:else}
-		<div class="px-4 lg:px-14 pb-10 -mt-24">
+	<div class="px-4 lg:px-14 pb-10 -mt-24">
+		{#if variant === VARIANTS.IMPORT}
+			<ImportCard
+				data={importResults.data as string[][]}
+				onCancel={onCancelImport}
+				onSubmit={() => {}}
+			/>
+		{:else}
 			<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
 				<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 					<CardTitle class="text-xl line-clamp-1">Transactions History</CardTitle>
@@ -113,6 +117,6 @@
 					</DataTable>
 				</CardContent>
 			</Card>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </DataTableLoader>

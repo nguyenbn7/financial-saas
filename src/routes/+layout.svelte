@@ -12,7 +12,7 @@
 
 	import { Toaster } from '$lib/components/ui/sonner';
 
-	import { BackToTop as BackToTopButton } from '$lib/components/button';
+	import { BackToTopButton } from '$lib/components/button';
 	import { ConfirmDialog } from '$lib/components/confirm-dialog';
 
 	interface LayoutProps {

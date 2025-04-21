@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
+	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
-	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
@@ -24,6 +25,7 @@
 
 	const { onOpen: openNewCategorySheet } = useNewCategory();
 	const { onOpen: openEditCategorySheet } = useEditCategory();
+	const { confirm } = useConfirm();
 
 	let { data }: PageProps = $props();
 

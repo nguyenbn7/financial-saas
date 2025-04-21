@@ -9,6 +9,8 @@ export const transactionFormSchema = z.object({
 	notes: z.string().nullable().default(null)
 });
 
+export const bulkTransaction = z.array(transactionFormSchema);
+
 export const querySchema = z.object({
 	from: z.string().optional(),
 	to: z.string().optional(),

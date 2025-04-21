@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { format, isMatch, parse } from 'date-fns';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import ImportTable from './import-table.svelte';
+	import { options } from '$lib/currency';
 
 	interface Props {
 		data: string[][];
@@ -9,7 +11,8 @@
 		onSubmit: (data: any) => void;
 	}
 
-	const dateFormat = 'yyyy-MM-dd HH:mm:ss';
+	const dateTimeFormat = 'yyyy-MM-dd HH:mm:ss';
+	const dateFormat = 'yyyy-MM-dd';
 	const outputFormat = 'yyyy-MM-dd';
 
 	const requiredOptions = ['amount', 'date', 'payee'];
@@ -41,6 +44,52 @@
 		selectedColumns = { ...newSelectedColumns };
 	}
 
+	const progress = $derived(Object.values(selectedColumns).filter(Boolean).length);
+
+	function handleContinue() {
+		const mappedData = {
+			headers: headers.map((_header, index) => {
+				return selectedColumns[`column_${index}`] ?? null;
+			}),
+			body: body
+				.map((row) => {
+					const transformedRow = row.map((cell, idx) =>
+						selectedColumns[`column_${idx}`] ? cell : null
+					);
+					return transformedRow.every((item) => item === null) ? [] : transformedRow;
+				})
+				.filter((row) => row.length > 0)
+		};
+
+		const arrayOfData = mappedData.body.map((row) => {
+			return row.reduce((acc: Record<string, string>, cell, index) => {
+				const header = mappedData.headers[index];
+				if (header !== null) acc[header] = cell as string;
+				return acc;
+			}, {});
+		});
+
+		const formattedData = arrayOfData.map((item) => {
+			const fractionDigits = Math.pow(10, options.maximumFractionDigits!);
+			const amount = Number((parseFloat(item.amount) * fractionDigits).toFixed(0));
+
+			const date = format(
+				isMatch(item.date, dateFormat)
+					? parse(item.date, dateFormat, new Date())
+					: parse(item.date, dateTimeFormat, new Date()),
+				outputFormat
+			);
+
+			return {
+				...item,
+				amount,
+				date
+			};
+		});
+
+		onSubmit(formattedData)
+	}
+
 	$inspect(selectedColumns);
 </script>
 
@@ -48,7 +97,17 @@
 	<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 		<CardTitle class="text-xl line-clamp-1">Import Transaction</CardTitle>
 
-		<Button size="sm" onclick={onCancel}>Cancel</Button>
+		<div class="flex flex-col lg:flex-row gap-y-2 items-center gap-x-2">
+			<Button class="w-full lg:w-auto" size="sm" onclick={onCancel}>Cancel</Button>
+
+			<Button
+				class="w-full lg:w-auto"
+				size="sm"
+				disabled={progress < requiredOptions.length}
+				onclick={handleContinue}
+				>Continue ({progress} / {requiredOptions.length})
+			</Button>
+		</div>
 	</CardHeader>
 
 	<CardContent>

@@ -10,7 +10,7 @@
 
 	let { columnIndex, selectedColumns, onChange }: Props = $props();
 
-	const options = ['amount', 'date', 'payee', 'notes'];
+	const options = ['amount', 'date', 'payee'];
 
 	const currentSelect = $derived(selectedColumns[`column_${columnIndex}`]);
 </script>

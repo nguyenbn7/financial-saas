@@ -13,7 +13,7 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { confirm } from '$lib/components/confirm-dialog';
+	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
 
 	import { createCreateAccountClient, createGetAccountsClient } from '$features/accounts/api';
 
@@ -30,6 +30,8 @@
 
 	import Trash from '@lucide/svelte/icons/trash';
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+
+	const { confirm } = useConfirm();
 
 	const queryClient = useQueryClient();
 

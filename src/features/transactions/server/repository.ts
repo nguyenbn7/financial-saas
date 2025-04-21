@@ -77,6 +77,35 @@ export async function createTransaction(data: {
 		.returning();
 }
 
+export async function createTransactions(
+	data: {
+		amount: number;
+		payee: string;
+		accountId: string;
+		date: Date;
+		categoryId?: string | null;
+		notes?: string | null;
+	}[]
+) {
+	return db
+		.insert(transactionTable)
+		.values(
+			data.map((value) => {
+				const { amount, payee, accountId, date, categoryId, notes } = value;
+
+				return {
+					amount,
+					accountId,
+					payee,
+					date,
+					categoryId,
+					notes
+				};
+			})
+		)
+		.returning();
+}
+
 export async function deleteTransactions(searchParams: { ids: string[]; userId: string }) {
 	const { ids, userId } = searchParams;
 

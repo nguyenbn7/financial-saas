@@ -12,6 +12,7 @@ import { clerkMiddlewareAuthenticated } from '$lib/server/api/middleware';
 import { parse, subDays } from 'date-fns';
 
 import {
+	bulkTransaction,
 	deletesSchema,
 	querySchema,
 	transactionFormSchema,
@@ -19,6 +20,7 @@ import {
 } from '$features/transactions/schema';
 import {
 	createTransaction,
+	createTransactions,
 	deleteTransactions,
 	getTransaction,
 	getTransactions,
@@ -92,6 +94,15 @@ const app = new Hono()
 
 		return c.json({
 			transaction
+		});
+	})
+	.post('/bulk', zValidator('json', bulkTransaction), async (c) => {
+		const body = c.req.valid('json');
+
+		const transactions = await createTransactions(body);
+
+		return c.json({
+			transactions
 		});
 	})
 	.put(

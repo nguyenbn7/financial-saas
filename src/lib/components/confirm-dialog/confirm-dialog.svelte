@@ -1,38 +1,3 @@
-<script lang="ts" module>
-	const defaultTitle = 'Are you absolutely sure?';
-	const defaultDescription =
-		'This action cannot be undone. This will permanently delete your data.';
-	const defaultAutoOpen = true;
-
-	let promise: { resolve: (value: boolean) => void } | null = $state(null);
-
-	let autoOpen = $state(false);
-	var titleFromFunction = $state(defaultTitle);
-	var descriptionFromFunction = $state(defaultDescription);
-
-	type Options = {
-		title?: string;
-		description?: string;
-		autoOpen?: boolean;
-	};
-
-	export async function confirm(
-		options: Options = {
-			title: defaultTitle,
-			description: defaultDescription,
-			autoOpen: true
-		}
-	) {
-		titleFromFunction = options.title ?? defaultTitle;
-		descriptionFromFunction = options.description ?? defaultDescription;
-		autoOpen = options.autoOpen ?? defaultAutoOpen;
-
-		return new Promise<boolean | null>((resolve, reject) => {
-			promise = { resolve };
-		});
-	}
-</script>
-
 <script lang="ts">
 	import {
 		AlertDialog,
@@ -45,43 +10,32 @@
 		AlertDialogTitle
 	} from '$lib/components/ui/alert-dialog';
 
+	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+
 	interface Props {
-		open?: boolean;
 		title?: string;
 		description?: string;
 	}
 
-	let {
-		open = $bindable(false),
-		title = defaultTitle,
-		description = defaultDescription
-	}: Props = $props();
+	const defaultTitle = 'Are you absolutely sure?';
+	const defaultDescription =
+		'This action cannot be undone. This will permanently delete your data.';
 
-	const handleClose = () => {
-		promise = null;
-		autoOpen = false;
-		open = false;
-	};
+	let { title, description }: Props = $props();
 
-	const handleConfirm = () => {
-		promise?.resolve(true);
-		handleClose();
-	};
+	const {
+		isOpen,
+		title: titleFromConfirm,
+		description: descriptionFromConfirm,
+		handleConfirm,
+		handleCancel
+	} = useConfirm();
 
-	const handleCancel = () => {
-		promise?.resolve(false);
-		handleClose();
-	};
-
-	let dialogTitle = $derived(titleFromFunction || title || defaultTitle);
-	let dialogDescription = $derived(descriptionFromFunction || description || defaultDescription);
-
-	$effect(() => {
-		if (autoOpen && !open) open = true;
-	});
+	const dialogTitle = $derived($titleFromConfirm || title || defaultTitle);
+	const dialogDescription = $derived($descriptionFromConfirm || description || defaultDescription);
 </script>
 
-<AlertDialog bind:open>
+<AlertDialog open={$isOpen}>
 	<AlertDialogContent class="z-[1000]">
 		<AlertDialogHeader>
 			<AlertDialogTitle>

@@ -3,8 +3,9 @@
 
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
+	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+
 	import { AddNewButton } from '$lib/components/button';
-	import { confirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
@@ -24,6 +25,7 @@
 
 	const { onOpen: openNewTransactionSheet } = useNewTransaction();
 	const { onOpen: openEditTransactionSheet } = useEditTransaction();
+	const { confirm } = useConfirm();
 
 	let { data }: PageProps = $props();
 
@@ -76,8 +78,8 @@
 				<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 					<CardTitle class="text-xl line-clamp-1">Transactions History</CardTitle>
 
-					<div class="flex items-center gap-x-2">
-						<AddNewButton onclick={openNewTransactionSheet} />
+					<div class="flex flex-col lg:flex-row gap-y-2 items-center gap-x-2">
+						<AddNewButton class="w-full lg:w-auto" onclick={openNewTransactionSheet} />
 
 						<UploadButton
 							onUpload={(results) => {

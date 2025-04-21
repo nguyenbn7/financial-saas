@@ -8,6 +8,8 @@ export { default as createGetTransactionClient } from './get-transaction';
 
 export { default as createCreateTransactionClient } from './create-transaction';
 
+export { default as createCreateTransactionsClient } from './create-transactions';
+
 export { default as createUpdateTransactionClient } from './update-transaction';
 
 export { default as createDeleteTransactionsClient } from './delete-transactions';

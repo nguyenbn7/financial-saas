@@ -8,3 +8,4 @@ export { default as EditTransactionSheet } from './edit-transaction-sheet.svelte
 
 export { default as UploadButton } from './upload-button.svelte';
 export { default as ImportCard } from './import-card.svelte';
+export { default as SelectAccount } from './select-account.svelte';

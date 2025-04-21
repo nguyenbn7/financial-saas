@@ -18,15 +18,17 @@ export default function createGetTransactionsClient(
 	params: Params = { ssrData: undefined },
 	searchParams: SearchParams = { accountId: undefined, from: undefined, to: undefined }
 ) {
-	const { ssrData } = params;
+	let { ssrData } = params;
 	let transactions: Transactions = [];
 
 	const query = createQuery<{ transactions: Transactions }, Error>({
 		// TODO:
 		queryKey: ['get', 'transactions', searchParams],
 		queryFn: async () => {
+			console.log('get transactions');
 			if (ssrData && transactions.length < 1) {
 				transactions = [...ssrData];
+				ssrData = undefined;
 
 				return {
 					transactions

@@ -1,9 +1,35 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
-const promiseStore = writable<{ resolve: (value: boolean) => void } | null>(null);
+const promiseStore = writable<{ resolve: (value: string | undefined) => void } | null>(null);
+
+export const selectedValue = writable<string | undefined>();
 
 export function useSelectAccount() {
+	function confirm() {
+		return new Promise((resolve: (value: string | undefined) => void, reject) =>
+			promiseStore.set({ resolve })
+		);
+	}
+
+	function handleClose() {
+		promiseStore.set(null);
+	}
+
+	function handleConfirm() {
+		promiseStore.update((v) => v?.resolve(get(selectedValue)) ?? null);
+		handleClose();
+	}
+
+	function handleCancel() {
+		promiseStore.update((v) => v?.resolve(undefined) ?? null);
+		handleClose();
+	}
+
 	return {
-		confirm: () => new Promise((resolve, reject) => promiseStore.set({ resolve }))
+		promise: { subscribe: promiseStore.subscribe },
+		confirm,
+		handleClose,
+		handleConfirm,
+		handleCancel
 	};
 }

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import type { transactionTable } from '$lib/server/database/schema';
+
+	import { toast } from 'svelte-sonner';
 
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
@@ -10,11 +13,13 @@
 	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
 	import { INITIAL_IMPORT_RESULTS, VARIANTS } from '$features/transactions';
-	import { ImportCard, UploadButton } from '$features/transactions/components';
+	import { ImportCard, SelectAccount, UploadButton } from '$features/transactions/components';
 	import { useNewTransaction } from '$features/transactions/hooks/use-new-transaction';
 	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
+	import { useSelectAccount } from '$features/transactions/hooks/use-select-account';
 	import { createTransactionDataTableColumns } from '$features/transactions/columns';
 	import {
+		createCreateTransactionsClient,
 		createDeleteTransactionsClient,
 		createGetTransactionsClient
 	} from '$features/transactions/api';
@@ -26,6 +31,7 @@
 	const { onOpen: openNewTransactionSheet } = useNewTransaction();
 	const { onOpen: openEditTransactionSheet } = useEditTransaction();
 	const { confirm } = useConfirm();
+	const { confirm: confirmSelectAccount } = useSelectAccount();
 
 	let { data }: PageProps = $props();
 
@@ -33,6 +39,11 @@
 		ssrData: [...data.transactions]
 	});
 	const deleteTransactionsClient = createDeleteTransactionsClient();
+	const createTransactions = createCreateTransactionsClient({
+		onSuccess: () => {
+			onCancelImport();
+		}
+	});
 
 	const columns = createTransactionDataTableColumns({
 		onEdit(transaction) {
@@ -52,7 +63,11 @@
 
 	let transactions = $derived($getTransactionsClient.data.transactions);
 
-	let loading = $derived($deleteTransactionsClient.isPending || $getTransactionsClient.isFetching);
+	let loading = $derived(
+		$deleteTransactionsClient.isPending ||
+			$getTransactionsClient.isFetching ||
+			$createTransactions.isPending
+	);
 
 	let variant = $state<'LIST' | 'IMPORT'>(VARIANTS.LIST);
 	let importResults = $state(INITIAL_IMPORT_RESULTS);
@@ -60,6 +75,21 @@
 	function onCancelImport() {
 		importResults = INITIAL_IMPORT_RESULTS;
 		variant = VARIANTS.LIST;
+	}
+
+	async function onSubmitImport(values: (typeof transactionTable.$inferInsert)[]) {
+		const accountId = await confirmSelectAccount();
+
+		if (!accountId) {
+			return toast.error('Please select an account to continue.');
+		}
+
+		const data = values.map((value) => ({
+			...value,
+			accountId
+		}));
+
+		$createTransactions.mutate(data);
 	}
 </script>
 
@@ -71,8 +101,9 @@
 			<ImportCard
 				data={importResults.data as string[][]}
 				onCancel={onCancelImport}
-				onSubmit={() => {}}
+				onSubmit={onSubmitImport}
 			/>
+			<SelectAccount />
 		{:else}
 			<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
 				<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">

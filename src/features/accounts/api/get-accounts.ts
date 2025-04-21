@@ -11,7 +11,7 @@ interface Params {
 }
 
 export default function createGetAccountsClient(params: Params = { ssrData: undefined }) {
-	const { ssrData } = params;
+	let { ssrData } = params;
 	let accounts: Accounts = [];
 
 	const query = createQuery<Response, Error>({
@@ -19,6 +19,8 @@ export default function createGetAccountsClient(params: Params = { ssrData: unde
 		queryFn: async () => {
 			if (ssrData && accounts.length < 1) {
 				accounts = [...ssrData];
+				ssrData = undefined;
+
 				return {
 					accounts
 				};

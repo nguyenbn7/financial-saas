@@ -24,7 +24,7 @@
 	let { title, description }: Props = $props();
 
 	const {
-		isOpen,
+		promise,
 		title: titleFromConfirm,
 		description: descriptionFromConfirm,
 		handleConfirm,
@@ -35,8 +35,8 @@
 	const dialogDescription = $derived($descriptionFromConfirm || description || defaultDescription);
 </script>
 
-<AlertDialog open={$isOpen}>
-	<AlertDialogContent class="z-[1000]">
+<AlertDialog open={$promise !== null}>
+	<AlertDialogContent>
 		<AlertDialogHeader>
 			<AlertDialogTitle>
 				{dialogTitle}

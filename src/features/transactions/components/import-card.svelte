@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { format, isMatch, parse } from 'date-fns';
+	import { toast } from 'svelte-sonner';
+	import { format, isMatch, parse, isValid } from 'date-fns';
+	import { options } from '$lib/currency';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import ImportTable from './import-table.svelte';
-	import { options } from '$lib/currency';
 
 	interface Props {
 		data: string[][];
@@ -70,15 +71,26 @@
 		});
 
 		const formattedData = arrayOfData.map((item) => {
+			if (isNaN(+item.amount)) {
+				const message = 'Column "Amount" must be numbers';
+				toast.error(message);
+				throw TypeError(message);
+			}
 			const fractionDigits = Math.pow(10, options.maximumFractionDigits!);
 			const amount = Number((parseFloat(item.amount) * fractionDigits).toFixed(0));
 
-			const date = format(
-				isMatch(item.date, dateFormat)
-					? parse(item.date, dateFormat, new Date())
-					: parse(item.date, dateTimeFormat, new Date()),
-				outputFormat
-			);
+			let parsedDate: Date;
+
+			if (isMatch(item.date, dateFormat)) parsedDate = parse(item.date, dateFormat, new Date());
+			else if (isMatch(item.date, dateTimeFormat))
+				parsedDate = parse(item.date, dateTimeFormat, new Date());
+			else {
+				const message = `Column "Date" must be format: "${dateFormat}" or "${dateTimeFormat}"`;
+				toast.error(message);
+				throw RangeError(message);
+			}
+
+			const date = format(parsedDate, outputFormat);
 
 			return {
 				...item,
@@ -87,10 +99,8 @@
 			};
 		});
 
-		onSubmit(formattedData)
+		onSubmit(formattedData);
 	}
-
-	$inspect(selectedColumns);
 </script>
 
 <Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">

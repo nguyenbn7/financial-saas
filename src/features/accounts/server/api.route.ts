@@ -27,7 +27,7 @@ const app = new Hono()
 	)
 	.use(clerkMiddlewareAuthenticated())
 	.get('/', async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 
 		const accounts = await getAccounts({ userId });
 
@@ -36,7 +36,7 @@ const app = new Hono()
 		});
 	})
 	.get('/:id', zValidator('param', accountIdSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const { id } = c.req.valid('param');
 
 		const [account] = await getAccount({ id, userId });
@@ -57,7 +57,7 @@ const app = new Hono()
 		});
 	})
 	.post('/', zValidator('json', accountFormSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const formData = c.req.valid('json');
 
 		const [account] = await createAccount({ userId, ...formData });
@@ -82,7 +82,7 @@ const app = new Hono()
 		zValidator('param', accountIdSchema),
 		zValidator('json', accountFormSchema),
 		async (c) => {
-			const userId = c.get('userId');
+			const { userId } = c.var;
 			const { id } = c.req.valid('param');
 			const formData = c.req.valid('json');
 
@@ -118,7 +118,7 @@ const app = new Hono()
 		}
 	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const formData = c.req.valid('json');
 
 		const deletedAccountIds = await deleteAccounts({ ...formData, userId });

@@ -36,7 +36,7 @@ const app = new Hono()
 	)
 	.use(clerkMiddlewareAuthenticated())
 	.get('/', zValidator('query', querySchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 
 		const { from, to, accountId } = c.req.valid('query');
 
@@ -56,7 +56,7 @@ const app = new Hono()
 		});
 	})
 	.get('/:id', zValidator('param', transactionIdSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const { id } = c.req.valid('param');
 
 		const [transaction] = await getTransaction({ id, userId });
@@ -110,7 +110,7 @@ const app = new Hono()
 		zValidator('param', transactionIdSchema),
 		zValidator('json', transactionFormSchema),
 		async (c) => {
-			const userId = c.get('userId');
+			const { userId } = c.var;
 			const { id } = c.req.valid('param');
 			const formData = c.req.valid('json');
 
@@ -146,7 +146,7 @@ const app = new Hono()
 		}
 	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const formData = c.req.valid('json');
 
 		const deletedTransactionIds = await deleteTransactions({ ...formData, userId });

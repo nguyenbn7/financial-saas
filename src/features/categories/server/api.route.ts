@@ -27,7 +27,7 @@ const app = new Hono()
 	)
 	.use(clerkMiddlewareAuthenticated())
 	.get('/', async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 
 		const categories = await getCategories({ userId });
 
@@ -36,7 +36,7 @@ const app = new Hono()
 		});
 	})
 	.get('/:id', zValidator('param', categoryIdSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const { id } = c.req.valid('param');
 
 		const [category] = await getCategory({ id, userId });
@@ -57,7 +57,7 @@ const app = new Hono()
 		});
 	})
 	.post('/', zValidator('json', categoryFormSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const formData = c.req.valid('json');
 
 		const result = await createCategory({ userId, ...formData });
@@ -84,7 +84,7 @@ const app = new Hono()
 		zValidator('param', categoryIdSchema),
 		zValidator('json', categoryFormSchema),
 		async (c) => {
-			const userId = c.get('userId');
+			const { userId } = c.var;
 			const { id } = c.req.valid('param');
 			const formData = c.req.valid('json');
 
@@ -120,7 +120,7 @@ const app = new Hono()
 		}
 	)
 	.delete('/', zValidator('json', deletesSchema), async (c) => {
-		const userId = c.get('userId');
+		const { userId } = c.var;
 		const formData = c.req.valid('json');
 
 		const deletedCategoryIds = await deleteCategories({ ...formData, userId });

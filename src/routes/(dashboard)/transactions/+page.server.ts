@@ -7,6 +7,7 @@ import { superValidate } from 'sveltekit-superforms';
 
 import { querySchema, transactionFormSchema } from '$features/transactions/schema';
 import { getTransactions } from '$features/transactions/server/repository';
+import { convertAmountFromMiliunits } from '$lib';
 
 export const load = (async ({ parent, url }) => {
 	const { userId } = await parent();
@@ -40,5 +41,8 @@ export const load = (async ({ parent, url }) => {
 
 	const form = await superValidate(zod(transactionFormSchema));
 
-	return { form, transactions };
+	return {
+		form,
+		transactions: transactions.map((t) => ({ ...t, amount: convertAmountFromMiliunits(t.amount) }))
+	};
 }) satisfies PageServerLoad;

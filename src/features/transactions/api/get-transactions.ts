@@ -1,4 +1,5 @@
 import type { InferRequestType, InferResponseType } from 'hono';
+import { convertAmountFromMiliunits } from '$lib';
 import { client } from '$lib/rpc';
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
@@ -24,7 +25,7 @@ export default function createGetTransactionsClient(
 
 	if (ssrData) {
 		queryClient.setQueryData(['get', 'transactions', searchParams], () => ({
-			transactions: [...ssrData]
+		transactions: [...ssrData]
 		}));
 	}
 
@@ -41,7 +42,13 @@ export default function createGetTransactionsClient(
 			const response = await client.api.transactions.$get({ query });
 
 			const data = await response.json();
-			const transactions = [...data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))];
+			const transactions = [
+				...data.transactions.map((v) => ({
+					...v,
+					date: new Date(v.date),
+					amount: convertAmountFromMiliunits(v.amount)
+				}))
+			];
 
 			return {
 				transactions

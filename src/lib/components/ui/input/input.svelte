@@ -9,12 +9,7 @@
 		Omit<HTMLInputAttributes, 'type'> &
 			({ type: 'file'; files?: FileList } | { type?: InputType; files?: undefined }) &
 			(
-				| {
-						type: 'currency';
-						fractionDigits?: number;
-						locales?: Intl.LocalesArgument;
-						options?: Intl.NumberFormatOptions;
-				  }
+				| { type: 'currency'; locales?: Intl.LocalesArgument; options?: Intl.NumberFormatOptions }
 				| { type?: InputType; locales?: undefined; options?: undefined }
 			)
 	>;
@@ -36,9 +31,9 @@
 	}: Props = $props();
 
 	function correctNumValue(value: any) {
-		const numValue = Number(value);
+		if (Number.isNaN(value)) return 0;
 
-		if (Number.isNaN(numValue)) return 0;
+		const numValue = Number(value);
 
 		if (numValue >= Number.POSITIVE_INFINITY) return Number.MAX_VALUE;
 
@@ -47,13 +42,14 @@
 		return numValue;
 	}
 
-	const currencyFormatter = Intl.NumberFormat(locales, options);
+	const formatter = Intl.NumberFormat(locales, options);
 	const fractionDigits = Math.pow(10, options.maximumFractionDigits ?? 2);
-	let currency = $state(currencyFormatter.format(correctNumValue(value) / fractionDigits));
+
+	let currency = $state(formatter.format(correctNumValue(value) / fractionDigits));
 
 	if (type === 'currency') {
 		$effect(() => {
-			currency = currencyFormatter.format(correctNumValue(value) / fractionDigits);
+			currency = formatter.format(value);
 		});
 	}
 </script>
@@ -77,13 +73,14 @@
 			'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-base file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
 			className
 		)}
+		autocomplete="off"
 		type="text"
 		bind:value={
 			() => currency,
 			(newValue) => {
 				if (newValue.at(-1) === '-') newValue = `-${newValue}`;
 				currency = newValue; // This one keep prevent user delete when display 0
-				value = Number(newValue.replace(/(?!^-)\D/g, ''));
+				value = correctNumValue(Number(newValue.replace(/(?!^-)\D/g, ''))) / fractionDigits;
 			}
 		}
 		{...restProps}

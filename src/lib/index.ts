@@ -10,6 +10,14 @@ export async function delay(minSeconds: number, maxSeconds: number): Promise<voi
 	return new Promise((fullfill) => setTimeout(fullfill, _delay(minSeconds, maxSeconds)));
 }
 
+export function convertAmountFromMiliunits(amount: number) {
+	return amount / 1000;
+}
+
+export function convertAmountToMiliunits(amount: number) {
+	return Math.round(amount * 1000);
+}
+
 export function calculatePercentageChange(current: number, previous: number) {
 	if (previous === 0) {
 		return previous === current ? 0 : 100;

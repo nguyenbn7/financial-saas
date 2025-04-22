@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { format, isMatch, parse, isValid } from 'date-fns';
-	import { options } from '$lib/currency';
+	import { format, isMatch, parse } from 'date-fns';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import ImportTable from './import-table.svelte';
@@ -76,8 +75,6 @@
 				toast.error(message);
 				throw TypeError(message);
 			}
-			const fractionDigits = Math.pow(10, options.maximumFractionDigits!);
-			const amount = Number((parseFloat(item.amount) * fractionDigits).toFixed(0));
 
 			let parsedDate: Date;
 
@@ -90,12 +87,10 @@
 				throw RangeError(message);
 			}
 
-			const date = format(parsedDate, outputFormat);
-
 			return {
 				...item,
-				amount,
-				date
+				amount: parseFloat(item.amount),
+				date: format(parsedDate, outputFormat)
 			};
 		});
 

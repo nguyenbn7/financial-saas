@@ -26,9 +26,10 @@
 		defaultOptions: {
 			queries: {
 				enabled: browser,
+				refetchOnWindowFocus: false,
 				// With SSR, we usually want to set some default staleTime
 				// above 0 to avoid refetching immediately on the client
-				staleTime: 60 * 1000 // 1 min
+				staleTime: 1000 // 1 sec
 			}
 		}
 	});

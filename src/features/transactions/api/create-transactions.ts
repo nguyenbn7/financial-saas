@@ -3,6 +3,7 @@ import type { ResponseError } from '$lib/error';
 import { goto } from '$app/navigation';
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { toast } from 'svelte-sonner';
+import { convertAmountFromMiliunits, convertAmountToMiliunits } from '$lib';
 import { client } from '$lib/rpc';
 import { ClientError } from '$lib/error';
 
@@ -26,14 +27,23 @@ export default function createCreateTransactionsClient(options: Options = {}) {
 	const mutation = createMutation<Response, ClientError, Request>({
 		mutationKey: ['create', 'transactions'],
 		mutationFn: async (json) => {
-			const response = await client.api.transactions.bulk.$post({ json });
+			const response = await client.api.transactions.bulk.$post({
+				json: json.map((t) => ({ ...t, amount: convertAmountToMiliunits(t.amount) }))
+			});
 
 			if (!response.ok) {
 				const data = (await response.json()) as unknown as ResponseError;
 				throw new ClientError(data.error.message, response.status);
 			}
 
-			return response.json();
+			const { transactions } = await response.json();
+
+			return {
+				transactions: transactions.map((t) => ({
+					...t,
+					amount: convertAmountFromMiliunits(t.amount)
+				}))
+			};
 		},
 		async onError(error, variables, context) {
 			const { message, status } = error;

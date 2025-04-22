@@ -109,6 +109,7 @@
 				{placeholder}
 				tabindex={0}
 				{disabled}
+				autocomplete="off"
 				oninput={(e) => {
 					query = e.currentTarget.value;
 				}}

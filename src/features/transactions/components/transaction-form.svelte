@@ -137,6 +137,7 @@
 						bind:value={$formData.notes}
 						{disabled}
 						placeholder="Optional notes"
+						autocomplete="off"
 					/>
 				{/snippet}
 			</FormControl>

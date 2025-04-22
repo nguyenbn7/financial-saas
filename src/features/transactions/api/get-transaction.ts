@@ -1,7 +1,8 @@
 import type { InferResponseType } from 'hono';
 import type { ResponseError } from '$lib/error';
-import { client } from '$lib/rpc';
 import { createQuery } from '@tanstack/svelte-query';
+import { convertAmountFromMiliunits } from '$lib';
+import { client } from '$lib/rpc';
 import { ClientError } from '$lib/error';
 
 type Response = InferResponseType<(typeof client.api.transactions)[':id']['$get'], 200>;
@@ -25,9 +26,11 @@ export default function createGetTransactionClient(params: Params) {
 				throw new ClientError(data.error.message, response.status);
 			}
 			const { transaction } = await response.json();
+
 			return {
 				transaction: {
 					...transaction,
+					amount: convertAmountFromMiliunits(transaction.amount),
 					date: new Date(transaction.date)
 				}
 			};

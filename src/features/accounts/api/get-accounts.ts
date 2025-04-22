@@ -1,6 +1,6 @@
 import type { InferResponseType } from 'hono';
 import { client } from '$lib/rpc';
-import { createQuery } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.accounts.$get>;
 
@@ -11,32 +11,31 @@ interface Params {
 }
 
 export default function createGetAccountsClient(params: Params = { ssrData: undefined }) {
-	let { ssrData } = params;
-	let accounts: Accounts = [];
+	const { ssrData } = params;
+
+	const queryClient = useQueryClient();
+
+	if (ssrData) {
+		queryClient.setQueryData(['get', 'accounts'], () => ({
+			accounts: [...ssrData]
+		}));
+	}
 
 	const query = createQuery<Response, Error>({
 		queryKey: ['get', 'accounts'],
 		queryFn: async () => {
-			if (ssrData && accounts.length < 1) {
-				accounts = [...ssrData];
-				ssrData = undefined;
-
-				return {
-					accounts
-				};
-			}
-
 			const response = await client.api.accounts.$get();
 
 			const data = await response.json();
-			accounts = [...data.accounts];
+
+			const { accounts } = data;
 
 			return {
 				accounts
 			};
 		},
 		initialData: {
-			accounts
+			accounts: []
 		}
 	});
 

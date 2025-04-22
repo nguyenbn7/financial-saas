@@ -1,6 +1,6 @@
 import type { InferRequestType, InferResponseType } from 'hono';
 import { client } from '$lib/rpc';
-import { createQuery } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.transactions.$get>;
 
@@ -18,23 +18,20 @@ export default function createGetTransactionsClient(
 	params: Params = { ssrData: undefined },
 	searchParams: SearchParams = { accountId: undefined, from: undefined, to: undefined }
 ) {
-	let { ssrData } = params;
-	let transactions: Transactions = [];
+	const { ssrData } = params;
+
+	const queryClient = useQueryClient();
+
+	if (ssrData) {
+		queryClient.setQueryData(['get', 'transactions', searchParams], () => ({
+			transactions: [...ssrData]
+		}));
+	}
 
 	const query = createQuery<{ transactions: Transactions }, Error>({
 		// TODO:
 		queryKey: ['get', 'transactions', searchParams],
 		queryFn: async () => {
-			console.log('get transactions');
-			if (ssrData && transactions.length < 1) {
-				transactions = [...ssrData];
-				ssrData = undefined;
-
-				return {
-					transactions
-				};
-			}
-
 			const query = {
 				accountId: undefined,
 				from: undefined,
@@ -44,14 +41,14 @@ export default function createGetTransactionsClient(
 			const response = await client.api.transactions.$get({ query });
 
 			const data = await response.json();
-			transactions = [...data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))];
+			const transactions = [...data.transactions.map((v) => ({ ...v, date: new Date(v.date) }))];
 
 			return {
 				transactions
 			};
 		},
 		initialData: {
-			transactions
+			transactions: []
 		}
 	});
 

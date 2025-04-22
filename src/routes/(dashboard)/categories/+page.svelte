@@ -29,7 +29,7 @@
 
 	let { data }: PageProps = $props();
 
-	const getCategoriesClient = createGetCategoriesClient({ ssrData: [...data.categories] });
+	const getCategoriesClient = createGetCategoriesClient({ ssrData: data.categories });
 	const deleteCategoriesClient = createDeleteCategoriesClient();
 
 	const columns = createCategoryDataTableColumns({

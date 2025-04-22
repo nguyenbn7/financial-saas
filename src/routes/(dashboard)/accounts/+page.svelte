@@ -26,7 +26,7 @@
 
 	let { data }: PageProps = $props();
 
-	const getAccountsClient = createGetAccountsClient({ ssrData: [...data.accounts] });
+	const getAccountsClient = createGetAccountsClient({ ssrData: data.accounts });
 	const deleteAccountsClient = createDeleteAccountsClient();
 
 	const columns = createAccountDataTableColumns({

@@ -36,7 +36,7 @@
 	let { data }: PageProps = $props();
 
 	const getTransactionsClient = createGetTransactionsClient({
-		ssrData: [...data.transactions]
+		ssrData: data.transactions
 	});
 	const deleteTransactionsClient = createDeleteTransactionsClient();
 	const createTransactions = createCreateTransactionsClient({

@@ -1,6 +1,6 @@
 import type { InferResponseType } from 'hono';
 import { client } from '$lib/rpc';
-import { createQuery } from '@tanstack/svelte-query';
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.categories.$get>;
 
@@ -11,32 +11,31 @@ interface Params {
 }
 
 export default function createGetCategoriesClient(params: Params = { ssrData: undefined }) {
-	let { ssrData } = params;
-	let categories: Categories = [];
+	const { ssrData } = params;
+
+	const queryClient = useQueryClient();
+
+	if (ssrData) {
+		queryClient.setQueryData(['get', 'categories'], () => ({
+			categories: [...ssrData]
+		}));
+	}
 
 	const query = createQuery({
 		queryKey: ['get', 'categories'],
 		queryFn: async () => {
-			if (ssrData && categories.length < 1) {
-				categories = [...ssrData];
-				ssrData = undefined;
-
-				return {
-					categories
-				};
-			}
-
 			const response = await client.api.categories.$get();
 
 			const data = await response.json();
-			categories = [...data.categories];
+
+			const { categories } = data;
 
 			return {
 				categories
 			};
 		},
 		initialData: {
-			categories
+			categories: []
 		}
 	});
 

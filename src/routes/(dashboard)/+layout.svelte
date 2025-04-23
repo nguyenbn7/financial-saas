@@ -63,7 +63,9 @@
 	</div>
 </header>
 
-{@render children()}
+<div class="px-3 lg:px-14">
+	{@render children()}
+</div>
 
 <NewAccountSheet />
 <EditAccountSheet />

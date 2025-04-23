@@ -36,7 +36,7 @@
 	let { data }: PageProps = $props();
 
 	const getTransactionsClient = createGetTransactionsClient({
-		ssrData: data.transactions
+		transactions: data.transactions
 	});
 	const deleteTransactionsClient = createDeleteTransactionsClient();
 	const createTransactions = createCreateTransactionsClient({
@@ -96,7 +96,7 @@
 <Metadata title="Transactions History" />
 
 <DataTableLoader {loading}>
-	<div class="px-4 lg:px-14 pb-10 -mt-24">
+	<div class="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
 		{#if variant === VARIANTS.IMPORT}
 			<ImportCard
 				data={importResults.data as string[][]}
@@ -105,7 +105,7 @@
 			/>
 			<SelectAccount />
 		{:else}
-			<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
+			<Card class="border-none drop-shadow-sm">
 				<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 					<CardTitle class="text-xl line-clamp-1">Transactions History</CardTitle>
 

@@ -6,18 +6,18 @@ type Response = InferResponseType<typeof client.api.categories.$get>;
 
 export type Categories = Response['categories'];
 
-interface Params {
-	ssrData?: Categories;
+interface SSR {
+	categories?: Categories;
 }
 
-export default function createGetCategoriesClient(params: Params = { ssrData: undefined }) {
-	const { ssrData } = params;
+export default function createGetCategoriesClient(ssr: SSR = { categories: undefined }) {
+	const { categories } = ssr;
 
 	const queryClient = useQueryClient();
 
-	if (ssrData) {
+	if (categories) {
 		queryClient.setQueryData(['get', 'categories'], () => ({
-			categories: [...ssrData]
+			categories: [...categories]
 		}));
 	}
 
@@ -36,7 +36,10 @@ export default function createGetCategoriesClient(params: Params = { ssrData: un
 		},
 		initialData: {
 			categories: []
-		}
+		},
+		// With SSR, we usually want to set some default staleTime
+		// above 0 to avoid refetching immediately on the client
+		staleTime: 1000 // 1 sec
 	});
 
 	return query;

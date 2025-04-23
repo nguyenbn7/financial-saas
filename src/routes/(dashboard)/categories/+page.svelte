@@ -29,7 +29,7 @@
 
 	let { data }: PageProps = $props();
 
-	const getCategoriesClient = createGetCategoriesClient({ ssrData: data.categories });
+	const getCategoriesClient = createGetCategoriesClient({ categories: data.categories });
 	const deleteCategoriesClient = createDeleteCategoriesClient();
 
 	const columns = createCategoryDataTableColumns({
@@ -54,8 +54,8 @@
 <Metadata title="Financial Categories" />
 
 <DataTableLoader {loading}>
-	<div class="px-4 lg:px-14 pb-10 -mt-24">
-		<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
+	<div class="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
+		<Card class="border-none drop-shadow-sm">
 			<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 				<CardTitle class="text-xl line-clamp-1">Categories page</CardTitle>
 

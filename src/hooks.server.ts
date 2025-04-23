@@ -15,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		await delay(1, 2);
 
 	if (event.url.pathname.startsWith('/api')) {
-		if (DEV && event.request.method === 'GET') await delay(0.5, 1);
+		if (DEV && event.request.method === 'GET') await delay(0.75, 1.25);
 
 		return resolve(event);
 	}

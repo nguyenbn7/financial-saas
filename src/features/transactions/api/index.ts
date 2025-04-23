@@ -1,8 +1,8 @@
-export type { Transactions } from './get-transactions';
+export type { Transactions } from './get-transactions.svelte';
 
 export type { Transaction } from './get-transaction';
 
-export { default as createGetTransactionsClient } from './get-transactions';
+export { default as createGetTransactionsClient } from './get-transactions.svelte';
 
 export { default as createGetTransactionClient } from './get-transaction';
 

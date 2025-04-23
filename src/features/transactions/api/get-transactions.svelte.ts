@@ -1,4 +1,5 @@
-import type { InferRequestType, InferResponseType } from 'hono';
+import type { InferResponseType } from 'hono';
+import { page } from '$app/state';
 import { convertAmountFromMiliunits } from '$lib';
 import { client } from '$lib/rpc';
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
@@ -9,37 +10,32 @@ type Transaction = Omit<ArrayElement<Response['transactions']>, 'date'> & { date
 
 export type Transactions = Array<Transaction>;
 
-type SearchParams = InferRequestType<typeof client.api.transactions.$get>['query'];
-
-interface Params {
-	ssrData?: Transactions;
+interface SSR {
+	transactions?: Transactions;
 }
 
-export default function createGetTransactionsClient(
-	params: Params = { ssrData: undefined },
-	searchParams: SearchParams = { accountId: undefined, from: undefined, to: undefined }
-) {
-	const { ssrData } = params;
+export default function createGetTransactionsClient(ssr: SSR = { transactions: undefined }) {
+	const { transactions } = ssr;
 
 	const queryClient = useQueryClient();
 
-	if (ssrData) {
-		queryClient.setQueryData(['get', 'transactions', searchParams], () => ({
-		transactions: [...ssrData]
+	const searchParams = $derived({
+		accountId: page.params['accountId'] ?? undefined,
+		from: page.params['from'] ?? undefined,
+		to: page.params['to'] ?? undefined
+	});
+
+	if (transactions) {
+		queryClient.setQueryData(['get', 'transactions'], () => ({
+			transactions: [...transactions]
 		}));
 	}
 
 	const query = createQuery<{ transactions: Transactions }, Error>({
 		// TODO:
-		queryKey: ['get', 'transactions', searchParams],
+		queryKey: ['get', 'transactions'],
 		queryFn: async () => {
-			const query = {
-				accountId: undefined,
-				from: undefined,
-				to: undefined
-			};
-
-			const response = await client.api.transactions.$get({ query });
+			const response = await client.api.transactions.$get({ query: searchParams });
 
 			const data = await response.json();
 			const transactions = [
@@ -56,7 +52,10 @@ export default function createGetTransactionsClient(
 		},
 		initialData: {
 			transactions: []
-		}
+		},
+		// With SSR, we usually want to set some default staleTime
+		// above 0 to avoid refetching immediately on the client
+		staleTime: 1000 // 1 sec
 	});
 
 	return query;

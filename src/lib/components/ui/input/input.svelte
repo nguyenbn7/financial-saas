@@ -24,7 +24,6 @@
 		options = {
 			style: 'currency',
 			currency: 'USD',
-			maximumFractionDigits: 2,
 			minimumFractionDigits: 2
 		},
 		...restProps

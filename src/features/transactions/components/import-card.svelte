@@ -98,7 +98,7 @@
 	}
 </script>
 
-<Card class="border-none drop-shadow-sm max-w-screen-2xl w-full mx-auto">
+<Card class="border-none drop-shadow-sm">
 	<CardHeader class="gap-y-2 lg:flex-row lg:items-center lg:justify-between">
 		<CardTitle class="text-xl line-clamp-1">Import Transaction</CardTitle>
 

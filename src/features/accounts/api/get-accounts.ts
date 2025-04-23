@@ -6,18 +6,18 @@ type Response = InferResponseType<typeof client.api.accounts.$get>;
 
 export type Accounts = Response['accounts'];
 
-interface Params {
-	ssrData?: Accounts;
+interface SSR {
+	accounts?: Accounts;
 }
 
-export default function createGetAccountsClient(params: Params = { ssrData: undefined }) {
-	const { ssrData } = params;
+export default function createGetAccountsClient(ssr: SSR = { accounts: undefined }) {
+	const { accounts } = ssr;
 
 	const queryClient = useQueryClient();
 
-	if (ssrData) {
+	if (accounts) {
 		queryClient.setQueryData(['get', 'accounts'], () => ({
-			accounts: [...ssrData]
+			accounts: [...accounts]
 		}));
 	}
 
@@ -36,7 +36,10 @@ export default function createGetAccountsClient(params: Params = { ssrData: unde
 		},
 		initialData: {
 			accounts: []
-		}
+		},
+		// With SSR, we usually want to set some default staleTime
+		// above 0 to avoid refetching immediately on the client
+		staleTime: 1000 // 1 sec
 	});
 
 	return query;

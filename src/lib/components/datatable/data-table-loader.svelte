@@ -15,7 +15,7 @@
 </script>
 
 {#if loading}
-	<div class="px-4 lg:px-14 pb-10 -mt-24">
+	<div class="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
 		<Card class="border-none drop-shadow-sm">
 			<CardHeader>
 				<Skeleton class="h-8 w-52" />

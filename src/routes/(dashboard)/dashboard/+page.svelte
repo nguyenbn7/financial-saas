@@ -3,6 +3,7 @@
 
 	import { Metadata } from '$lib/components/metadata';
 	import { DataGrid } from '$lib/components/data-grid';
+	import { DataCharts } from '$lib/components/data-charts';
 
 	let { data }: PageProps = $props();
 </script>
@@ -11,4 +12,5 @@
 
 <div class="max-w-screen-2xl mx-auto w-full pb-10 -mt-24">
 	<DataGrid />
+	<DataCharts />
 </div>

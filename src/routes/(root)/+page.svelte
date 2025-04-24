@@ -10,15 +10,12 @@
 
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import Video from '@lucide/svelte/icons/video';
-	import LayoutDashboard from '@lucide/svelte/icons/layout-dashboard';
 
 	const title = 'Embrace the financial arena with an engaging spirit';
 	const description =
 		'The path to financial freedom starts with a single step. Take that step into the portal of finance and let inspiration be your compass';
 
 	let { data }: PageProps = $props();
-
-	const { authenticated } = data;
 </script>
 
 <Metadata {title} />
@@ -38,25 +35,19 @@
 		<div
 			class="flex flex-col mb-8 lg:mb-16 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4"
 		>
-			{#if authenticated}
-				<Button size="lg" class="rounded-lg font-semibold" href="/dashboard"
-					>Dashboard <LayoutDashboard size={20} class="ml-2 -mr-1" /></Button
-				>
-			{:else}
-				<Button size="lg" class="rounded-lg font-semibold" href="/sign-in">
-					Sign in
-					<ArrowRight size={20} class="ml-2 -mr-1" />
-				</Button>
-				<Button
-					size="lg"
-					class="rounded-lg font-semibold"
-					href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-					variant="secondary"
-				>
-					<Video size={20} class="mr-2 -ml-1" />
-					Watch video
-				</Button>
-			{/if}
+			<Button size="lg" class="rounded-lg font-semibold" href="/sign-in">
+				Sign in
+				<ArrowRight size={20} class="ml-2 -mr-1" />
+			</Button>
+			<Button
+				size="lg"
+				class="rounded-lg font-semibold"
+				href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+				variant="secondary"
+			>
+				<Video size={20} class="mr-2 -ml-1" />
+				Watch video
+			</Button>
 		</div>
 	</div>
 </section>

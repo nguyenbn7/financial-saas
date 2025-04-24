@@ -51,7 +51,8 @@ export default function createGetSummaryClient() {
 					date: new Date(day.date)
 				}))
 			};
-		}
+		},
+		staleTime: 0
 	});
 
 	return query;

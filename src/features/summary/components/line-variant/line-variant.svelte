@@ -17,11 +17,17 @@
 	let chartEl: HTMLCanvasElement;
 
 	onMount(() => {
+		const ctx = chartEl.getContext('2d');
+
 		new Chart(chartEl, {
-			type: 'bar',
+			type: 'line',
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
+				interaction: {
+					mode: 'index',
+					intersect: false
+				},
 				scales: {
 					y: {
 						beginAtZero: true,
@@ -66,23 +72,21 @@
 					{
 						label: 'Income',
 						data: data.map((d) => d.income),
-						backgroundColor: '#3d82f6'
+						borderColor: '#3d82f6',
+						tension: 0.3,
+						pointRadius: 1,
+						borderWidth: 2
 					},
 					{
 						label: 'Expense',
 						data: data.map((d) => d.expense),
-						backgroundColor: '#f43f5e'
+						borderColor: '#f43f5e',
+						tension: 0.3,
+						pointRadius: 1,
+						borderWidth: 2
 					}
 				]
-			},
-			plugins: [
-				{
-					id: 'hoverSegment',
-					beforeDatasetsDraw(chart, args) {
-						// TODO: https://www.youtube.com/watch?v=ec761hCLIpE
-					}
-				}
-			]
+			}
 		});
 	});
 </script>

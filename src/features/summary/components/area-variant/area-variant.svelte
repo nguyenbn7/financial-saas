@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { format } from 'date-fns';
 	import { formatCurrency } from '$lib';
-	import Chart, { type ChartItem } from 'chart.js/auto';
+	import Chart from 'chart.js/auto';
 
 	interface Props {
 		data: {
@@ -32,6 +32,10 @@
 			options: {
 				responsive: true,
 				maintainAspectRatio: false,
+				interaction: {
+					mode: 'index',
+					intersect: false
+				},
 				scales: {
 					y: {
 						beginAtZero: true,
@@ -79,7 +83,9 @@
 						borderColor: '#3d82f6',
 						backgroundColor: incomeGradient,
 						fill: 'origin',
-						tension: 0.45
+						tension: 0.3,
+						pointRadius: 0,
+						borderWidth: 2
 					},
 					{
 						label: 'Expense',
@@ -87,7 +93,9 @@
 						borderColor: '#f43f5e',
 						backgroundColor: expenseGradient,
 						fill: 'origin',
-						tension: 0.45
+						tension: 0.3,
+						pointRadius: 0,
+						borderWidth: 2
 					}
 				]
 			}

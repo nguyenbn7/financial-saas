@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createGetSummaryClient } from '$features/summary/api';
-	import { Chart } from '$lib/components/chart';
+	import { Chart } from '$features/summary/components/chart';
 
 	const getSummaryClient = createGetSummaryClient();
 </script>

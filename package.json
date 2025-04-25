@@ -61,6 +61,7 @@
     "@tanstack/table-core": "^8.21.2",
     "@types/lodash": "^4.17.16",
     "@types/papaparse": "^5.3.15",
+    "chart.js": "^4.4.9",
     "countup.js": "^2.8.0",
     "d3-scale": "^4.0.2",
     "date-fns": "^4.1.0",

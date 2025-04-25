@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { AreaVariant } from '$lib/components/area-variant';
+	import { AreaVariant } from '$features/summary/components/area-variant';
+	import { BarVariant } from '$features/summary/components/bar-variant';
 	import FileSearch from '@lucide/svelte/icons/file-search';
 
 	interface Props {
@@ -29,6 +30,7 @@
 			</div>
 		{:else}
 			<AreaVariant {data} />
+			<!-- <BarVariant {data} /> -->
 		{/if}
 	</CardContent>
 </Card>

@@ -2,8 +2,8 @@
 	import type { PageProps } from './$types';
 
 	import { Metadata } from '$lib/components/metadata';
-	import { DataGrid } from '$lib/components/data-grid';
-	import { DataCharts } from '$lib/components/data-charts';
+	import { DataGrid } from '$features/summary/components/data-grid';
+	import { DataCharts } from '$features/summary/components/data-charts';
 
 	let { data }: PageProps = $props();
 </script>

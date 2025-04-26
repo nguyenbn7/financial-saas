@@ -93,7 +93,7 @@
 				percentageChange < 0 && 'text-rose-500'
 			)}
 		>
-			{formatPercentage(percentageChange, { addPrefix: true })} from last period
+			{formatPercentage(percentageChange * 100, { addPrefix: true })} from last period
 		</p>
 	</CardContent>
 </Card>

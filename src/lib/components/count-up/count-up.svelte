@@ -21,14 +21,14 @@
 		countUpAnim = new CountUp(targetEl, end, {
 			startVal: start,
 			decimalPlaces,
-			formattingFn,
+			formattingFn
 		});
 	});
 
 	$effect(() => {
-    if(!preserveValue) countUpAnim.reset();
-    if(end) countUpAnim.update(end);
-  })
+		if (!preserveValue) countUpAnim.reset();
+		countUpAnim.update(end);
+	});
 </script>
 
 <span bind:this={targetEl}>{formattingFn?.(start) ?? `${start}`}</span>

@@ -49,13 +49,17 @@
 			}
 		];
 	});
+
+	let open = $state(false);
 </script>
 
 <nav class="hidden items-center gap-x-2 overflow-x-auto lg:flex">
 	{#each routes as route}
 		<a
 			class="mb-2 me-2 rounded-lg px-3 py-2 text-center text-sm font-medium text-white outline-hidden hover:bg-white/20 focus:bg-white/30 focus-visible:ring-transparent focus-visible:ring-offset-0 transition{page
-				.url.pathname === route.href
+				.url.pathname +
+				page.url.search ===
+			route.href
 				? ' bg-white/10'
 				: ''}"
 			href={route.href}>{route.label}</a
@@ -63,7 +67,7 @@
 	{/each}
 </nav>
 
-<Sheet>
+<Sheet bind:open>
 	<SheetTrigger
 		class={cn(
 			buttonVariants({ variant: 'outline', size: 'sm' }),
@@ -81,11 +85,12 @@
 			</span>
 		</div>
 		<nav class="flex flex-col gap-y-2 pt-6">
-			{#each routes as route}
+			{#each routes as route (route.href)}
 				<Button
 					href={route.href}
-					variant={page.url.pathname === route.href ? 'secondary' : 'ghost'}
-					class="w-full justify-start">{route.label}</Button
+					variant={page.url.pathname + page.url.search === route.href ? 'secondary' : 'ghost'}
+					class="w-full justify-start"
+					onclick={() => (open = false)}>{route.label}</Button
 				>
 			{/each}
 		</nav>

@@ -51,6 +51,7 @@ export default function createDeleteAccountsClient(options: Options = {}) {
 
 			await queryClient.invalidateQueries({ queryKey: ['get', 'accounts'] });
 			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'summary'] });
 
 			if (ids.length === 1) {
 				toast.success('Account deleted');

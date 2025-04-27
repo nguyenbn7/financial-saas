@@ -51,6 +51,7 @@ export default function createDeleteCategoriesClient(options: Options = {}) {
 
 			await queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
 			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'summary'] });
 
 			if (ids.length === 1) {
 				toast.success('Category deleted');

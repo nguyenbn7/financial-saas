@@ -54,7 +54,7 @@
     "@clerk/backend": "^1.28.0",
     "@hono/clerk-auth": "^2.0.0",
     "@hono/zod-validator": "^0.4.3",
-    "@lucide/svelte": "^0.501.0",
+    "@lucide/svelte": "^0.503.0",
     "@tanstack/svelte-query": "^5.74.3",
     "@tanstack/table-core": "^8.21.2",
     "@types/lodash": "^4.17.16",

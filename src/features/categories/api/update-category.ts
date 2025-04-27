@@ -49,6 +49,7 @@ export default function createUpdateCategoryClient(options: Options = {}) {
 		async onSuccess(data, variables, context) {
 			await queryClient.invalidateQueries({ queryKey: ['get', 'categories'] });
 			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'summary'] });
 
 			toast.success('Category updated');
 

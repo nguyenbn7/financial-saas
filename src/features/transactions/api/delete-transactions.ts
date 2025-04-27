@@ -50,6 +50,7 @@ export default function createDeleteTransactionsClient(options: Options = {}) {
 			const { ids } = variables;
 
 			await queryClient.invalidateQueries({ queryKey: ['get', 'transactions'] });
+			await queryClient.invalidateQueries({ queryKey: ['get', 'summary'] });
 
 			if (ids.length === 1) {
 				toast.success('Transaction deleted');

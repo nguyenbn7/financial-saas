@@ -26,7 +26,7 @@ export async function getFinancialData(query: {
 		.innerJoin(accountTable, eq(transactionTable.accountId, accountTable.id))
 		.where(
 			and(
-				accountId ? eq(transactionTable, accountId) : undefined,
+				accountId ? eq(transactionTable.accountId, accountId) : undefined,
 				eq(accountTable.userId, userId),
 				gte(transactionTable.date, startDate),
 				lte(transactionTable.date, endDate)

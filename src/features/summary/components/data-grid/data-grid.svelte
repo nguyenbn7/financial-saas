@@ -5,11 +5,10 @@
 	import { DataCard, DataCardLoading } from '$lib/components/data-card';
 	import { FaArrowTrendDown, FaArrowTrendUp, FaPiggyBank } from '$lib/components/icon';
 
-	const params = page.params;
-	const to = params['to'] || undefined;
-	const from = params['from'] || undefined;
+	const from = $derived(page.url.searchParams.get('from') || undefined);
+	const to = $derived(page.url.searchParams.get('to') || undefined);
 
-	const dateRangeLabel = formatDateRange({ from, to });
+	const dateRangeLabel = $derived(formatDateRange({ from, to }));
 
 	const getSummaryClient = createGetSummaryClient();
 </script>

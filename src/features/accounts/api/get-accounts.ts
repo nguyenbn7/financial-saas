@@ -36,7 +36,8 @@ export default function createGetAccountsClient(ssr: SSR = { accounts: undefined
 		},
 		initialData: {
 			accounts: []
-		}
+		},
+		staleTime: accounts ? 1000 : 0
 	});
 
 	return query;

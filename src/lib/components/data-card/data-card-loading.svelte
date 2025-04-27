@@ -1,9 +1,16 @@
 <script lang="ts">
+	import { cn } from '$lib/utils';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Card, CardContent, CardHeader } from '$lib/components/ui/card';
+
+	interface Props {
+		class?: string;
+	}
+
+	let { class: className }: Props = $props();
 </script>
 
-<Card class="border-none drop-shadow-sm h-[192px]">
+<Card class={cn('border-none drop-shadow-sm h-[192px]', className)}>
 	<CardHeader class="flex flex-row items-center justify-between gap-x-4">
 		<div class="space-y-2">
 			<Skeleton class="h-6 w-24" />

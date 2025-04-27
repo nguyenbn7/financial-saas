@@ -25,7 +25,7 @@ export default function createUpdateTransactionClient(options: Options = {}) {
 	const queryClient = useQueryClient();
 
 	const mutation = createMutation<Response, ClientError, Request>({
-		mutationKey: ['put', 'transaction'],
+		mutationKey: ['update', 'transaction'],
 		mutationFn: async ({ param, json }) => {
 			const response = await client.api.transactions[':id'].$put({
 				param,

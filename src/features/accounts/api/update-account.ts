@@ -1,8 +1,8 @@
 import type { InferRequestType, InferResponseType } from 'hono';
 import type { ResponseError } from '$lib/error';
 import { goto } from '$app/navigation';
-import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { toast } from 'svelte-sonner';
+import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { client } from '$lib/rpc';
 import { ClientError } from '$lib/error';
 
@@ -24,7 +24,7 @@ export default function createUpdateAccountClient(options: Options = {}) {
 	const queryClient = useQueryClient();
 
 	const mutation = createMutation<Response, ClientError, Request>({
-		mutationKey: ['put', 'account'],
+		mutationKey: ['update', 'account'],
 		mutationFn: async ({ param, json }) => {
 			const response = await client.api.accounts[':id'].$put({ param, json });
 

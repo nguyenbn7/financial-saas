@@ -68,6 +68,7 @@
     "lodash": "^4.17.21",
     "papaparse": "^5.5.2",
     "postgres": "^3.4.5",
+    "query-string": "^9.1.1",
     "svelte-clerk": "^0.11.1"
   },
   "trustedDependencies": [

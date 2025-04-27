@@ -24,7 +24,7 @@ export default function createUpdateCategoryClient(options: Options = {}) {
 	const queryClient = useQueryClient();
 
 	const mutation = createMutation<Response, ClientError, Request>({
-		mutationKey: ['put', 'category'],
+		mutationKey: ['update', 'category'],
 		mutationFn: async ({ param, json }) => {
 			const response = await client.api.categories[':id'].$put({ param, json });
 

@@ -36,7 +36,8 @@ export default function createGetCategoriesClient(ssr: SSR = { categories: undef
 		},
 		initialData: {
 			categories: []
-		}
+		},
+		staleTime: categories ? 1000 : 0
 	});
 
 	return query;

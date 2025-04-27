@@ -4,6 +4,8 @@
 
 	import { page } from '$app/state';
 
+	import qs from 'query-string';
+
 	import { cn } from '$lib/utils';
 
 	import { Button, buttonVariants } from '$lib/components/ui/button';
@@ -11,28 +13,42 @@
 
 	import Menu from '@lucide/svelte/icons/menu';
 
-	const routes = [
-		{
-			href: '/dashboard',
-			label: 'Overview'
-		},
-		{
-			href: '/transactions',
-			label: 'Transactions'
-		},
-		{
-			href: '/accounts',
-			label: 'Accounts'
-		},
-		{
-			href: '/categories',
-			label: 'Categories'
-		},
-		{
-			href: '/settings',
-			label: 'Settings'
-		}
-	];
+	function stringifyUrl(url: string, query: Record<string, string | null | undefined>) {
+		return qs.stringifyUrl({ url, query }, { skipEmptyString: true, skipNull: true });
+	}
+
+	const routes = $derived.by(() => {
+		const { searchParams } = page.url;
+
+		const query = {
+			accountId: searchParams.get('accountId') ?? undefined,
+			from: searchParams.get('from') ?? undefined,
+			to: searchParams.get('to') ?? undefined
+		};
+
+		return [
+			{
+				href: stringifyUrl('/dashboard', query),
+				label: 'Overview'
+			},
+			{
+				href: stringifyUrl('/transactions', query),
+				label: 'Transactions'
+			},
+			{
+				href: '/accounts',
+				label: 'Accounts'
+			},
+			{
+				href: '/categories',
+				label: 'Categories'
+			},
+			{
+				href: '/settings',
+				label: 'Settings'
+			}
+		];
+	});
 </script>
 
 <nav class="hidden items-center gap-x-2 overflow-x-auto lg:flex">

@@ -20,7 +20,7 @@ interface Options {
 
 export default function createCreateAccountClient(options: Options = {}) {
 	const { onSuccess, onError } = options;
-	
+
 	const queryClient = useQueryClient();
 
 	const mutation = createMutation<Response, ClientError, Request>({

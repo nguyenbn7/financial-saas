@@ -10,6 +10,7 @@
 	import { ClerkLoaded, ClerkLoading, UserButton } from 'svelte-clerk/client';
 
 	import { Navigation } from '$lib/components/navigation';
+	import { Filters } from '$lib/components/filters';
 
 	import { NewAccountSheet, EditAccountSheet } from '$features/accounts/components';
 	import { NewCategorySheet, EditCategorySheet } from '$features/categories/components';
@@ -60,6 +61,8 @@
 			</h2>
 			<p class="text-sm text-[#89b6fd] lg:text-base">This is your Financial Overview Report</p>
 		</div>
+
+		<Filters />
 	</div>
 </header>
 

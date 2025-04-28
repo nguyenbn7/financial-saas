@@ -7,39 +7,57 @@
 		title?: string;
 		description?: string;
 		image?: string;
+		includeMeta?: boolean;
 	}
 
-	let { title = 'Home', description = '', image = 'marketing.jpg' }: Props = $props();
+	let {
+		title,
+		description,
+		image = 'thumbnail.jpg',
+		includeMeta: showMeta = false
+	}: Props = $props();
 
-	const siteName = PUBLIC_APP_NAME;
-	let imageUrl = $derived(`${page.url.origin}/${image}`);
-	let currentUrl = $derived(`${page.url.origin}${page.url.pathname}`);
+	const { origin, pathname } = page.url;
+
+	const SITE_NAME = $derived(PUBLIC_APP_NAME || 'Missing Site Name');
+
+	const TITLE = $derived.by(() => {
+		if (title) return `${title} - ${SITE_NAME}`;
+		return SITE_NAME;
+	});
+
+	const IMAGE_META_URL = $derived(`${origin}/${image}`);
+	const currentUrl = $derived(`${origin}${pathname}`);
 </script>
 
 <svelte:head>
 	<link rel="shortcut icon" href={Logo} type="image/svg" />
 
-	<title>{title} - {siteName}</title>
-	<meta name="description" content={description} />
-	<meta property="og:site_name" content={siteName} />
-	<meta property="og:url" content={currentUrl} />
-	<meta property="og:type" content="website" />
-	<meta property="og:title" content={title} />
-	<meta property="og:description" content={description} />
-	<meta property="og:image" content={imageUrl} />
+	<title>{TITLE}</title>
+	{#if description}
+		<meta name="description" content={description} />
+	{/if}
 
-	<meta property="og:url" content={currentUrl} />
-	<meta property="og:image" content={imageUrl} />
-	<meta property="og:description" content={description} />
-	<meta property="og:title" content={title} />
-	<meta property="og:site_name" content={siteName} />
+	{#if showMeta}
+		<meta property="og:title" content={TITLE} />
+		<meta property="og:type" content="Landing page" />
+		<meta property="og:image" content={IMAGE_META_URL} />
+		<meta property="og:url" content={currentUrl} />
+		<meta property="og:image:alt" content={TITLE} />
 
-	{@html `<script type="application/ld+json">{
+		<!--  Non-Essential, But Recommended -->
+		{#if description}
+			<meta property="og:description" content={description} />
+		{/if}
+		<meta property="og:site_name" content={SITE_NAME} />
+
+		{@html `<script type="application/ld+json">{
    "@context": "https://schema.org",
    "@type": "Website",
-   "name": "${title} - ${siteName}",
+   "name": "${TITLE}",
    "url": ${currentUrl},
-   "logo": ${imageUrl} }</script>`}
+   "logo": ${IMAGE_META_URL} }</script>`}
 
-	<meta name="robots" content="noindex,nofollow" />
+		<meta name="robots" content="noindex,nofollow" />
+	{/if}
 </svelte:head>

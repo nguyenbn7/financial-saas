@@ -18,7 +18,7 @@
 	let { data }: PageProps = $props();
 </script>
 
-<Metadata {title} />
+<Metadata {title} {description} includeMeta />
 
 <section class="min-h-screen flex items-center">
 	<div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">

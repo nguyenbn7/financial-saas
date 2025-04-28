@@ -67,8 +67,8 @@
 								return format(data[dataIndex].date, 'MMM dd, yyyy');
 							},
 							label(tooltipItem) {
-								const { dataset, formattedValue } = tooltipItem;
-								return `${dataset.label}: ${formatCurrency(Number(formattedValue))}`;
+								const { dataset, raw } = tooltipItem;
+								return `${dataset.label}: ${formatCurrency(raw as number)}`;
 							}
 						}
 					}

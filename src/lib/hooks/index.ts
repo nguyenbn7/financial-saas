@@ -1,1 +1,1 @@
-export { default as useSearchParams } from './use-search-params';
+export { default as useSearchParams } from './use-search-params.svelte';

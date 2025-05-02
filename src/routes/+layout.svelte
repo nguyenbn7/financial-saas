@@ -9,6 +9,8 @@
 
 	import { browser } from '$app/environment';
 
+	import { ModeWatcher } from 'mode-watcher';
+
 	import { ClerkProvider } from 'svelte-clerk';
 
 	import { Toaster } from '$lib/components/ui/sonner';
@@ -35,14 +37,16 @@
 	});
 </script>
 
+<ModeWatcher defaultMode="system" />
+
 <Toaster richColors closeButton theme="light" position="top-right" />
+
+<BackToTopButton />
+
+<ConfirmDialog />
 
 <QueryClientProvider client={queryClient}>
 	<ClerkProvider>
 		{@render children()}
 	</ClerkProvider>
 </QueryClientProvider>
-
-<BackToTopButton />
-
-<ConfirmDialog />

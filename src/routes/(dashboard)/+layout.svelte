@@ -21,6 +21,7 @@
 
 	import toLower from 'lodash/toLower';
 	import startCase from 'lodash/startCase';
+	import { DarkModeToggleButton } from '$lib/components/button';
 
 	interface LayoutProps {
 		data: LayoutData;
@@ -45,13 +46,17 @@
 				<Navigation />
 			</div>
 
-			<ClerkLoading>
-				<LoaderCircle size={32} class="mr-1 text-white animate-spin" />
-			</ClerkLoading>
+			<div class="flex items-center gap-x-3">
+				<ClerkLoading>
+					<LoaderCircle size={32} class="mr-1 text-white animate-spin" />
+				</ClerkLoading>
 
-			<ClerkLoaded>
-				<UserButton />
-			</ClerkLoaded>
+				<ClerkLoaded>
+					<UserButton />
+				</ClerkLoaded>
+
+				<DarkModeToggleButton class="rounded-full size-8" />
+			</div>
 		</div>
 
 		<div class="mb-4 space-y-2">

@@ -4,6 +4,8 @@
 	import Logo from '$assets/logo.svg';
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
+	import { DarkModeToggleButton } from '$lib/components/button';
+
 	import { Button } from '$lib/components/ui/button';
 
 	import { Metadata } from '$lib/components/metadata';
@@ -19,6 +21,10 @@
 </script>
 
 <Metadata {title} {description} includeMeta />
+
+<div class="fixed top-0 w-full py-8 px-4 z-996 flex flex-row-reverse bg-transparent">
+	<DarkModeToggleButton class="mr-5 rounded-full" />
+</div>
 
 <section class="min-h-screen flex items-center">
 	<div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">

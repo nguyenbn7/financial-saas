@@ -2,6 +2,7 @@
 	import { Tween } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 	import { expoInOut } from 'svelte/easing';
+
 	import { Button } from '$lib/components/ui/button';
 
 	let scrollY = $state(0);

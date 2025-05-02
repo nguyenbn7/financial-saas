@@ -1,23 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+	import Plus from '@lucide/svelte/icons/plus';
+
+	import { useNewCategory } from '$features/categories/components/new-category-sheet';
+	import { useEditCategory } from '$features/categories/components/edit-category-sheet';
+	import { createCategoryDataTableColumns } from '$features/categories/columns';
+	import { useDeleteCategories, useGetCategories } from '$features/categories/api';
+
+	import { Metadata } from '$lib/components/metadata';
+	import { useConfirm } from '$lib/components/confirm-dialog';
+	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-
-	import { Metadata } from '$lib/components/metadata';
-	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
-
-	import { useNewCategory } from '$features/categories/hooks/use-new-category';
-	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
-	import { createCategoryDataTableColumns } from '$features/categories/columns';
-	import {
-		createDeleteCategoriesClient,
-		createGetCategoriesClient
-	} from '$features/categories/api';
-
-	import Plus from '@lucide/svelte/icons/plus';
 
 	interface PageProps {
 		data: PageData;
@@ -27,10 +23,10 @@
 	const { onOpen: openEditCategorySheet } = useEditCategory();
 	const { confirm } = useConfirm();
 
-	let { data }: PageProps = $props();
+	const { data }: PageProps = $props();
 
-	const getCategoriesClient = createGetCategoriesClient({ categories: data.categories });
-	const deleteCategoriesClient = createDeleteCategoriesClient();
+	const getCategoriesClient = useGetCategories({ categories: data.categories });
+	const deleteCategoriesClient = useDeleteCategories();
 
 	const columns = createCategoryDataTableColumns({
 		onEdit: (category) => openEditCategorySheet(category.id),
@@ -46,9 +42,9 @@
 		}
 	});
 
-	let categories = $derived($getCategoriesClient.data.categories);
+	const categories = $derived($getCategoriesClient.data.categories);
 
-	let loading = $derived($deleteCategoriesClient.isPending || $getCategoriesClient.isFetching);
+	const loading = $derived($deleteCategoriesClient.isPending || $getCategoriesClient.isFetching);
 </script>
 
 <Metadata title="Financial Categories" />

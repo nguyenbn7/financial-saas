@@ -3,6 +3,7 @@
 	import type { LayoutData } from './$types';
 
 	import Logo from '$assets/logo.svg';
+
 	import { PUBLIC_APP_NAME } from '$env/static/public';
 
 	interface LayoutProps {

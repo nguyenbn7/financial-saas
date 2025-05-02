@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
-	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
-	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
 	import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
+
+	import { useEditTransaction } from '$features/transactions/components/edit-transaction-sheet';
+
+	import { useEditCategory } from '$features/categories/components/edit-category-sheet';
+
+	import { cn } from '$lib/utils';
 
 	interface Props {
 		id: string;

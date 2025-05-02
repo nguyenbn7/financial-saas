@@ -1,5 +1,7 @@
 import type { InferResponseType } from 'hono';
+
 import { client } from '$lib/rpc';
+
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.accounts.$get>;
@@ -10,7 +12,7 @@ interface SSR {
 	accounts?: Accounts;
 }
 
-export default function createGetAccountsClient(ssr: SSR = { accounts: undefined }) {
+export default function useGetAccounts(ssr: SSR = { accounts: undefined }) {
 	const { accounts } = ssr;
 
 	const queryClient = useQueryClient();

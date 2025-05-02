@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { useConfirm } from '$lib/components/confirm-dialog';
+
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -9,8 +11,6 @@
 		AlertDialogHeader,
 		AlertDialogTitle
 	} from '$lib/components/ui/alert-dialog';
-
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
 
 	interface Props {
 		title?: string;

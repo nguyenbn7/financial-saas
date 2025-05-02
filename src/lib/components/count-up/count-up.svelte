@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
 	import * as countup from 'countup.js';
 
 	const { CountUp } = countup;

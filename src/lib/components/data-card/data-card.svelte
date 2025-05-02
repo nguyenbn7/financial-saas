@@ -1,9 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { VariantProps } from 'tailwind-variants';
-	import { tv } from 'tailwind-variants';
+
+	import { CountUp } from '$lib/components/count-up';
+
 	import { formatCurrency, formatPercentage } from '$lib';
+
+	import { tv } from 'tailwind-variants';
 	import { cn } from '$lib/utils';
+
 	import {
 		Card,
 		CardContent,
@@ -11,7 +16,6 @@
 		CardHeader,
 		CardTitle
 	} from '$lib/components/ui/card';
-	import { CountUp } from '$lib/components/count-up';
 
 	const boxVariants = tv({
 		base: 'rounded-md p-3',

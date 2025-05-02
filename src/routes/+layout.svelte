@@ -4,16 +4,16 @@
 
 	import '../app.css';
 
-	import { browser } from '$app/environment';
+	import { BackToTopButton } from '$lib/components/button';
+	import { ConfirmDialog } from '$lib/components/confirm-dialog';
 
-	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+	import { browser } from '$app/environment';
 
 	import { ClerkProvider } from 'svelte-clerk';
 
 	import { Toaster } from '$lib/components/ui/sonner';
 
-	import { BackToTopButton } from '$lib/components/button';
-	import { ConfirmDialog } from '$lib/components/confirm-dialog';
+	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 
 	interface LayoutProps {
 		data: LayoutData;

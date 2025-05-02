@@ -2,27 +2,29 @@
 	import type { PageData } from './$types';
 	import type { transactionTable } from '$lib/server/database/schema';
 
-	import { toast } from 'svelte-sonner';
-
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+	import { INITIAL_IMPORT_RESULTS, VARIANTS } from '$features/transactions';
+	import { ImportCard, UploadButton } from '$features/transactions/components';
+	import { useNewTransaction } from '$features/transactions/components/new-transaction-sheet';
+	import { useEditTransaction } from '$features/transactions/components/edit-transaction-sheet';
+	import {
+		useSelectAccount,
+		SelectAccount
+	} from '$features/transactions/components/select-account';
+	import { createTransactionDataTableColumns } from '$features/transactions/columns';
+	import {
+		useCreateTransactions,
+		useDeleteTransactions,
+		useGetTransactions
+	} from '$features/transactions/api';
 
 	import { AddNewButton } from '$lib/components/button';
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
+	import { useConfirm } from '$lib/components/confirm-dialog';
 
-	import { INITIAL_IMPORT_RESULTS, VARIANTS } from '$features/transactions';
-	import { ImportCard, SelectAccount, UploadButton } from '$features/transactions/components';
-	import { useNewTransaction } from '$features/transactions/hooks/use-new-transaction';
-	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
-	import { useSelectAccount } from '$features/transactions/hooks/use-select-account';
-	import { createTransactionDataTableColumns } from '$features/transactions/columns';
-	import {
-		createCreateTransactionsClient,
-		createDeleteTransactionsClient,
-		createGetTransactionsClient
-	} from '$features/transactions/api';
+	import { toast } from 'svelte-sonner';
+
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	interface PageProps {
 		data: PageData;
@@ -33,13 +35,13 @@
 	const { confirm } = useConfirm();
 	const { confirm: confirmSelectAccount } = useSelectAccount();
 
-	let { data }: PageProps = $props();
+	const { data }: PageProps = $props();
 
-	const getTransactionsClient = createGetTransactionsClient({
+	const getTransactionsClient = useGetTransactions({
 		transactions: data.transactions
 	});
-	const deleteTransactionsClient = createDeleteTransactionsClient();
-	const createTransactions = createCreateTransactionsClient({
+	const deleteTransactionsClient = useDeleteTransactions();
+	const createTransactions = useCreateTransactions({
 		onSuccess: () => {
 			onCancelImport();
 		}
@@ -61,9 +63,9 @@
 		}
 	});
 
-	let transactions = $derived($getTransactionsClient.data.transactions);
+	const transactions = $derived($getTransactionsClient.data.transactions);
 
-	let loading = $derived(
+	const loading = $derived(
 		$deleteTransactionsClient.isPending ||
 			$getTransactionsClient.isFetching ||
 			$createTransactions.isPending

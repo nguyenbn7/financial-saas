@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 
-	import { Metadata } from '$lib/components/metadata';
 	import { DataGrid } from '$features/summary/components/data-grid';
 	import { DataCharts } from '$features/summary/components/data-charts';
+
+	import { Metadata } from '$lib/components/metadata';
 
 	let { data }: PageProps = $props();
 </script>

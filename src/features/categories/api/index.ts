@@ -2,12 +2,13 @@ export type { Categories } from './get-categories';
 
 export type { Category } from './get-category';
 
-export { default as createGetCategoriesClient } from './get-categories';
+export { default as useGetCategories } from './get-categories';
 
-export { default as createGetCategoryClient } from './get-category';
+export { default as useGetCategory } from './get-category';
+export { useCategoryId as useCategoryIdForGetCategory } from './get-category';
 
-export { default as createCreateCategoryClient } from './create-category';
+export { default as useCreateCategory } from './create-category';
 
-export { default as createUpdateCategoryClient } from './update-category';
+export { default as useUpdateCategory } from './update-category';
 
-export { default as createDeleteCategoriesClient } from './delete-categories';
+export { default as useDeleteCategories } from './delete-categories';

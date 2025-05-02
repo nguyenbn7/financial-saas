@@ -6,9 +6,9 @@
 
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 
-	import { createGetAccountsClient } from '$features/accounts/api';
+	import { useGetAccounts } from '$features/accounts/api';
 
-	const getAccountsClient = createGetAccountsClient();
+	const getAccountsClient = useGetAccounts();
 
 	const accountId = $derived(page.url.searchParams.get('accountId') || 'all');
 	const from = $derived(page.url.searchParams.get('from') || '');

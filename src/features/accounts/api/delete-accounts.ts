@@ -1,12 +1,21 @@
 import type { InferRequestType, InferResponseType } from 'hono';
-import type { ResponseError } from '$lib/error';
-import { goto } from '$app/navigation';
-import { createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { toast } from 'svelte-sonner';
+
 import { client } from '$lib/rpc';
 import { ClientError } from '$lib/error';
 
+import { goto } from '$app/navigation';
+
+import { createMutation, useQueryClient } from '@tanstack/svelte-query';
+
+import { toast } from 'svelte-sonner';
+
+type ErrorResponse = Extract<
+	InferResponseType<typeof client.api.accounts.$delete>,
+	{ status: number }
+>;
+
 type Response = InferResponseType<typeof client.api.accounts.$delete>;
+
 type Request = InferRequestType<typeof client.api.accounts.$delete>['json'];
 
 interface Options {
@@ -18,7 +27,7 @@ interface Options {
 	) => Promise<unknown> | unknown;
 }
 
-export default function createDeleteAccountsClient(options: Options = {}) {
+export default function useDeleteAccounts(options: Options = {}) {
 	const { onSuccess, onError } = options;
 
 	const queryClient = useQueryClient();
@@ -29,8 +38,8 @@ export default function createDeleteAccountsClient(options: Options = {}) {
 			const response = await client.api.accounts.$delete({ json });
 
 			if (!response.ok) {
-				const data = (await response.json()) as unknown as ResponseError;
-				throw new ClientError(data.error.message, response.status);
+				const { title, detail, status } = (await response.json()) as ErrorResponse;
+				throw new ClientError({ title, detail, status });
 			}
 
 			return response.json();

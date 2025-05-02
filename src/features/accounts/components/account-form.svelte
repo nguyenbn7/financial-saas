@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { accountFormSchema } from '$features/accounts/schema';
+	import type { accountSchema } from '$features/accounts/schema';
 
 	import { z } from 'zod';
 
@@ -11,7 +11,7 @@
 
 	interface Props {
 		id?: string;
-		form: SuperForm<z.infer<typeof accountFormSchema>, any>;
+		form: SuperForm<z.infer<typeof accountSchema>, any>;
 		disabled?: boolean;
 		disableLoader?: boolean;
 	}

@@ -1,4 +1,9 @@
 <script lang="ts">
+	import { useNewCategory } from '$features/categories/components/new-category-sheet';
+	import { categorySchema } from '$features/categories/schema';
+	import { useCreateCategory } from '$features/categories/api';
+	import { CategoryForm } from '$features/categories/components';
+
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
 
@@ -10,22 +15,17 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { useNewCategory } from '$features/categories/hooks/use-new-category';
-	import { categoryFormSchema } from '$features/categories/schema';
-	import { createCreateCategoryClient } from '$features/categories/api';
-	import { CategoryForm } from '$features/categories/components';
-
 	const { isOpen, onClose } = useNewCategory();
 
-	const createCategoryClient = createCreateCategoryClient({
+	const createCategoryClient = useCreateCategory({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(categoryFormSchema)), {
+	const form = superForm(defaults(zod(categorySchema)), {
 		id: 'create category form',
 		SPA: true,
 		dataType: 'json',
-		validators: zodClient(categoryFormSchema),
+		validators: zodClient(categorySchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid) {
 				$createCategoryClient.mutate(validatedForm.data);

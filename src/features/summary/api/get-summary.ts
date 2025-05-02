@@ -1,9 +1,12 @@
 import type { InferResponseType } from 'hono';
-import { derived } from 'svelte/store';
-import { createQuery } from '@tanstack/svelte-query';
-import { useSearchParams } from '$lib/hooks.svelte';
+
 import { convertAmountFromMiliunits } from '$lib';
 import { client } from '$lib/rpc';
+import { useSearchParams } from '$lib/hooks';
+
+import { derived } from 'svelte/store';
+
+import { createQuery } from '@tanstack/svelte-query';
 
 type Response = Omit<InferResponseType<typeof client.api.summary.$get>, 'days'> & {
 	days: { income: number; expense: number; date: Date }[];

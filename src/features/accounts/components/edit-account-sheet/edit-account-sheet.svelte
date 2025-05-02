@@ -1,4 +1,14 @@
 <script lang="ts">
+	import Trash from '@lucide/svelte/icons/trash';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+
+	import { useEditAccount } from '$features/accounts/components/edit-account-sheet';
+	import { accountSchema } from '$features/accounts/schema';
+	import { AccountForm } from '$features/accounts/components';
+	import { useUpdateAccount, useGetAccount, useDeleteAccounts } from '$features/accounts/api';
+
+	import { useConfirm } from '$lib/components/confirm-dialog';
+
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -13,32 +23,15 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
-
-	import { useEditAccount } from '$features/accounts/hooks/use-edit-account';
-	import { accountFormSchema } from '$features/accounts/schema';
-	import { AccountForm } from '$features/accounts/components';
-	import {
-		createUpdateAccountClient,
-		createGetAccountClient,
-		createDeleteAccountsClient
-	} from '$features/accounts/api';
-
-	import Trash from '@lucide/svelte/icons/trash';
-	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
-
 	const { confirm } = useConfirm();
 
 	const queryClient = useQueryClient();
 
 	const { isOpen, accountId, onClose } = useEditAccount();
 
-	let getAccountClient = $derived(
-		$accountId ? createGetAccountClient({ id: $accountId }) : undefined
-	);
-	let account = $derived($getAccountClient?.data?.account);
+	const getAccountClient = useGetAccount();
 
-	const updateAccountClient = createUpdateAccountClient({
+	const updateAccountClient = useUpdateAccount({
 		async onSuccess(data, variables, context) {
 			onClose();
 
@@ -48,14 +41,16 @@
 		}
 	});
 
-	const deleteAccountsClient = createDeleteAccountsClient({
+	const deleteAccountsClient = useDeleteAccounts({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(accountFormSchema)), {
+	const account = $derived($getAccountClient.data?.account);
+
+	const form = superForm(defaults(zod(accountSchema)), {
 		id: 'edit account form',
 		SPA: true,
-		validators: zodClient(accountFormSchema),
+		validators: zodClient(accountSchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid && account) {
 				$updateAccountClient.mutate({ param: { id: account.id }, json: validatedForm.data });
@@ -68,12 +63,12 @@
 
 	$effect(() => {
 		if (account) formData.set({ ...account });
-		else form.reset(defaults(zod(accountFormSchema)));
+		else form.reset(defaults(zod(accountSchema)));
 	});
 
-	let disableLoader = $derived($deleteAccountsClient.isPending || $getAccountClient?.isFetching);
+	const disableLoader = $derived($deleteAccountsClient.isPending || $getAccountClient.isFetching);
 
-	let disabled = $derived($updateAccountClient.isPending || disableLoader);
+	const disabled = $derived($updateAccountClient.isPending || disableLoader);
 </script>
 
 <Sheet open={$isOpen} onOpenChange={onClose}>

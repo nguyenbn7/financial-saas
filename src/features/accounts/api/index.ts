@@ -2,12 +2,13 @@ export type { Accounts } from './get-accounts';
 
 export type { Account } from './get-account';
 
-export { default as createGetAccountsClient } from './get-accounts';
+export { default as useGetAccounts } from './get-accounts';
 
-export { default as createGetAccountClient } from './get-account';
+export { default as useGetAccount } from './get-account';
+export { useAccountId as useAccountIdForGetAccount } from './get-account';
 
-export { default as createCreateAccountClient } from './create-account';
+export { default as useCreateAccount } from './create-account';
 
-export { default as createUpdateAccountClient } from './update-account';
+export { default as useUpdateAccount } from './update-account';
 
-export { default as createDeleteAccountsClient } from './delete-accounts';
+export { default as useDeleteAccounts } from './delete-accounts';

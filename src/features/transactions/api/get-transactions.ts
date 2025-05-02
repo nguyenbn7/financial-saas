@@ -1,9 +1,12 @@
 import type { InferResponseType } from 'hono';
-import { derived, get } from 'svelte/store';
-import { createQuery, useQueryClient } from '@tanstack/svelte-query';
-import { useSearchParams } from '$lib/hooks.svelte';
+
 import { convertAmountFromMiliunits } from '$lib';
 import { client } from '$lib/rpc';
+import { useSearchParams } from '$lib/hooks';
+
+import { derived, get } from 'svelte/store';
+
+import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.transactions.$get>;
 
@@ -15,7 +18,7 @@ interface SSR {
 	transactions?: Transactions;
 }
 
-export default function createGetTransactionsClient(ssr: SSR = { transactions: undefined }) {
+export default function useGetTransactions(ssr: SSR = { transactions: undefined }) {
 	const { transactions: transactionsFromSSR } = ssr;
 
 	const queryClient = useQueryClient();

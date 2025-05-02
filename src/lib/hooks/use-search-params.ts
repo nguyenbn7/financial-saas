@@ -1,4 +1,5 @@
 import { page } from '$app/state';
+
 import { writable } from 'svelte/store';
 
 type SearchParams = {
@@ -7,7 +8,7 @@ type SearchParams = {
 	to?: string | undefined;
 };
 
-export function useSearchParams() {
+export default function useSearchParams() {
 	const searchParams = writable<SearchParams>({});
 
 	$effect(() => {

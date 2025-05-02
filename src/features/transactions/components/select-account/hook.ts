@@ -4,7 +4,7 @@ const promiseStore = writable<{ resolve: (value: string | undefined) => void } |
 
 export const selectedValue = writable<string | undefined>();
 
-export function useSelectAccount() {
+export default function useSelectAccount() {
 	function confirm() {
 		return new Promise((resolve: (value: string | undefined) => void, reject) =>
 			promiseStore.set({ resolve })

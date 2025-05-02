@@ -1,4 +1,9 @@
 <script lang="ts">
+	import { useNewAccount } from '$features/accounts/components/new-account-sheet';
+	import { accountSchema } from '$features/accounts/schema';
+	import { useCreateAccount } from '$features/accounts/api';
+	import { AccountForm } from '$features/accounts/components';
+
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod, zodClient } from 'sveltekit-superforms/adapters';
 
@@ -10,22 +15,17 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { useNewAccount } from '$features/accounts/hooks/use-new-account';
-	import { accountFormSchema } from '$features/accounts/schema';
-	import { createCreateAccountClient } from '$features/accounts/api';
-	import { AccountForm } from '$features/accounts/components';
-
 	const { isOpen, onClose } = useNewAccount();
 
-	const createAccountClient = createCreateAccountClient({
+	const createAccountClient = useCreateAccount({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(accountFormSchema)), {
+	const form = superForm(defaults(zod(accountSchema)), {
 		id: 'create account form',
 		SPA: true,
 		dataType: 'json',
-		validators: zodClient(accountFormSchema),
+		validators: zodClient(accountSchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid) {
 				$createAccountClient.mutate(validatedForm.data);

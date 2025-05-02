@@ -1,5 +1,14 @@
 <script lang="ts">
 	import {
+		selectedValue,
+		useSelectAccount
+	} from '$features/transactions/components/select-account';
+
+	import { useCreateAccount, useGetAccounts } from '$features/accounts/api';
+
+	import { CreatableSelect } from '$lib/components/select';
+
+	import {
 		AlertDialog,
 		AlertDialogAction,
 		AlertDialogCancel,
@@ -10,16 +19,10 @@
 		AlertDialogTitle
 	} from '$lib/components/ui/alert-dialog';
 
-	import { CreatableSelect } from '$lib/components/select';
-
-	import { createCreateAccountClient, createGetAccountsClient } from '$features/accounts/api';
-
-	import { selectedValue, useSelectAccount } from '$features/transactions/hooks/use-select-account';
-
 	const { promise, handleConfirm, handleCancel } = useSelectAccount();
 
-	const accountQuery = createGetAccountsClient();
-	const accountMutation = createCreateAccountClient();
+	const accountQuery = useGetAccounts();
+	const accountMutation = useCreateAccount();
 
 	const accountOptions = $derived(
 		($accountQuery.data.accounts ?? []).map((account) => ({

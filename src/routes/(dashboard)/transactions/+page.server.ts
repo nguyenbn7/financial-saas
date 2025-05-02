@@ -1,13 +1,14 @@
 import type { PageServerLoad } from './$types';
 
-import { parse, subDays } from 'date-fns';
+import { querySchema, transactionSchema } from '$features/transactions/schema';
+import { getTransactions } from '$features/transactions/server/repository';
+
+import { convertAmountFromMiliunits } from '$lib';
 
 import { zod } from 'sveltekit-superforms/adapters';
 import { superValidate } from 'sveltekit-superforms';
 
-import { querySchema, transactionFormSchema } from '$features/transactions/schema';
-import { getTransactions } from '$features/transactions/server/repository';
-import { convertAmountFromMiliunits } from '$lib';
+import { parse, subDays } from 'date-fns';
 
 export const load = (async ({ parent, url }) => {
 	const { userId } = await parent();
@@ -39,7 +40,7 @@ export const load = (async ({ parent, url }) => {
 		endDate
 	});
 
-	const form = await superValidate(zod(transactionFormSchema));
+	const form = await superValidate(zod(transactionSchema));
 
 	return {
 		form,

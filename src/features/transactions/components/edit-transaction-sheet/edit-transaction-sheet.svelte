@@ -1,4 +1,22 @@
 <script lang="ts">
+	import Trash from '@lucide/svelte/icons/trash';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+
+	import { useEditTransaction } from '$features/transactions/components/edit-transaction-sheet';
+	import { transactionSchema } from '$features/transactions/schema';
+	import { TransactionForm } from '$features/transactions/components/form';
+	import {
+		useUpdateTransaction,
+		useGetTransaction,
+		useDeleteTransactions
+	} from '$features/transactions/api';
+
+	import { useCreateAccount, useGetAccounts } from '$features/accounts/api';
+
+	import { useCreateCategory, useGetCategories } from '$features/categories/api';
+
+	import { useConfirm } from '$lib/components/confirm-dialog';
+
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -13,46 +31,25 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
-
-	import { createCreateAccountClient, createGetAccountsClient } from '$features/accounts/api';
-
-	import { createCreateCategoryClient, createGetCategoriesClient } from '$features/categories/api';
-
-	import { useEditTransaction } from '$features/transactions/hooks/use-edit-transaction';
-	import { transactionFormSchema } from '$features/transactions/schema';
-	import { TransactionForm } from '$features/transactions/components';
-	import {
-		createUpdateTransactionClient,
-		createGetTransactionClient,
-		createDeleteTransactionsClient
-	} from '$features/transactions/api';
-
-	import Trash from '@lucide/svelte/icons/trash';
-	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
-
 	const { confirm } = useConfirm();
 
 	const queryClient = useQueryClient();
 
 	const { isOpen, transactionId, onClose } = useEditTransaction();
 
-	const getAccountsClient = createGetAccountsClient();
-	const createAccountClient = createCreateAccountClient();
+	const getAccountsClient = useGetAccounts();
+	const createAccountClient = useCreateAccount();
 
-	let accounts = $derived($isOpen ? $getAccountsClient.data.accounts : []);
+	const accounts = $derived($isOpen ? $getAccountsClient.data.accounts : []);
 
-	const getCategoriesClient = createGetCategoriesClient();
-	const createCategoryClient = createCreateCategoryClient();
+	const getCategoriesClient = useGetCategories();
+	const createCategoryClient = useCreateCategory();
 
-	let categories = $derived($isOpen ? $getCategoriesClient.data.categories : []);
+	const categories = $derived($isOpen ? $getCategoriesClient.data.categories : []);
 
-	let getTransactionClient = $derived(
-		$transactionId ? createGetTransactionClient({ id: $transactionId }) : undefined
-	);
-	let transaction = $derived($getTransactionClient?.data?.transaction ?? undefined);
+	const getTransactionClient = useGetTransaction();
 
-	const updateTransactionClient = createUpdateTransactionClient({
+	const updateTransactionClient = useUpdateTransaction({
 		async onSuccess(data, variables, context) {
 			onClose();
 
@@ -62,14 +59,16 @@
 		}
 	});
 
-	const deleteTransactionsClient = createDeleteTransactionsClient({
+	const deleteTransactionsClient = useDeleteTransactions({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(transactionFormSchema)), {
+	const transaction = $derived($getTransactionClient.data?.transaction);
+
+	const form = superForm(defaults(zod(transactionSchema)), {
 		id: 'edit transaction form',
 		SPA: true,
-		validators: zodClient(transactionFormSchema),
+		validators: zodClient(transactionSchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid && transaction) {
 				$updateTransactionClient.mutate({
@@ -85,18 +84,18 @@
 
 	$effect(() => {
 		if (transaction) formData.set({ ...transaction });
-		else form.reset(defaults(zod(transactionFormSchema)));
+		else form.reset(defaults(zod(transactionSchema)));
 	});
 
-	let disableLoader = $derived(
-		$getTransactionClient?.isFetching ||
+	const disableLoader = $derived(
+		$getTransactionClient.isFetching ||
 			$getAccountsClient.isFetching ||
 			$createAccountClient.isPending ||
 			$getCategoriesClient.isFetching ||
 			$createCategoryClient.isPending
 	);
 
-	let disabled = $derived(
+	const disabled = $derived(
 		$updateTransactionClient.isPending || $deleteTransactionsClient.isPending || disableLoader
 	);
 </script>

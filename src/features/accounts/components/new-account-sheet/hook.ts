@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 
 const { subscribe, set } = writable(false);
 
-export function useNewTransaction() {
+export default function useNewAccount() {
 	return {
 		isOpen: { subscribe },
 		onOpen: () => set(true),

@@ -1,8 +1,10 @@
 import type { ColumnDef } from '@tanstack/table-core';
 import type { Categories } from '$features/categories/api';
+
+import { CellActions, SortColumnButton } from '$lib/components/datatable';
+
 import { Checkbox } from '$lib/components/ui/checkbox';
 import { renderComponent } from '$lib/components/ui/data-table';
-import { CellActions, SortColumnButton } from '$lib/components/datatable';
 
 type Category = ArrayElement<Categories>;
 

@@ -1,19 +1,21 @@
 export class ClientError extends Error {
-	#status = 500;
+	#status;
+	#detail;
 
-	constructor(message?: string, status = 500) {
-		super(message);
+	constructor(error: { title: string; detail: string; status?: number }, options?: ErrorOptions) {
+		const { title, detail, status } = error;
+
+		super(title, options);
+
 		this.#status = status;
+		this.#detail = detail;
 	}
 
 	get status() {
 		return this.#status;
 	}
-}
 
-export type ResponseError = {
-	error: {
-		code: number;
-		message: string;
-	};
-};
+	get detail() {
+		return this.#detail;
+	}
+}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { z } from 'zod';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { transactionFormSchema } from '$features/transactions/schema';
+	import type { transactionSchema } from '$features/transactions/schema';
 
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -14,7 +14,7 @@
 
 	interface Props {
 		id?: string;
-		form: SuperForm<z.infer<typeof transactionFormSchema>, any>;
+		form: SuperForm<z.infer<typeof transactionSchema>, any>;
 		disabled?: boolean;
 		disableLoader?: boolean;
 		onCreateAccount: (name: string) => void;

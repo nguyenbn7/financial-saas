@@ -1,12 +1,21 @@
 import type { InferRequestType, InferResponseType } from 'hono';
-import type { ResponseError } from '$lib/error';
-import { goto } from '$app/navigation';
-import { toast } from 'svelte-sonner';
-import { createMutation, useQueryClient } from '@tanstack/svelte-query';
+
 import { client } from '$lib/rpc';
 import { ClientError } from '$lib/error';
 
+import { goto } from '$app/navigation';
+
+import { createMutation, useQueryClient } from '@tanstack/svelte-query';
+
+import { toast } from 'svelte-sonner';
+
+type ErrorResponse = Extract<
+	InferResponseType<(typeof client.api.accounts)[':id']['$put']>,
+	{ status: number }
+>;
+
 type Response = InferResponseType<(typeof client.api.accounts)[':id']['$put'], 200>;
+
 type Request = InferRequestType<(typeof client.api.accounts)[':id']['$put']>;
 
 interface Options {
@@ -18,7 +27,7 @@ interface Options {
 	) => Promise<unknown> | unknown;
 }
 
-export default function createUpdateAccountClient(options: Options = {}) {
+export default function useUpdateAccount(options: Options = {}) {
 	const { onSuccess, onError } = options;
 
 	const queryClient = useQueryClient();
@@ -29,8 +38,8 @@ export default function createUpdateAccountClient(options: Options = {}) {
 			const response = await client.api.accounts[':id'].$put({ param, json });
 
 			if (!response.ok) {
-				const data = (await response.json()) as unknown as ResponseError;
-				throw new ClientError(data.error.message, response.status);
+				const { title, detail, status } = (await response.json()) as ErrorResponse;
+				throw new ClientError({ title, detail, status });
 			}
 
 			return response.json();

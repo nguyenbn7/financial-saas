@@ -1,4 +1,14 @@
 <script lang="ts">
+	import Trash from '@lucide/svelte/icons/trash';
+	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
+
+	import { useEditCategory } from '$features/categories/components/edit-category-sheet';
+	import { categorySchema } from '$features/categories/schema';
+	import { CategoryForm } from '$features/categories/components';
+	import { useUpdateCategory, useGetCategory, useDeleteCategories } from '$features/categories/api';
+
+	import { useConfirm } from '$lib/components/confirm-dialog';
+
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -13,32 +23,15 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
-
-	import { useEditCategory } from '$features/categories/hooks/use-edit-category';
-	import { categoryFormSchema } from '$features/categories/schema';
-	import { CategoryForm } from '$features/categories/components';
-	import {
-		createUpdateCategoryClient,
-		createGetCategoryClient,
-		createDeleteCategoriesClient
-	} from '$features/categories/api';
-
-	import Trash from '@lucide/svelte/icons/trash';
-	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
-
 	const { confirm } = useConfirm();
 
 	const queryClient = useQueryClient();
 
 	const { isOpen, categoryId, onClose } = useEditCategory();
 
-	let getCategoryClient = $derived(
-		$categoryId ? createGetCategoryClient({ id: $categoryId }) : undefined
-	);
-	let category = $derived($getCategoryClient?.data?.category);
+	const getCategoryClient = useGetCategory();
 
-	const updateCategoryClient = createUpdateCategoryClient({
+	const updateCategoryClient = useUpdateCategory({
 		async onSuccess(data, variables, context) {
 			onClose();
 
@@ -48,14 +41,16 @@
 		}
 	});
 
-	const deleteCategoriesClient = createDeleteCategoriesClient({
+	const deleteCategoriesClient = useDeleteCategories({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(categoryFormSchema)), {
+	const category = $derived($getCategoryClient.data?.category);
+
+	const form = superForm(defaults(zod(categorySchema)), {
 		id: 'edit category form',
 		SPA: true,
-		validators: zodClient(categoryFormSchema),
+		validators: zodClient(categorySchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid && category) {
 				$updateCategoryClient.mutate({ param: { id: category.id }, json: validatedForm.data });
@@ -68,12 +63,14 @@
 
 	$effect(() => {
 		if (category) formData.set({ ...category });
-		else form.reset(defaults(zod(categoryFormSchema)));
+		else form.reset(defaults(zod(categorySchema)));
 	});
 
-	let disableLoader = $derived($deleteCategoriesClient.isPending || $getCategoryClient?.isFetching);
+	const disableLoader = $derived(
+		$deleteCategoriesClient.isPending || $getCategoryClient.isFetching
+	);
 
-	let disabled = $derived($updateCategoryClient.isPending || disableLoader);
+	const disabled = $derived($updateCategoryClient.isPending || disableLoader);
 </script>
 
 <Sheet open={$isOpen} onOpenChange={onClose}>

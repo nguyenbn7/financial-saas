@@ -1,4 +1,13 @@
 <script lang="ts">
+	import { useNewTransaction } from '$features/transactions/components/new-transaction-sheet';
+	import { transactionSchema } from '$features/transactions/schema';
+	import { useCreateTransaction } from '$features/transactions/api';
+	import { TransactionForm } from '$features/transactions/components/form';
+
+	import { useCreateAccount, useGetAccounts } from '$features/accounts/api';
+
+	import { useCreateCategory, useGetCategories } from '$features/categories/api';
+
 	import { useQueryClient } from '@tanstack/svelte-query';
 
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -12,38 +21,29 @@
 		SheetTitle
 	} from '$lib/components/ui/sheet';
 
-	import { createCreateAccountClient, createGetAccountsClient } from '$features/accounts/api';
-
-	import { createCreateCategoryClient, createGetCategoriesClient } from '$features/categories/api';
-
-	import { useNewTransaction } from '$features/transactions/hooks/use-new-transaction';
-	import { transactionFormSchema } from '$features/transactions/schema';
-	import { createCreateTransactionClient } from '$features/transactions/api';
-	import { TransactionForm } from '$features/transactions/components';
-
 	const { isOpen, onClose } = useNewTransaction();
 
 	const queryClient = useQueryClient();
 
-	const getAccountsClient = createGetAccountsClient();
-	const createAccountClient = createCreateAccountClient();
+	const getAccountsClient = useGetAccounts();
+	const createAccountClient = useCreateAccount();
 
 	let accounts = $derived($isOpen ? $getAccountsClient.data.accounts : []);
 
-	const getCategoriesClient = createGetCategoriesClient();
-	const createCategoryClient = createCreateCategoryClient();
+	const getCategoriesClient = useGetCategories();
+	const createCategoryClient = useCreateCategory();
 
 	let categories = $derived($isOpen ? $getCategoriesClient.data.categories : []);
 
-	const createTransactionClient = createCreateTransactionClient({
+	const createTransactionClient = useCreateTransaction({
 		onSuccess: () => onClose()
 	});
 
-	const form = superForm(defaults(zod(transactionFormSchema)), {
+	const form = superForm(defaults(zod(transactionSchema)), {
 		id: 'create transaction form',
 		SPA: true,
 		dataType: 'json',
-		validators: zodClient(transactionFormSchema),
+		validators: zodClient(transactionSchema),
 		onUpdate({ form: validatedForm }) {
 			if (validatedForm.valid) {
 				$createTransactionClient.mutate(validatedForm.data);

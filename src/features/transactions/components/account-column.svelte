@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useEditAccount } from '$features/accounts/hooks/use-edit-account';
+	import { useEditAccount } from '$features/accounts/components/edit-account-sheet';
 
 	interface Props {
 		account: string;

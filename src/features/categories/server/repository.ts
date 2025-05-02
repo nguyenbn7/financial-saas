@@ -1,6 +1,8 @@
-import { and, eq, inArray } from 'drizzle-orm';
 import db from '$lib/server/database';
+
 import { categoryTable } from '$lib/server/database/schema';
+
+import { and, eq, inArray } from 'drizzle-orm';
 
 export async function createCategory(data: { userId: string; name: string }) {
 	const { userId, name } = data;

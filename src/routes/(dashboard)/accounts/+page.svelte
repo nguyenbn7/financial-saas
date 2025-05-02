@@ -1,20 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { useConfirm } from '$lib/hooks/use-confirm-dialog';
+	import Plus from '@lucide/svelte/icons/plus';
 
-	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { useDeleteAccounts, useGetAccounts } from '$features/accounts/api';
+	import { createAccountDataTableColumns } from '$features/accounts/columns';
+	import { useNewAccount } from '$features/accounts/components/new-account-sheet';
+	import { useEditAccount } from '$features/accounts/components/edit-account-sheet';
 
+	import { useConfirm } from '$lib/components/confirm-dialog';
 	import { Metadata } from '$lib/components/metadata';
 	import { DataTable, DeleteBulkButton, DataTableLoader } from '$lib/components/datatable';
 
-	import { useNewAccount } from '$features/accounts/hooks/use-new-account';
-	import { useEditAccount } from '$features/accounts/hooks/use-edit-account';
-	import { createAccountDataTableColumns } from '$features/accounts/columns';
-	import { createDeleteAccountsClient, createGetAccountsClient } from '$features/accounts/api';
-
-	import Plus from '@lucide/svelte/icons/plus';
+	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	interface PageProps {
 		data: PageData;
@@ -24,10 +23,10 @@
 	const { onOpen: openEditAccountSheet } = useEditAccount();
 	const { confirm } = useConfirm();
 
-	let { data }: PageProps = $props();
+	const { data }: PageProps = $props();
 
-	const getAccountsClient = createGetAccountsClient({ accounts: data.accounts });
-	const deleteAccountsClient = createDeleteAccountsClient();
+	const getAccountsClient = useGetAccounts({ accounts: data.accounts });
+	const deleteAccountsClient = useDeleteAccounts();
 
 	const columns = createAccountDataTableColumns({
 		onEdit(account) {
@@ -45,9 +44,9 @@
 		}
 	});
 
-	let accounts = $derived($getAccountsClient.data.accounts);
+	const accounts = $derived($getAccountsClient.data.accounts);
 
-	let loading = $derived($deleteAccountsClient.isPending || $getAccountsClient.isFetching);
+	const loading = $derived($deleteAccountsClient.isPending || $getAccountsClient.isFetching);
 </script>
 
 <Metadata title="Financial Accounts" />

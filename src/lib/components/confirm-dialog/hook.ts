@@ -9,7 +9,7 @@ const promiseStore = writable<{ resolve: (value: boolean) => void } | null>(null
 const titleStore = writable<string | null | undefined>(undefined);
 const descriptionStore = writable<string | null | undefined>(undefined);
 
-export function useConfirm() {
+export default function useConfirm() {
 	function confirm(options: Options = {}) {
 		const { title, description } = options;
 

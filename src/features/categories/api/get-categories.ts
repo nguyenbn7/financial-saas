@@ -1,5 +1,7 @@
 import type { InferResponseType } from 'hono';
+
 import { client } from '$lib/rpc';
+
 import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 
 type Response = InferResponseType<typeof client.api.categories.$get>;
@@ -10,7 +12,7 @@ interface SSR {
 	categories?: Categories;
 }
 
-export default function createGetCategoriesClient(ssr: SSR = { categories: undefined }) {
+export default function useGetCategories(ssr: SSR = { categories: undefined }) {
 	const { categories } = ssr;
 
 	const queryClient = useQueryClient();

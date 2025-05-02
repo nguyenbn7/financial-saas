@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	import { SignUp } from 'svelte-clerk/client';
 	import { Metadata } from '$lib/components/metadata';
+
+	import { SignUp } from 'svelte-clerk/client';
 
 	interface PageProps {
 		data: PageData;

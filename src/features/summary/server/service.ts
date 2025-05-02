@@ -1,6 +1,8 @@
-import { and, desc, eq, gte, lt, lte, sql, sum } from 'drizzle-orm';
 import db from '$lib/server/database';
+
 import { accountTable, categoryTable, transactionTable } from '$lib/server/database/schema';
+
+import { and, desc, eq, gte, lt, lte, sql, sum } from 'drizzle-orm';
 
 export async function getFinancialData(query: {
 	userId: string;

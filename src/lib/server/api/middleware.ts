@@ -1,7 +1,8 @@
 import type { MiddlewareHandler } from 'hono';
 import type { ClerkClient } from '@clerk/backend';
+import type { RequestIdVariables } from 'hono/request-id';
 
-import { StatusCodes } from 'http-status-codes';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 import { getAuth } from '@hono/clerk-auth';
 
@@ -12,19 +13,21 @@ interface ClerkEnv {
 		clerk: ClerkClient;
 		clerkAuth: ClerkAuth;
 		userId: string;
-	};
+	} & RequestIdVariables;
 }
 
 export const clerkMiddlewareAuthenticated = (): MiddlewareHandler<ClerkEnv> => async (c, next) => {
 	const auth = getAuth(c);
 
 	if (!auth?.userId) {
+		const { requestId } = c.var;
+
 		return c.json(
 			{
-				error: {
-					code: StatusCodes.UNAUTHORIZED,
-					message: 'Login required'
-				}
+				requestId,
+				status: StatusCodes.UNAUTHORIZED,
+				title: ReasonPhrases.UNAUTHORIZED,
+				detail: 'Login required'
 			},
 			StatusCodes.UNAUTHORIZED
 		);

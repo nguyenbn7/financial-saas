@@ -9,7 +9,8 @@ const config = {
 
 	kit: {
 		adapter: adapter({
-			runtime: 'nodejs22.x'
+			runtime: 'nodejs22.x',
+			external: ['countup.js', 'chart.js']
 		}),
 		alias: {
 			'$features/*': './src/features/*',

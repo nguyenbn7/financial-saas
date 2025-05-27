@@ -3,15 +3,18 @@
 
 	import { Metadata } from '$lib/components/metadata';
 
+	import { dark } from '@clerk/themes';
+	import { mode } from 'mode-watcher';
+
 	import { SignUp } from 'svelte-clerk/client';
 
 	interface PageProps {
 		data: PageData;
 	}
 
-	let { data }: PageProps = $props();
+	const { data }: PageProps = $props();
 </script>
 
 <Metadata title="Create an account" />
 
-<SignUp />
+<SignUp appearance={{ baseTheme: mode.current === 'dark' ? dark : undefined }} />

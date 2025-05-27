@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Papa, { type ParseResult } from 'papaparse';
+	import type { ParseResult } from 'papaparse';
+	import * as Papa from 'papaparse';
 	import { Button } from '$lib/components/ui/button';
 	import Upload from '@lucide/svelte/icons/upload';
 

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import * as countup from 'countup.js';
-
-	const { CountUp } = countup;
+	import { CountUp } from 'countup.js';
 
 	interface Props {
 		preserveValue?: boolean;
@@ -16,7 +14,7 @@
 	let { preserveValue, start = 0, end, decimalPlaces, formattingFn }: Props = $props();
 
 	let targetEl: HTMLElement;
-	let countUpAnim: countup.CountUp;
+	let countUpAnim: CountUp;
 
 	onMount(() => {
 		countUpAnim = new CountUp(targetEl, end, {

@@ -8,9 +8,7 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter({
-			runtime: 'nodejs22.x'
-		}),
+		adapter: adapter(),
 		alias: {
 			'$features/*': './src/features/*',
 			'$assets/*': './src/assets/*'

@@ -8,7 +8,10 @@ const config = {
 	preprocess: vitePreprocess(),
 
 	kit: {
-		adapter: adapter(),
+		adapter: adapter({
+			// runtime: '22.x',
+			split: true
+		}),
 		alias: {
 			'$features/*': './src/features/*',
 			'$assets/*': './src/assets/*'

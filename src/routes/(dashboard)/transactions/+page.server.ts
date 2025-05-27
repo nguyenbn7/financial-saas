@@ -13,9 +13,10 @@ import { parse, subDays } from 'date-fns';
 export const load = (async ({ parent, url }) => {
 	const { userId } = await parent();
 
-	const query = url.searchParams
-		.entries()
-		.reduce((prev, curr) => Object.assign(prev, { [curr[0]]: curr[1] }), {}) as {
+	const query = Array.from(url.searchParams.entries()).reduce(
+		(prev, curr) => Object.assign(prev, { [curr[0]]: curr[1] }),
+		{}
+	) as {
 		[x: string]: string;
 	};
 

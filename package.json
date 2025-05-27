@@ -1,7 +1,7 @@
 {
   "name": "financial-platform",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -62,7 +62,7 @@
     "@types/lodash": "^4.17.17",
     "@types/papaparse": "^5.3.16",
     "chart.js": "^4.4.9",
-    "countup.js": "^2.8.2",
+    "countup.js": "^2.8.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.43.1",
     "hono": "^4.7.10",
